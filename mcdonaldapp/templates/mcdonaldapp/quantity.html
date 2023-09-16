@@ -3,101 +3,101 @@
 
 {% block extra-style %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="{% static 'css/reset.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
 
     <script>
 
-    const getClickData = (button_name) => {
-        let clickData = [];
-        if ( sessionStorage.getItem('clickData') ) {
-            clickData = JSON.parse(sessionStorage.getItem('clickData'));
+        const getClickData = (button_name) => {
+            let clickData = [];
+            if (sessionStorage.getItem('clickData')) {
+                clickData = JSON.parse(sessionStorage.getItem('clickData'));
+            }
+            const date = new Date();
+            clickData.push({
+                button_name: button_name,
+                datetime: date.toString()
+            });
+
+            console.log("click data: ", clickData);
+            sessionStorage.setItem('clickData', JSON.stringify(clickData));
         }
-        const date = new Date();
-        clickData.push({
-            button_name: button_name,
-            datetime: date.toString()
+
+        $(function () {
+            var num = 0;
+            var stat3 = $('#increasePrice').text();
+            var ProductPrice = parseInt(stat3, 10);
+
+            $('#decreaseQuantity').click(function (e) {
+                e.preventDefault();
+                getClickData('decreaseQuantity');
+                var stat = $('#numberUpDown').val();
+                var stat2 = $('#total_price').text();
+
+                var num = parseInt(stat, 10);
+                var price = parseInt(stat2, 10);
+                if (num > 0) {
+                    num--;
+                    price = ProductPrice * num;
+
+                    $('#numberUpDown').val(num);
+                    $('#total_price').text(price);
+                }
+                updateURLAndHref(num);
+            });
+
+            $('#increaseQuantity').click(function (e) {
+                e.preventDefault();
+                getClickData('increaseQuantity')
+                var stat = $('#numberUpDown').val();
+                var stat2 = $('#total_price').text();
+
+                var num = parseInt(stat, 10);
+
+                var price = parseInt(stat2, 10);
+                var total_price = 0;
+                num++;
+                price = ProductPrice * num;
+                total_price = ProductPrice * num;
+                $('#numberUpDown').val(num);
+                $('#total_price').text(price + "원");
+                updateURLAndHref(num);
+            });
+
+            function updateURLAndHref(num) {
+                var url = new URL(window.location.href);
+                url.searchParams.set('num', num);
+                history.replaceState(null, '', url.toString());
+
+                var quantityParam = `quantity=${num}`;
+                var newHref = `{% url 'mcdonaldapp:basket' %}?packing={{ packing }}&name={{ name }}&price={{ price }}&${quantityParam}`;
+
+                $('#addToBasketLink').attr('href', newHref); // a 태그의 href 속성 업데이트
+            }
         });
-
-        console.log("click data: ", clickData);
-        sessionStorage.setItem('clickData', JSON.stringify(clickData));
-    }
-
-    $(function(){
-        var num = 0;
-        var stat3 = $('#increasePrice').text();
-        var ProductPrice = parseInt(stat3,10);
-
-    $('#decreaseQuantity').click(function(e){
-        e.preventDefault();
-        getClickData('decreaseQuantity');
-        var stat = $('#numberUpDown').val();
-        var stat2 = $('#total_price').text();
-
-        var num = parseInt(stat,10);
-        var price = parseInt(stat2,10);
-        if (num > 0) {
-            num--;
-            price = ProductPrice * num;
-
-            $('#numberUpDown').val(num);
-            $('#total_price').text(price);
-        }
-        updateURLAndHref(num);
-        });
-
-    $('#increaseQuantity').click(function(e){
-        e.preventDefault();
-        getClickData('increaseQuantity')
-        var stat = $('#numberUpDown').val();
-        var stat2 = $('#total_price').text();
-
-        var num = parseInt(stat,10);
-
-        var price = parseInt(stat2,10);
-        var total_price = 0;
-        num++;
-        price = ProductPrice * num;
-        total_price = ProductPrice * num;
-        $('#numberUpDown').val(num);
-        $('#total_price').text(price + "원");
-        updateURLAndHref(num);
-        });
-
-      function updateURLAndHref(num) {
-            var url = new URL(window.location.href);
-            url.searchParams.set('num', num);
-            history.replaceState(null, '', url.toString());
-
-            var quantityParam = `quantity=${num}`;
-            var newHref = `{% url 'mcdonaldapp:basket' %}?packing={{ packing }}&name={{ name }}&price={{ price }}&${quantityParam}`;
-
-            $('#addToBasketLink').attr('href', newHref); // a 태그의 href 속성 업데이트
-        }
-    });
     </script>
 {% endblock %}
 
 {% block content %}
-<div class="wrapper">
+    <div class="wrapper">
     <div class="banner">
         <p>
             <a href="{% url 'mcdonaldapp:menu' %}">
-              <img src="{% static 'img/MacLogo.png' %}" alt="">
+                <img src="{% static 'img/MacLogo.png' %}" alt="">
             </a>
         </p>
     </div>
-    <form method="post" action="{% url 'mcdonaldapp:basket' %}">{% csrf_token %}
+    <div method="post" action="{% url 'mcdonaldapp:basket' %}">{% csrf_token %}
         <input type="hidden" name="MenuID" value="{{ name }}">
         <div class="flex row">
             <div class="select_menu">
                 <li>
-                    <div class="photo"> 
-                        <img src="{% static 'img/'|add:image|add:'.png' %}" />
+                    <div class="photo">
+                        <img src="{% static 'img/'|add:image|add:'.png' %}"/>
                     </div>
                     <div class="menu_list">
                         <a class="menu_name" name="MenuName">
-                            {{ name}}
+                            {{ name }}
                         </a>
                         <div class="price" id="increasePrice" name="MenuPrice">
                             {{ price }}원
@@ -119,13 +119,29 @@
                 </button>
             </li>
         </div>
-    </form>
-    <div class="select">
+        <div/>
+        <div class="select">
             <div class="textCenter font-black">
                 <div class="total_mc">Total: <span id="total_price">{{ total_price }}</span> 원</div>
-
             </div>
+        </div>
 
+        <div>
+            <form action="{% url 'mcdonaldapp:basket' %}" method="GET">
+                <div>
+                    <label for="menu_id">제품명</label>
+                    <input type="text" name="menu_name" id="menu_id" value="{{ name }}">
+                </div>
+                <div>
+                    <label for="menu_id">단가</label>
+                    <input type="text" name="menu_price" id="menu_id" value="{{ price }}">
+                </div>
+                <div>
+                    <label for="num">수량</label>
+                    <input type="number" name="num" id="num">
+                </div>
+                <button type="submit">장바구니 추가</button>
+            </form>
+        </div>
     </div>
-</div>
 {% endblock %}
