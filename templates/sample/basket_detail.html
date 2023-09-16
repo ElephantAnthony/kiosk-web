@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample</title>
+</head>
+<body>
+<h1>장바구니 상세</h1>
+<div>
+    {% for menu in basket.menu.all %}
+        <p>[{{ menu.group }}] {{ menu.name }}, {{ menu.price }}원</p>
+    {% endfor %}
+</div>
+
+</body>
+</html>

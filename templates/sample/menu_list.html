@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample</title>
+</head>
+<body>
+<h1>메뉴 목록</h1>
+<ul>
+    {% for menu in menu_list %}
+        <li>
+            <a href="{% url 'sample:menu_detail' menu.id %}">{{ menu.name }}</a>
+        </li>
+    {% empty %}
+        <li>메뉴가 없음.</li>
+    {% endfor %}
+</ul>
+</body>
+</html>

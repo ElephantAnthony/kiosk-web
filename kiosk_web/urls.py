@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('introapp.urls')),
     path('megacoffee/', include('megacoffeeapp.urls')),
     path('mcdonald/', include('mcdonaldapp.urls')),
+    path('sample/', include('sample.urls')),
 ]

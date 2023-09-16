@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample</title>
+</head>
+<body>
+<h1>메뉴 상세</h1>
+<div>
+    <p>{{ menu.id }}</p>
+    <p>{{ menu.name }}</p>
+    <p>{{ menu.price }}</p>
+    <p>{{ menu.group }}</p>
+    <p>{{ menu.brand }}</p>
+</div>
+
+<form action="{% url 'sample:basket_add' %}" method="POST">{% csrf_token %}
+    <div>
+        {#        <label for="menu_id">메뉴 ID</label>#}
+        <input type="hidden" name="menu_id" id="menu_id" value="{{ menu.id }}">
+    </div>
+    <div>
+        <label for="order_num">수량</label>
+        <input type="number" name="order_num" id="order_num">
+    </div>
+    <button type="submit">장바구니 담기</button>
+</form>
+</body>
+</html>

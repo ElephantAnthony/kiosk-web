@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample</title>
+</head>
+<body>
+<h1>브랜드 목록</h1>
+<ul>
+    {% for brand in brand_list %}
+        <li>
+            <a href="{% url 'sample:menu_list' brand.id %}">{{ brand.name }}</a>
+        </li>
+    {% empty %}
+        <li>브랜드가 없음.</li>
+    {% endfor %}
+</ul>
+</body>
+</html>
