@@ -516,17 +516,23 @@ mission page
 }
 
 .mission {
-    height: 20rem;
+    min-height: 20rem;
+    font-size: 2rem;
+    font-weight: 700;
 }
 
-.mission_text {
-    height: 19rem;
+.mission>div>div:not(:last-child) {
+    margin-bottom: 2rem;
 }
 
 .mission, .receipt {
     /* border: 0.5rem solid var(--primary); */
     border-radius: 3px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
     box-shadow: 0 4px 10px 0 rgba(30,77,110,.08), 0 6px 42px 0 rgba(31,79,113,.12);
 }
 
@@ -534,7 +540,6 @@ mission page
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
 }
 
 /* 
