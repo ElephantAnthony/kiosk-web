@@ -92,6 +92,6 @@ window.addEventListener('DOMContentLoaded', function() {
         
 
         // redirecting
-        // location.href = '/complete/?brand=megacoffee';
+        location.href = '/complete/?brand=megacoffee';
     });
 });
