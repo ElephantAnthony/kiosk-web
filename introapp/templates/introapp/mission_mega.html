@@ -12,13 +12,17 @@
         </div>
 
         <div class="mission">
-            <p class="mission_text">
-                {% for name, value in order.items %}
-                        {{ name }} {{ value.0}}해서 {{ value.1 }}개<br>
-                {% endfor %}
-                {{ payment.packaging }}으로 하고, 결제는 {{ payment.payments }}로(으로) 할게요.
+            <p class="mission_text"> <!-- 가독성 좋게 표기 -->
+                <div>
+                    매장/포장: {{ payment.packing }} &nbsp; 결제: {{ payment.payments }} <br><br>
+                    {% for name, value in order.items %}
+                    <div>
+                    메뉴: {{ name }} ({{ value.1 }}개)<br>
+                    옵션: {{ value.0}}
+                    </div>
+                    {% endfor %}
+                </div>
             </p>
-            
         </div>
         <div class = "flex justify-center align-center items-center my-5">
             <a class = "btn-big" href="{% url 'megacoffeeapp:start' %}">ORDER</a>

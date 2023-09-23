@@ -38,7 +38,7 @@
             var price = parseInt(stat2,10);
             if (num > 0) {
                 num--;
-                price = ProductPrice * num;
+                price = price * num;
 
                 $('#numberUpDown').val(num);
                 $('#total_price').text(price);
@@ -63,6 +63,13 @@
             $('#total_price').text(total_price);
             updateURLAndHref(num);
         });
+
+         // timer
+         let time = parseInt(sessionStorage.getItem('time'));
+        setInterval(() => {
+            time += 1;
+            sessionStorage.setItem('time', time);
+        }, 1000);
 
       function updateURLAndHref(num) {
             var url = new URL(window.location.href);
