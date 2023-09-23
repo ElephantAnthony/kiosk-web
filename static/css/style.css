@@ -380,20 +380,15 @@
   margin: 0 1rem;
   border: 1px solid #666;
   border-radius: 1.5rem;
+  min-height: 12.5rem;
 }
 
-.payment {
+.payment img {
   width: 70%;
-  height: 20rem;
   margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.payment img {
-  width: 100%;
-  height: auto;
 }
 
 .payment-desc {

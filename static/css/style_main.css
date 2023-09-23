@@ -495,8 +495,7 @@ mission page
 
 .wrap {
     flex-direction: column;
-    margin: 2.5rem;
-    margin-top: 0px;
+    padding: 2.5rem;
 }
 
 .select, .mission {
