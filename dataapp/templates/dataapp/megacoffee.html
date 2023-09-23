@@ -75,8 +75,12 @@
             <div class="font-bold fs-1" style="font-size:x-large; text-align:center;">연령별 정확도</div>
         </div>
     </div>
-    
-        
+
+
+    <div>
+        <input type="hidden" class="accuracy" value="{{ accuracy_list }}" />
+        <input type="hidden" class="totalTime" value="{{ totalTime_list }}" />
+    </div>
     </div>
     </main>
     
@@ -141,7 +145,8 @@ var context = document
                 }
             });
 </script>
-<script>// 완료 시간 
+<script>// 완료 시간
+const totalTime = document.querySelector('.totalTime').value;
 var context = document
                 .getElementById('complete_time')
                 .getContext('2d');
@@ -150,14 +155,17 @@ var context = document
                 data: { // 차트에 들어갈 데이터
                     labels: [
                         //x 축
-                        '0~9초','10~19초','20~29초','30~39초','40~49초','50~60초'
+                        '0초','10초','20초','30초','40초','50초', '60초'
                     ],
                     datasets: [
                         { //데이터
                             label: 'Finish Time', //차트 제목
                             fill: false, // line 형태일 때, 선 안쪽을 채우는지 안채우는지
                             data: [
-                                1,19,25,20,23,6,5 //x축 label에 대응되는 데이터 값
+                               parseInt(totalTime[1]+totalTime[2]), parseInt(totalTime[5]+totalTime[6]),
+                               parseInt(totalTime[9]+totalTime[10]), parseInt(totalTime[13]+totalTime[14]),
+                               parseInt(totalTime[17]+totalTime[18]),
+                               parseInt(totalTime[1]+totalTime[2]), parseInt(totalTime[5]+totalTime[6])
                             ],
                             backgroundColor: [
                                 //색상
@@ -196,6 +204,8 @@ var context = document
             });
 </script>
 <script>// 전체 정확도
+const accuracy = document.querySelector('.accuracy').value;
+console.log(accuracy)
 var context = document
                 .getElementById('accuracy')
                 .getContext('2d');
@@ -210,7 +220,10 @@ var context = document
                         { //데이터
                             fill: false, // line 형태일 때, 선 안쪽을 채우는지 안채우는지
                             data: [
-                                11,9,29,10 //x축 label에 대응되는 데이터 값
+                                parseInt(accuracy[2]+accuracy[1]), parseInt(accuracy[5]+accuracy[6]),
+                               parseInt(accuracy[9]+accuracy[10]), parseInt(accuracy[13]+accuracy[14]),
+                               parseInt(accuracy[17]+accuracy[18]),
+                               parseInt(accuracy[1]+accuracy[2]), parseInt(accuracy[5]+accuracy[6])
                             ],
                             backgroundColor: [
                                 //색상
