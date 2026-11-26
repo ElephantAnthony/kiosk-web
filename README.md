@@ -178,7 +178,7 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)" -WebSession $web
 | 프론트엔드 계약 테스트 | Vitest 8개 PASS, lint/typecheck/build PASS |
 | 보안 검사 | 206개 커밋 검사, 검증된 과거 오탐 6개 외 미분류 탐지 0건 |
 | OpenAPI | CI 생성본 SHA-256 확인, 커밋 및 strict diff 통과 |
-| 도메인 프록시 E2E | 최종 통합 검증 진행 중 |
+| 도메인 프록시 E2E | 통과 (JSON import 수정 후) |
 
 [초기 화면 실제 브라우저 보고서](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45771026505/artifacts/15094117044) / [도메인 검증 기록](docs/evidence/runs/SEN-02-domain-45772148779.md)
 
@@ -199,4 +199,7 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)" -WebSession $web
 
 서버의 결정론적 채점, 주문 제출 및 중복 처리, XState 주문 흐름, 접근성 개선, 오프라인 이벤트 재전송, 관리자 분석을 순서대로 개발합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
 
-최신 검증: [CI 45772447666](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45772447666). OpenAPI 재생성 및 byte-for-byte diff 통과. 백엔드, 프론트엔드, V1, 보안 검사 통과. Compose/브라우저 최종 결과 확인 전. [실행 증빙](docs/evidence/runs/SEN-02-strict-45772447666.md)
+최신 검증: [CI 45772447666](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45772447666). OpenAPI 재생성 및 byte-for-byte diff 통과. 백엔드, 프론트엔드, V1, 보안 검사 통과. 이 실행은 JSON import 오류로 브라우저 검사 실패. 후속 CI 45773007930에서 5개 Job 모두 통과. [실행 증빙](docs/evidence/runs/SEN-02-strict-45772447666.md)
+
+
+SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 검증과 OpenAPI 재생성은 진행 중입니다. 기존 시나리오 API 전체 검증은 [CI 45773007930](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773007930)에서 통과했습니다.

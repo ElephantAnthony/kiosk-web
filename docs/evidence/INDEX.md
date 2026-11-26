@@ -16,3 +16,5 @@
 - [SEN-02 domain verification](runs/SEN-02-domain-45772148779.md): 8 Java unit + 5 PostgreSQL IT + 8 Vitest passed; OpenAPI generated and committed; final strict CI pending.
 
 - [SEN-02 strict CI](runs/SEN-02-strict-45772447666.md): OpenAPI diff, backend, frontend, legacy, scan pass; Compose/browser result pending at checkpoint.
+
+- [SEN-02 gate repair](runs/SEN-02-pass-45773007930.md): previous Compose/browser failure resolved; all five jobs success.

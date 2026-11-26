@@ -23,8 +23,8 @@ public class SecurityConfig {
         return http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/healthz", "/v3/api-docs", "/v3/api-docs/**",
                         "/swagger-ui.html", "/swagger-ui/**", "/api/csrf",
-                        "/api/scenarios", "/api/scenarios/*/*", "/api/sessions/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/sessions").permitAll()
+                        "/api/scenarios", "/api/scenarios/*/*", "/api/sessions/*", "/api/sessions/*/result").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/sessions", "/api/sessions/*/submit").permitAll()
                 .anyRequest().denyAll())
             .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, failure) ->
                 response.sendError(HttpServletResponse.SC_FORBIDDEN)))

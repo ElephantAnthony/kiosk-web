@@ -48,6 +48,23 @@ public class SessionRepository {
             """, (rs, row) -> read(rs), id, owner).stream().findFirst();
     }
 
+    public Optional<StoredSession> findOwnedForUpdate(UUID id, UUID owner) {
+        return jdbc.query("""
+            SELECT s.*, m.id AS mission_id, m.template_id, m.instruction,
+                   m.expected_order::text AS expected_json, m.expected_payment
+            FROM training_session s JOIN mission m ON m.session_id = s.id
+            WHERE s.id = ? AND s.owner_id = ? FOR UPDATE OF s
+            """, (rs, row) -> read(rs), id, owner).stream().findFirst();
+    }
+
+    public void markCompleted(UUID id, UUID owner) {
+        int changed = jdbc.update("""
+            UPDATE training_session SET status='COMPLETED'
+            WHERE id=? AND owner_id=? AND status='ACTIVE'
+            """, id, owner);
+        if (changed != 1) throw new IllegalStateException("Expected one active session update");
+    }
+
     private StoredSession read(ResultSet rs) throws SQLException {
         TrainingSession session = new TrainingSession(rs.getObject("id", UUID.class),
             rs.getObject("owner_id", UUID.class), rs.getString("scenario_id"), rs.getInt("scenario_version"),

@@ -1,0 +1,2 @@
+# SEN-03 grading (SEN-02B)
+Implement D5 normalization, deterministic scoring, server-owned mission snapshot, completion/result APIs, CSRF and ownership, PostgreSQL row locking and unique result, separate server/client timing, rollback tests, and generated OpenAPI. No kiosk UI, actual payment, event collection or real participants. Require full CI green and actual generated spec diff. A first generated-spec mismatch is expected and must be resolved by committing actual output, not bypassing diff.

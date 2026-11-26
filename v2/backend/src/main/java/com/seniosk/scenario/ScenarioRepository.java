@@ -31,4 +31,14 @@ public class ScenarioRepository {
             throw new IllegalStateException("Cannot serialize scenario", ex);
         }
     }
+    public Scenario readVersion(String id, int version) {
+        String json = jdbc.queryForObject("""
+            SELECT definition::text FROM scenario_version WHERE scenario_id=? AND version=?
+            """, String.class, id, version);
+        try {
+            return mapper.readValue(json, Scenario.class);
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException("Stored scenario is invalid", ex);
+        }
+    }
 }

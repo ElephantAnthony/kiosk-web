@@ -5,8 +5,8 @@
 |---|---|---|
 | SEN-00 | Branch, audit, hygiene, harness | Verified |
 | SEN-01 | Spring and React foundation | PASS: all 5 CI jobs |
-| SEN-02 | Shared scenario, PostgreSQL domain, session API, generated spec | Implemented; strict API diff and backend/frontend verified; Compose/browser pending |
-| SEN-02B | Deterministic server grading, completion and idempotency | TODO after SEN-02 gate |
+| SEN-02 | Shared scenario, PostgreSQL domain, session API, generated spec | PASS: all five jobs after JSON import fix |
+| SEN-02B | Deterministic server grading, completion and idempotency | ACTIVE: deterministic grading and completion |
 | SEN-03 | Durable events | TODO |
 | SEN-04 | Admin and accessibility | TODO |
 | SEN-05 | Kiosk E2E, evidence, final portfolio | TODO |
@@ -30,3 +30,6 @@
 Follow-up: Compose startup/health step in run 45772447666: success. Browser job state: in_progress. Do not mark browser/axe or full SEN-02 passed until final result. AGENTS commands updated to locked dependency install and generated API diff.
 
 SEN-02 gate failed in run 45772447666: Node ESM JSON import attribute missing. Corrected shared schema import; full regression required before grading. See [troubleshooting](troubleshooting/SEN-02-json-import.md).
+
+### SEN-03 active
+Previous gate 45773007930: all five jobs success after adding JSON import attribute. Grading source and unit/integration tests added. Generate actual OpenAPI and enforce diff on next CI. Acceptance: D5 edge cases, owner/CSRF rejection, replay, simultaneous conflict, cancellation protection, rollback, persisted snapshot, timing and full CI. Local independent Java prototype 424 cases passed before integration; do not substitute for Maven tests.

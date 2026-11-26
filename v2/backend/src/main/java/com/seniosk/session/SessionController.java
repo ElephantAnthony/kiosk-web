@@ -18,12 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.WebUtils;
 
 @RestController
 @RequestMapping(value = "/api", produces = "application/json")
 public class SessionController {
-    private static final String OWNER_ATTRIBUTE = "seniosk.learner.owner";
     private final SessionService service;
     public SessionController(SessionService service) { this.service = service; }
 
@@ -51,14 +49,7 @@ public class SessionController {
     @ApiResponse(responseCode = "403", description = "Missing or invalid CSRF", content = @Content)
     @ApiResponse(responseCode = "404", description = "Scenario not found", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     public ResponseEntity<SessionView> start(@Valid @RequestBody StartRequest input, HttpSession httpSession) {
-        UUID owner;
-        synchronized (WebUtils.getSessionMutex(httpSession)) {
-            owner = (UUID) httpSession.getAttribute(OWNER_ATTRIBUTE);
-            if (owner == null) {
-                owner = UUID.randomUUID();
-                httpSession.setAttribute(OWNER_ATTRIBUTE, owner);
-            }
-        }
+        UUID owner = LearnerOwner.getOrCreate(httpSession);
         return ResponseEntity.status(HttpStatus.CREATED).cacheControl(CacheControl.noStore())
             .body(view(service.start(owner, input.scenarioId(), input.version(), input.uiVariant())));
     }
@@ -68,8 +59,7 @@ public class SessionController {
     @ApiResponse(responseCode = "200", description = "Owned training session")
     @ApiResponse(responseCode = "404", description = "Absent or owned by another browser", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     public ResponseEntity<SessionView> detail(@PathVariable UUID id, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        UUID owner = session == null ? null : (UUID) session.getAttribute(OWNER_ATTRIBUTE);
+        UUID owner = LearnerOwner.current(request);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(view(service.read(owner, id)));
     }
 

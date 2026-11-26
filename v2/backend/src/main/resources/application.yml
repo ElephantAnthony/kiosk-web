@@ -10,6 +10,7 @@ spring:
   jackson:
     deserialization:
       fail-on-unknown-properties: true
+      accept-float-as-int: false
   flyway:
     enabled: true
 server:
