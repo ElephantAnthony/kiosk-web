@@ -7,8 +7,8 @@
 | EXECUTION 01 | Spring and React foundation | PASS |
 | EXECUTION 02 | Scenario contract and isolated sessions | PASS |
 | EXECUTION 03 | Server grading and completion | PASS: all five jobs, 45773698103 |
-| EXECUTION 04 | Kiosk UI, cancellation and fixture extension | Implemented; Java/frontend/spec/scan PASS; final browser pending |
-| EXECUTION 05 | Durable event ingestion and SDK | TODO, gated on 04 |
+| EXECUTION 04 | Kiosk UI, cancellation and fixture extension | PASS: all five jobs, both stores and capture |
+| EXECUTION 05 | Durable event ingestion and SDK | ACTIVE: durable event ingestion |
 | EXECUTION 06 | Admin funnel and accessibility completion | TODO |
 | EXECUTION 07 | Release gate and portfolio evidence | TODO |
 
@@ -27,3 +27,5 @@ SEN-05 preflight: CI 45775017053 completed with four jobs PASS, Compose health P
 ### SEN-05 prerequisite repair checkpoint
 - Previous run 45775017053: six Playwright passes, one strict locator failure. Cafe success; fast-food result not verified. Browser report artifact 15095314243. [Evidence](evidence/runs/SEN-04-browser-45775017053.md).
 - Repair source 444830a3c56b0cea2f5b8e630bcf1e76cc21c7d9. New CI 45775831858. Wait for actual final outcome, verify both success markers, screenshot bytes and digest, commit image and README only after successful suite. Event source not started. Local Maven/Docker absent; direct git DNS unavailable. Do not cancel ongoing CI by modifying v2 or workflow paths while verifying.
+
+SEN-04 final gate: CI 45775831858 all five jobs green; both scenario success markers and seven Playwright tests observed. JPEG 67443 bytes, SHA-256 c9025076f8394c97fc6e639f88bb89e9a514a0b355e58630e5eb872326cd3179 independently verified and committed. Begin SEN-05.

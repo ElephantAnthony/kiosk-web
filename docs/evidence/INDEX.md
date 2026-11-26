@@ -31,3 +31,5 @@
 - [Kiosk locator repair](troubleshooting/SEN-04-category-locator.md): run 45775017053, six browser tests passed; one failed due to ambiguous category selector; retry required.
 
 - [Browser run 45775017053](runs/SEN-04-browser-45775017053.md): 6 browser passes, 1 locator failure, cafe success; repair 444830a and retry 45775831858. Event work gated.
+
+- [SEN-04 final gate](runs/SEN-04-pass-45775831858.md): both scenario flows, seven browser tests, all five jobs and actual capture verified.
