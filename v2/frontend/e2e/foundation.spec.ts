@@ -9,4 +9,6 @@ test('landing page reports actual database readiness', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText('서버 및 데이터베이스 연결 정상');
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
+  await page.screenshot({ path: test.info().outputPath('foundation.png'), fullPage: true });
+  await test.info().attach('foundation-screen', { path: test.info().outputPath('foundation.png'), contentType: 'image/png' });
 });

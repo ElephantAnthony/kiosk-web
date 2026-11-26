@@ -8,3 +8,6 @@ Root cause not experimentally confirmed in this repository. Candidate fix after 
 
 ## Fix attempt
 Pin npm 11.21.2 in the frontend manifest, Docker, CI and local verification command; Node remains 22.16.0. Known npm issue #9787 documents Arborist optional peer handling with Vitest 4.1. No --force or --legacy-peer-deps. The actual result is pending. The temporary public-registry-only lock export and standard CI artifact will allow a generated lockfile to be committed without fabricating it. Once committed, remove the temporary export and require npm ci.
+
+## Observed follow-up: run 45770554222
+npm 11.21.2 installation and package resolution succeeded; ESLint passed. TypeScript failed with TS2740 for axe's Page argument. Actual generated lockfile contained playwright-core 1.65.1 at root and playwright-core 1.56.1 under playwright. The axe adapter's open peer range resolved to the newer root type, while @playwright/test 1.56.1 uses the nested older type. Pin the root playwright-core to the same 1.56.1 release; regenerate lockfile through CI. Do not cast away the incompatible type or downgrade checks. Previous successful lockfile is superseded by this manifest change.

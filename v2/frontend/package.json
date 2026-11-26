@@ -36,7 +36,8 @@
     "globals": "16.5.0",
     "prettier": "3.6.2",
     "@playwright/test": "1.56.1",
-    "@axe-core/playwright": "4.10.2"
+    "@axe-core/playwright": "4.10.2",
+    "playwright-core": "1.56.1"
   },
   "packageManager": "npm@11.21.2"
 }

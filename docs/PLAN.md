@@ -32,3 +32,7 @@
 - Run 45770313225: 4 findings, all exact upstream setuptools function aliases. Evidence: [security triage](evidence/runs/SEN-01-security-45770313225.md).
 - No genuine credential among these findings; no issuance needed. Four precise fingerprints added, scanner remains enforced. Re-scan pending.
 - Next: fix npm resolution, generate lockfile, rerun all foundation gates. Do not advance to SEN-02 until verified.
+
+### Foundation follow-up
+- Run 45770554222: npm pin/install, ESLint, Maven and V1 pass; TS2740 failure due to mismatched Playwright core versions. Two documented quotations detected as false positives; checked exact lines and extended fingerprint list only for those lines. No secret rotation needed.
+- Next attempt: align playwright-core, regenerate actual lockfile, validate security and integration. Source commit before fix: 8b0a04a9f0046266a2500695728f1c8291f07564.

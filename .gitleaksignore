@@ -3,3 +3,6 @@
 b74b9682a3e70f671f26b8e764736ef42fcedc01:senisk/Lib/site-packages/setuptools/_distutils/msvccompiler.py:generic-api-key:39
 cd16cee272584936d6f51b49d565e9992818fea9:Lib/site-packages/setuptools/_distutils/msvccompiler.py:generic-api-key:45
 e6d2d015abd630f130808e12eb17dbb36eb5b7dd:Lib/site-packages/setuptools/_distutils/msvccompiler.py:generic-api-key:45
+# Two reviewed Markdown quotations of the same benign upstream line, from one historical commit.
+b496aecee2651e08f8d94d858405ac3062e8c969:docs/troubleshooting/SEN-01-security-triage.md:generic-api-key:3
+b496aecee2651e08f8d94d858405ac3062e8c969:docs/evidence/runs/SEN-01-security-45770313225.md:generic-api-key:15

@@ -9,3 +9,5 @@ Release and next implementation gate: BLOCKED. No secret values stored.
 - [SEN-01-FIX triage checkpoint](runs/SEN-01-FIX-triage.md): previous CI results reconfirmed; no detailed security report available; owner action required. No new test run.
 
 - [Security triage](runs/SEN-01-security-45770313225.md): four upstream-library false positives verified; exact fingerprint disposition; filtered re-scan pending.
+
+- [Foundation follow-up](runs/SEN-01-fix-45770554222.md): installation and lint pass; typecheck and security still failed; precise fixes applied, re-run required.
