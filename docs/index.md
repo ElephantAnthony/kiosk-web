@@ -25,3 +25,5 @@ This repository keeps public technical evidence, not personal application drafts
 - [Kiosk state machine ADR](adr/004-kiosk-state-machine.md) / [State diagram](design/KIOSK_FLOW.md) / [Phase 4 learning](learning/phase-4.md) / [Actor output troubleshooting](troubleshooting/SEN-04-actor-output.md) / [Event SDK task](prompts/SEN-05.md)
 
 - [Event outbox ADR](adr/005-durable-event-outbox.md) / [Event pipeline](design/EVENT_PIPELINE.md) / [Phase 5 learning](learning/phase-5.md)
+
+- [Event OpenAPI drift troubleshooting](troubleshooting/SEN-05-openapi-drift.md) / [Strict event verification](evidence/runs/SEN-05-strict-45777346496.md)

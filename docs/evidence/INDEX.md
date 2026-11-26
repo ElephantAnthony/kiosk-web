@@ -37,3 +37,5 @@
 - SEN-05 source 8e483d7: [CI 45776976931](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931), Vitest 22, frontend build/typecheck/lint PASS. Backend and full browser result pending.
 
 - [SEN-05 source verification](runs/SEN-05-event-45776976931.md): 42 Java, 22 Vitest, 9 browser PASS, eight offline/reloaded events, 429, scan, V1; contract drift detected and actual output recovered.
+
+- [SEN-05 strict verification](runs/SEN-05-strict-45777346496.md): generated API diff PASS, Java/frontend/V1/scan PASS; final browser pending at checkpoint.

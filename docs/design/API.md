@@ -23,7 +23,7 @@ Example POST JSON:
 
 First fetch /api/csrf with the same browser cookie jar; set its returned header for POST. CSRF is not authentication by itself. Session ownership is a server-created UUID inside HttpSession, separate from the database session UUID exposed to the browser. A read by an unrelated browser returns 404 without disclosing existence. The API returns mission instruction, not private owner identifier. The scenario is intentionally a public educational fixture with expected orders; server-side scoring relies on the persisted snapshot, never a client score.
 
-Validation: Jakarta Bean Validation, strict JSON fields, JSON Schema Draft 2020-12, and server semantic validation. Unknown scenario or version returns 404. Malformed UUID or body returns 400. Administrator authentication is not implemented. Event endpoint and shared schema implemented; actual generated OpenAPI committed, strict re-verification pending.
+Validation: Jakarta Bean Validation, strict JSON fields, JSON Schema Draft 2020-12, and server semantic validation. Unknown scenario or version returns 404. Malformed UUID or body returns 400. Administrator authentication is not implemented. Event endpoint and shared schema implemented; actual generated OpenAPI committed, mandatory strict diff passed.
 
 Run locally at http://localhost:8080/swagger-ui.html after Compose starts. Use only synthetic practice sessions.
 
