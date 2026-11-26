@@ -17,3 +17,5 @@ This repository keeps public technical evidence, not personal application drafts
 - [Training ERD](design/ERD.md) / [API contract](design/API.md) / [Scenario session ADR](adr/002-scenario-session-contract.md) / [Phase 2 learning](learning/phase-2.md) / [SEN-02 task](prompts/SEN-02.md)
 
 - [OpenAPI contract troubleshooting](troubleshooting/SEN-02-openapi.md)
+
+- [Grading ADR](adr/003-grading-and-idempotency.md) / [SEN-03 task](prompts/SEN-03.md) / [Phase 3 learning](learning/phase-3.md) / [API drift troubleshooting](troubleshooting/SEN-03-openapi-drift.md)

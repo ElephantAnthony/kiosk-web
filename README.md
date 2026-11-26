@@ -4,14 +4,14 @@
 
 시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
 
-> 현재 상태: 개발 환경 검증 완료, 시나리오와 학습 세션 API 구현. 서버 채점, 실제 주문 화면, 행동 로그 및 관리자 화면은 후속 개발 범위입니다.
+> 현재 상태: 개발 환경과 시나리오/학습 세션 검증 완료, 서버 채점과 결과 저장 구현 및 PostgreSQL 테스트 통과. 전체 통합 CI는 재검증 중이며, 실제 주문 화면과 행동 로그, 관리자 화면은 후속 개발 범위입니다.
 
 ## 1. 프로젝트의 문제와 개선 방향
 
 | 기존 V1 문제 | V2 개선 설계 | 확인 상태 |
 |---|---|---|
 | 전역 장바구니 사용 | 사용자별 HttpSession과 소유자 조건이 있는 DB 조회 | 실제 동시 세션 통합 테스트 통과 |
-| 공유 미션과 난수 기반 점수 | 세션별 미션 스냅샷, 서버 채점 예정 | 미션 저장 통과, 채점 미구현 |
+| 공유 미션과 난수 기반 점수 | 세션별 미션 스냅샷, 결정론적 서버 채점 | 채점 단위 및 DB 통합 테스트 통과 |
 | 브랜드별 UI 분리 | 공통 시나리오 JSON 계약 | Java/Ajv 검증 통과, 화면 엔진 미구현 |
 | 장애 시 기록 손실 가능성 | IndexedDB outbox와 멱등 수집 예정 | 미구현 |
 
@@ -54,13 +54,50 @@ docker compose up --build -d --wait
 
 이는 익명 브라우저 세션 격리입니다. 회원가입, 관리자 인증, 다중 서버 세션 공유를 구현했다는 의미가 아닙니다.
 
+### 서버 채점과 주문 완료
+
+미션에 필요한 주문을 정답으로 저장하고 제출 주문을 메뉴 ID, 정렬된 옵션, 포장 여부로 정규화합니다. 일치, 누락, 초과 수량을 각각 계산합니다.
+
+| 주문 예시 (정답: 차가운 아메리카노 2잔 포장) | 일치 | 누락 | 초과 | 정확도 |
+|---|---:|---:|---:|---:|
+| 정확한 주문 2잔 | 2 | 0 | 0 | 100% |
+| 1잔만 주문 | 1 | 1 | 0 | 50% |
+| 3잔 주문 | 2 | 0 | 1 | 66.67% |
+| 다른 온도로 2잔 | 0 | 2 | 2 | 0% |
+
+정확도 = matched / (matched + missing + extra), 소수점 6자리 반올림. 주문이 완전히 맞고 모의 결제 수단도 일치할 때만 미션 성공입니다. 실제 결제를 하지 않습니다.
+
+```mermaid
+sequenceDiagram
+    participant A as 요청 A
+    participant B as 동시 요청 B
+    participant S as Spring Service
+    participant DB as PostgreSQL
+    A->>S: 주문 제출
+    S->>DB: 소유자 조건 + FOR UPDATE
+    B->>S: 같은 세션 제출
+    S->>DB: 상태 완료 및 결과 1행 저장
+    DB-->>S: COMMIT
+    S-->>A: 200 저장된 결과
+    S->>DB: 후속 요청 비교
+    alt 동일 주문, 결제 및 활동 시간
+        S-->>B: 200 기존 결과
+    else 다른 제출
+        S-->>B: 409 충돌
+    end
+```
+
+행 잠금, 유일 제약 및 트랜잭션으로 상태와 결과의 정합성을 보호합니다. 클라이언트의 점수는 받지 않으며 서버에서 생성한 미션 스냅샷으로 채점합니다. 서버 경과 시간과 클라이언트 보고 활동 시간은 각각 저장합니다. 서버 경과 시간에는 대기 및 통신 시간이 포함되고 클라이언트 활동 시간은 신뢰 가능한 독립 측정치가 아닙니다.
+
+[채점 설계 ADR](docs/adr/003-grading-and-idempotency.md)
+
 ## 4. 아키텍처
 
 ```mermaid
 flowchart LR
     B[Browser] --> F[React / TypeScript]
     F -->|Vite Proxy / HTTP| C[Spring MVC + Security]
-    C --> S[Scenario Catalog / Session Service]
+    C --> S[Scenario / Session / Grading Service]
     S --> R[Spring JDBC Repository]
     R --> P[(PostgreSQL)]
     J[Shared JSON Schema] --> F
@@ -86,6 +123,7 @@ XState는 이후 키오스크 주문 상태 머신에서 사용할 예정입니�
 erDiagram
     SCENARIO_VERSION ||--o{ TRAINING_SESSION : references
     TRAINING_SESSION ||--|| MISSION : has
+    TRAINING_SESSION ||--o| MISSION_RESULT : yields
     SCENARIO_VERSION {
         varchar scenario_id PK
         integer version PK
@@ -108,9 +146,23 @@ erDiagram
         jsonb expected_order
         varchar expected_payment
     }
+    MISSION_RESULT {
+        uuid session_id PK,FK
+        jsonb actual_order
+        varchar actual_payment
+        integer matched
+        integer missing
+        integer extra
+        numeric accuracy
+        boolean payment_matched
+        boolean correct
+        bigint server_elapsed_ms
+        bigint client_active_ms
+        timestamptz completed_at
+    }
 ```
 
-[ERD 상세 설명](docs/design/ERD.md) / [Flyway V1 SQL](v2/backend/src/main/resources/db/migration/V1__training_domain.sql)
+[ERD 상세 설명](docs/design/ERD.md) / [Flyway V1 SQL](v2/backend/src/main/resources/db/migration/V1__training_domain.sql) / [Flyway V2 SQL](v2/backend/src/main/resources/db/migration/V2__mission_result.sql)
 
 ## 6. REST API
 
@@ -122,6 +174,8 @@ erDiagram
 | GET | /api/csrf | 세션 기반 CSRF 토큰 |
 | POST | /api/sessions | 학습 세션과 미션 생성 |
 | GET | /api/sessions/{id} | 소유한 세션 조회 |
+| POST | /api/sessions/{id}/submit | 모의 주문 채점 및 완료 |
+| GET | /api/sessions/{id}/result | 저장된 학습 결과 조회 |
 
 PowerShell에서 가상 세션 생성 예시:
 
@@ -131,6 +185,9 @@ $csrf = Invoke-RestMethod "$base/api/csrf" -SessionVariable web
 $body = @{scenarioId='boram-cafe'; version=1; uiVariant='standard'} | ConvertTo-Json
 $result = Invoke-RestMethod "$base/api/sessions" -Method Post -WebSession $web -Headers @{'X-CSRF-TOKEN'=$csrf.token} -ContentType 'application/json' -Body $body
 Invoke-RestMethod "$base/api/sessions/$($result.id)" -WebSession $web
+$order = @{order=@(@{menuId="americano";optionIds=@("ice");packing="TAKE_OUT";quantity=2});payment="CARD";clientActiveMs=1000} | ConvertTo-Json -Depth 5
+Invoke-RestMethod "$base/api/sessions/$($result.id)/submit" -Method Post -WebSession $web -Headers @{'X-CSRF-TOKEN'=$csrf.token} -ContentType 'application/json' -Body $order
+Invoke-RestMethod "$base/api/sessions/$($result.id)/result" -WebSession $web
 ```
 
 [생성된 OpenAPI 3.1](v2/contracts/openapi.json) / [API 설명](docs/design/API.md)
@@ -156,7 +213,8 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)" -WebSession $web
 │   │       ├── health/
 │   │       ├── scenario/
 │   │       ├── session/
-│   │       └── mission/
+│   │       ├── mission/
+│   │       └── grading/
 │   ├── contracts/    # JSON Schema, fixture, OpenAPI
 │   ├── frontend/
 │   │   ├── src/api/
@@ -197,9 +255,13 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)" -WebSession $web
 
 ## 10. 다음 개발 단계
 
-서버의 결정론적 채점, 주문 제출 및 중복 처리, XState 주문 흐름, 접근성 개선, 오프라인 이벤트 재전송, 관리자 분석을 순서대로 개발합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
+XState 주문 흐름과 화면, 접근성 개선, 오프라인 이벤트 재전송, 관리자 분석을 순서대로 개발합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
 
 최신 검증: [CI 45772447666](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45772447666). OpenAPI 재생성 및 byte-for-byte diff 통과. 백엔드, 프론트엔드, V1, 보안 검사 통과. 이 실행은 JSON import 오류로 브라우저 검사 실패. 후속 CI 45773007930에서 5개 Job 모두 통과. [실행 증빙](docs/evidence/runs/SEN-02-strict-45772447666.md)
 
 
 SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 검증과 OpenAPI 재생성은 진행 중입니다. 기존 시나리오 API 전체 검증은 [CI 45773007930](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773007930)에서 통과했습니다.
+
+
+### 채점 검증
+[CI 45773475536](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773475536): Java 단위 19개, 실제 PostgreSQL 통합 15개 통과. Flyway V1/V2 적용, 동시 동일 제출과 충돌 제출, 소유자 격리, 롤백, 미션 스냅샷, 시간 분리 검증 성공. 새 API에 따른 명세 diff 실패를 확인하고 실제 생성본을 커밋했습니다. 프론트 채점 클라이언트와 프록시 검증을 추가했으며 최종 CI 결과 확인 전입니다. [증빙](docs/evidence/runs/SEN-03-grading-45773475536.md) / [학습 노트](docs/learning/phase-3.md)

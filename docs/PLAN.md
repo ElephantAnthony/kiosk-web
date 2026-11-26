@@ -33,3 +33,6 @@ SEN-02 gate failed in run 45772447666: Node ESM JSON import attribute missing. C
 
 ### SEN-03 active
 Previous gate 45773007930: all five jobs success after adding JSON import attribute. Grading source and unit/integration tests added. Generate actual OpenAPI and enforce diff on next CI. Acceptance: D5 edge cases, owner/CSRF rejection, replay, simultaneous conflict, cancellation protection, rollback, persisted snapshot, timing and full CI. Local independent Java prototype 424 cases passed before integration; do not substitute for Maven tests.
+
+### SEN-03 verification checkpoint
+Run 45773475536: Maven 19 unit + 15 PostgreSQL IT PASS, Flyway V2 applied. Frontend, V1 and history scan PASS. Strict OpenAPI diff failed on expected API expansion; exact generated spec committed, no bypass. Frontend grading API client and real proxy replay tests added. Next: check latest full CI, repair actual errors, finish milestone before XState kiosk UI (EXECUTION 04).
