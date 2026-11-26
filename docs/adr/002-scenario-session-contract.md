@@ -1,6 +1,6 @@
 # ADR-002: versioned scenario and isolated session
 
-Status: implemented; backend and frontend tests passed; full regression CI pending.
+Status: implemented; backend/frontend tests and strict OpenAPI diff passed; final Compose/browser pending.
 
 One JSON Schema Draft 2020-12 defines structural constraints. The server also enforces semantic references that JSON Schema cannot express. Both consumers use the same source directory. Maven packages it as a resource; Docker builds with the v2 context rather than copying a second schema. Pin networknt 1.5.9 for Jackson 2 compatibility (https://central.sonatype.com/artifact/com.networknt/json-schema-validator/1.5.9). Frontend Ajv 8.17.1 uses the same source file.
 
