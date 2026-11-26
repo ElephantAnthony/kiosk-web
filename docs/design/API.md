@@ -12,6 +12,7 @@ Generated [OpenAPI 3.1](../../v2/contracts/openapi.json) is the machine-readable
 | GET | /api/sessions/{id} | 200 | 400, 404 |
 | POST | /api/sessions/{id}/submit | 200 | 400, 403, 404, 409 |
 | GET | /api/sessions/{id}/result | 200 | 400, 404 |
+| POST | /api/sessions/{id}/cancel | 200 | 403, 404, 409 |
 
 Example POST JSON:
 
@@ -34,3 +35,5 @@ Use the same session cookie and a CSRF token for POST.
 ```
 
 The response includes sessionId, matched, missing, extra, accuracy (0..1, six-decimal rounding), paymentMatched, correct, serverElapsedMs, clientActiveMs and completedAt. No client score is accepted. One result per session. The same normalized order, payment and active-time input returns the original result even when reordered or split. A different valid submission after completion is 409. The caller must freeze the input when retrying after connection uncertainty. Unknown or other-owner sessions and not-yet-available results return 404. The endpoint accepts an empty actual order for missing-item grading; future UI prevents empty checkout. The submitted data is synthetic practice data and contains no real payment details.
+
+Cancel uses the same owner and CSRF checks and session row lock as submit. Replaying cancellation returns CANCELLED; completing first prevents cancellation (409). A cancelled session cannot be submitted. No new result row on cancellation.
