@@ -1,0 +1,5 @@
+# Four reviewed historical setuptools false positives; see docs/troubleshooting/SEN-01-security-triage.md.
+98b803e243c3e67a2373f2f3aa3a173c617856b9:myvenv/Lib/site-packages/setuptools/_distutils/msvccompiler.py:generic-api-key:45
+b74b9682a3e70f671f26b8e764736ef42fcedc01:senisk/Lib/site-packages/setuptools/_distutils/msvccompiler.py:generic-api-key:39
+cd16cee272584936d6f51b49d565e9992818fea9:Lib/site-packages/setuptools/_distutils/msvccompiler.py:generic-api-key:45
+e6d2d015abd630f130808e12eb17dbb36eb5b7dd:Lib/site-packages/setuptools/_distutils/msvccompiler.py:generic-api-key:45

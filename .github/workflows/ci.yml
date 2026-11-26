@@ -84,7 +84,7 @@ jobs:
           set +e
           docker run --rm --network none -v "$PWD:/repo:ro" -v "$report:/report" \
             -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
-            ghcr.io/gitleaks/gitleaks:v8.24.2 git --redact=100 --no-banner --log-opts=--all --report-format=json --report-path=/report/findings.json /repo
+            ghcr.io/gitleaks/gitleaks:v8.24.2 git --redact=100 --no-banner --log-opts=--all --gitleaks-ignore-path=/repo/.gitleaksignore --report-format=json --report-path=/report/findings.json /repo
           result=$?
           set -e
           if [ -f "$report/findings.json" ]; then
