@@ -1,5 +1,6 @@
 FROM node:22.16.0-alpine
 WORKDIR /app
+RUN chown node:node /app
 COPY --chown=node:node package*.json ./
 USER node
 RUN if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi

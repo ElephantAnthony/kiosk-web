@@ -1,0 +1,120 @@
+name: SENIOSK verification
+on:
+  push:
+    branches: ['portfolio/seniosk-v2']
+    paths: ['v2/**', '.github/workflows/ci.yml', 'mcdonaldapp/tests.py', 'requirements.txt']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: seniosk-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: v2/backend/pom.xml
+      - run: mvn -B -ntp -f v2/backend/pom.xml verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-reports
+          path: v2/backend/target/surefire-reports/
+          if-no-files-found: warn
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: v2/frontend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - run: |
+          if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-lockfile
+          path: v2/frontend/package-lock.json
+          if-no-files-found: error
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+  legacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Reproduce shared V1 cart
+        run: SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')" python manage.py test mcdonaldapp.tests.LegacySharedCartReproduction --verbosity 2
+  secret-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan history with redacted findings
+        run: |
+          docker run --rm --network none -v "$PWD:/repo:ro" \
+            -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
+            ghcr.io/gitleaks/gitleaks:v8.24.2 git --redact=100 --no-banner --log-opts=--all /repo
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Generate ephemeral database password
+        run: |
+          password="$(openssl rand -hex 24)"
+          echo "::add-mask::$password"
+          echo "DB_PASSWORD=$password" >> "$GITHUB_ENV"
+      - name: Validate and start services
+        working-directory: v2
+        run: |
+          docker compose config -q
+          docker compose up --build -d --wait --wait-timeout 180
+          curl --fail --silent --show-error http://127.0.0.1:8080/healthz
+          curl --fail --silent --show-error http://127.0.0.1:5173/healthz
+      - name: Browser smoke and accessibility test
+        working-directory: v2/frontend
+        run: |
+          if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-report
+          path: v2/frontend/playwright-report/
+          if-no-files-found: warn
+      - name: Stop local CI services
+        if: always()
+        working-directory: v2
+        run: docker compose down -v
