@@ -4,7 +4,7 @@
 
 시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
 
-> 현재 상태: 키오스크 화면, 서버 채점, 세션 취소, 두 매장 시나리오를 구현했습니다. Java 38개, Vitest 16개 테스트 통과. 실제 전체 주문 브라우저 검증은 결과 확인 중이며 행동 로그와 관리자 분석은 후속 개발 범위입니다.
+> 현재 상태: 키오스크 화면, 서버 채점, 세션 취소, 두 매장 시나리오를 구현했습니다. Java 38개, Vitest 16개 테스트 통과. 실제 브라우저 검증에서 보람 카페 주문을 완료했고, 두 번째 시나리오 테스트의 선택자 오류를 수정하여 재검증 중이며 행동 로그와 관리자 분석은 후속 개발 범위입니다.
 
 ## 1. 프로젝트의 문제와 개선 방향
 
@@ -296,6 +296,8 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 최신 검증 [CI 45773698103](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773698103): Java 34개, Vitest 12개, V1 테스트 및 Gitleaks 미분류 0건 (211개 커밋), 생성된 OpenAPI 바이트 단위 비교 통과. 전체 5개 Job 통과. [실행 증빙](docs/evidence/runs/SEN-03-pass-45773698103.md)
 
 ### 키오스크 개발 검증
-[CI 45774770229](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45774770229): Java 단위 20개 및 PostgreSQL 통합 18개, Vitest 16개, OpenAPI diff, 기존 V1 및 Gitleaks 통과. 실제 브라우저 결과 및 캡처는 확인 전입니다. [검증 근거](docs/evidence/runs/SEN-04-kiosk-45774770229.md) / [학습 노트](docs/learning/phase-4.md)
+[CI 45774770229](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45774770229): Java 단위 20개 및 PostgreSQL 통합 18개, Vitest 16개, OpenAPI diff, 기존 V1 및 Gitleaks 통과. 후속 CI 45775017053에서 브라우저 테스트 6개 통과, 1개 실패(도란 버거 카테고리 선택자 중복). 보람 카페 주문 성공, 잘못된 주문, 키보드와 고대비, 응답 유실 재시도, 서버 취소 검증을 확인했습니다. 선택자 수정 후 재검증 중이며 실제 캡처 커밋은 전체 검증 이후 진행합니다. [검증 근거](docs/evidence/runs/SEN-04-kiosk-45774770229.md) / [학습 노트](docs/learning/phase-4.md)
 
 현재 한계: 브라우저 새로고침 후 장바구니 복구는 미구현이며, 세션 발급 응답 자체를 잃으면 활성 세션이 남을 수 있습니다. 활동 시간은 화면 표시 상태 기반 근사값입니다. 실제 이용자 연구와 운영 배포는 수행하지 않았습니다.
+
+[브라우저 검증 결과 및 오류 수정](docs/evidence/runs/SEN-04-browser-45775017053.md) / [재검증 CI](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45775831858)

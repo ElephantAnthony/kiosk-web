@@ -23,3 +23,7 @@
 - Known limitations: orphan session if creation response lost, no browser reload recovery for cart yet, anonymous session expiry, approximate client active time. Event persistence and admin not implemented.
 
 SEN-05 preflight: CI 45775017053 completed with four jobs PASS, Compose health PASS, browser 6 PASS / 1 FAIL. Cafe correct flow demonstrated. Fast-food category selector ambiguous; scoped to category group and exact label. Require both scenarios. Screenshot export skipped. Re-run before implementing events. See [troubleshooting](troubleshooting/SEN-04-category-locator.md).
+
+### SEN-05 prerequisite repair checkpoint
+- Previous run 45775017053: six Playwright passes, one strict locator failure. Cafe success; fast-food result not verified. Browser report artifact 15095314243. [Evidence](evidence/runs/SEN-04-browser-45775017053.md).
+- Repair source 444830a3c56b0cea2f5b8e630bcf1e76cc21c7d9. New CI 45775831858. Wait for actual final outcome, verify both success markers, screenshot bytes and digest, commit image and README only after successful suite. Event source not started. Local Maven/Docker absent; direct git DNS unavailable. Do not cancel ongoing CI by modifying v2 or workflow paths while verifying.
