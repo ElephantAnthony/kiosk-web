@@ -28,7 +28,7 @@ function HealthStatus() {
 }
 
 export function App() {
-  const { snapshot, send } = useKiosk();
+  const { snapshot, send, delivery } = useKiosk();
   const c = snapshot.context;
   const state = String(snapshot.value);
   const [contrast, setContrast] = useState(false);
@@ -50,6 +50,7 @@ export function App() {
       <div className="tools"><button className="secondary" aria-pressed={contrast} onClick={()=>setContrast(v=>!v)}>고대비 모드</button>
       <button className="secondary" aria-expanded={c.help} aria-controls={c.help?"help-panel":undefined} onClick={()=>send({type:'HELP'})}>도움말</button></div></header>
     <main id="content" className="shell" tabIndex={-1}>
+      {['retrying','blocked','storage-error'].includes(delivery) && <p role="status" className="notice">{delivery==='storage-error'?'행동 기록 저장에 문제가 있습니다. 주문 연습은 계속할 수 있습니다.':delivery==='blocked'?'일부 행동 기록을 전송하지 못했습니다. 기록은 기기에 유지됩니다.':'행동 기록 연결이 불안정합니다. 저장된 기록은 다시 전송합니다.'}</p>}
       <div className="topline"><span>키오스크 주문 연습</span><span className="tag">실제 결제 없음</span></div>
       {stepIndex[state]!==undefined && <nav aria-label="연습 단계"><ol className="steps">{steps.map((step,i)=><li key={step} aria-current={i===stepIndex[state]?'step':undefined} className={i===stepIndex[state]?'current':i<stepIndex[state]?'done':''}><span>{i+1}</span>{step}</li>)}</ol></nav>}
       <section className={state==='START'?'panel hero':'panel'} aria-labelledby="page-title">

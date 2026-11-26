@@ -31,3 +31,5 @@ SEN-05 preflight: CI 45775017053 completed with four jobs PASS, Compose health P
 SEN-04 final gate: CI 45775831858 all five jobs green; both scenario success markers and seven Playwright tests observed. JPEG 67443 bytes, SHA-256 c9025076f8394c97fc6e639f88bb89e9a514a0b355e58630e5eb872326cd3179 independently verified and committed. Begin SEN-05.
 
 SEN-05 backend: shared schema, V3 migration, atomic batch ACK with ownership and unique event ID/sequence, real PostgreSQL integration tests authored. Strict spec regeneration required. Frontend outbox and tests next. No real participant collection.
+
+Frontend: IndexedDB event and sequence stores, one track interface, strict schema, accepted action/state hooks, 20/5s batching, retry and ACK validation, status feedback and browser offline/reload/lost ACK/429 tests authored. Run CI and regenerate actual OpenAPI. No new dependency required.

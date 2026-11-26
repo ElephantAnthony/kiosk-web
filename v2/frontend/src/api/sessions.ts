@@ -35,7 +35,7 @@ function parseSession(value: unknown): TrainingSession {
     mission: { id: value.mission.id, templateId: value.mission.templateId, instruction: value.mission.instruction } };
 }
 
-async function getCsrf(signal?: AbortSignal): Promise<{ headerName: string; token: string }> {
+export async function getCsrf(signal?: AbortSignal): Promise<{ headerName: string; token: string }> {
   const csrf = await json(await fetch('/api/csrf', { credentials: 'same-origin', cache: 'no-store', signal }));
   if (!isObject(csrf) || csrf.headerName !== 'X-CSRF-TOKEN' || typeof csrf.token !== 'string') {
     throw new Error('Invalid CSRF response');
