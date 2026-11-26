@@ -4,7 +4,7 @@
 
 시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
 
-> 현재 상태: 개발 환경과 시나리오/학습 세션 검증 완료, 서버 채점과 결과 저장 구현 및 PostgreSQL 테스트 통과. 최종 브라우저 CI를 재검증 중이며, 실제 주문 화면과 행동 로그, 관리자 화면은 후속 개발 범위입니다.
+> 현재 상태: 키오스크 화면, 서버 채점, 세션 취소, 두 매장 시나리오를 구현했습니다. Java 38개, Vitest 16개 테스트 통과. 실제 전체 주문 브라우저 검증은 결과 확인 중이며 행동 로그와 관리자 분석은 후속 개발 범위입니다.
 
 ## 1. 프로젝트의 문제와 개선 방향
 
@@ -12,7 +12,7 @@
 |---|---|---|
 | 전역 장바구니 사용 | 사용자별 HttpSession과 소유자 조건이 있는 DB 조회 | 실제 동시 세션 통합 테스트 통과 |
 | 공유 미션과 난수 기반 점수 | 세션별 미션 스냅샷, 결정론적 서버 채점 | 채점 단위 및 DB 통합 테스트 통과 |
-| 브랜드별 UI 분리 | 공통 시나리오 JSON 계약 | Java/Ajv 검증 통과, 화면 엔진 미구현 |
+| 브랜드별 UI 분리 | 공통 시나리오 JSON 계약 | 공통 화면 엔진 구현, fixture-only 확장 검증 중 |
 | 장애 시 기록 손실 가능성 | IndexedDB outbox와 멱등 수집 예정 | 미구현 |
 
 기존 V1의 장바구니 공유 문제는 Django test client 두 개를 사용해 재현했습니다. 원본 main 브랜치는 변경하지 않습니다.
@@ -91,11 +91,36 @@ sequenceDiagram
 
 [채점 설계 ADR](docs/adr/003-grading-and-idempotency.md)
 
+### 실제 키오스크 주문 화면
+
+메뉴와 옵션은 매장별 JSON으로 구성합니다. 보람 카페와 도란 버거는 서로 다른 메뉴, 옵션, 미션을 하나의 상태 머신과 화면에서 처리합니다. 두 번째 매장 추가 커밋 [f4668ee](https://github.com/ElephantAnthony/kiosk-web/commit/f4668ee64cfe573e6bc14b4661f7786f0b9914ec)은 JSON 1개, 101줄만 추가했고 렌더러와 상태 머신 변경은 0줄입니다.
+
+```mermaid
+stateDiagram-v2
+    START --> MISSION
+    MISSION --> MENU
+    MENU --> OPTION
+    OPTION --> CART
+    CART --> OPTION: 수정
+    CART --> PAYMENT: 비어 있지 않음
+    PAYMENT --> SUBMITTING
+    SUBMITTING --> COMPLETE: 서버 결과
+    SUBMITTING --> SUBMIT_ERROR: 통신 실패
+    SUBMIT_ERROR --> SUBMITTING: 동일 요청 재전송
+    COMPLETE --> START: 다시 연습
+```
+
+- 필수 옵션 선택, 포장 여부, 수량, 장바구니 수정, 모의 결제
+- 도움말, 키보드 탐색, 포커스 표시, 고대비 모드, 최소 48 CSS px 버튼
+- 서버 결과를 받기 전 완료 처리 금지, 재전송 데이터 고정, 서버 취소 확인 후 초기화
+
+[상태 머신 전체 설계](docs/design/KIOSK_FLOW.md) / [기술 결정](docs/adr/004-kiosk-state-machine.md) / [도란 버거 fixture](v2/contracts/scenarios/doran-burger.v1.json)
+
 ## 4. 아키텍처
 
 ```mermaid
 flowchart LR
-    B[Browser] --> F[React / TypeScript]
+    B[Browser] --> F[React / TypeScript / XState]
     F -->|Vite Proxy / HTTP| C[Spring MVC + Security]
     C --> S[Scenario / Session / Grading Service]
     S --> R[Spring JDBC Repository]
@@ -108,14 +133,14 @@ flowchart LR
 
 | 계층 | 기술 |
 |---|---|
-| Frontend | React 19, TypeScript, Vite, Ajv 8.17.1 |
+| Frontend | React 19, TypeScript, Vite, XState 5, Ajv 8.17.1 |
 | Backend | Java 21, Spring Boot 3.5.16, Spring MVC, Security, JDBC |
 | Contract | JSON Schema Draft 2020-12, networknt 1.5.9, OpenAPI 3.1 |
 | Database | PostgreSQL 16, Flyway |
 | Test | JUnit, MockMvc, Vitest, Playwright, axe-core |
 | DevOps | Docker Compose, GitHub Actions, Gitleaks, npm lockfile |
 
-XState는 이후 키오스크 주문 상태 머신에서 사용할 예정입니다. 외부 AI 호출이나 유료 인프라에 의존하지 않습니다.
+XState 5를 주문 상태 머신에 사용합니다. 외부 AI 호출이나 유료 인프라에 의존하지 않습니다.
 
 ## 5. 데이터베이스 설계
 
@@ -176,6 +201,7 @@ erDiagram
 | GET | /api/sessions/{id} | 소유한 세션 조회 |
 | POST | /api/sessions/{id}/submit | 모의 주문 채점 및 완료 |
 | GET | /api/sessions/{id}/result | 저장된 학습 결과 조회 |
+| POST | /api/sessions/{id}/cancel | 연습 취소 및 상태 보호 |
 
 PowerShell에서 가상 세션 생성 예시:
 
@@ -219,6 +245,7 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)/result" -WebSession $web
 │   ├── frontend/
 │   │   ├── src/api/
 │   │   ├── src/scenario/
+│   │   ├── src/kiosk/
 │   │   └── e2e/
 │   ├── scripts/verify
 │   └── docker-compose.yml
@@ -255,7 +282,7 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)/result" -WebSession $web
 
 ## 10. 다음 개발 단계
 
-XState 주문 흐름과 화면, 접근성 개선, 오프라인 이벤트 재전송, 관리자 분석을 순서대로 개발합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
+오프라인 이벤트 재전송, 관리자 분석 및 접근성 보완을 순서대로 개발합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
 
 최신 검증: [CI 45772447666](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45772447666). OpenAPI 재생성 및 byte-for-byte diff 통과. 백엔드, 프론트엔드, V1, 보안 검사 통과. 이 실행은 JSON import 오류로 브라우저 검사 실패. 후속 CI 45773007930에서 5개 Job 모두 통과. [실행 증빙](docs/evidence/runs/SEN-02-strict-45772447666.md)
 
@@ -266,4 +293,9 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 ### 채점 검증
 [CI 45773475536](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773475536): Java 단위 19개, 실제 PostgreSQL 통합 15개 통과. Flyway V1/V2 적용, 동시 동일 제출과 충돌 제출, 소유자 격리, 롤백, 미션 스냅샷, 시간 분리 검증 성공. 새 API에 따른 명세 diff 실패를 확인하고 실제 생성본을 커밋했습니다. 프론트 채점 클라이언트와 프록시 검증을 추가했습니다. [증빙](docs/evidence/runs/SEN-03-grading-45773475536.md) / [학습 노트](docs/learning/phase-3.md)
 
-최신 검증 [CI 45773698103](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773698103): Java 34개, Vitest 12개, V1 테스트 및 Gitleaks 미분류 0건 (211개 커밋), 생성된 OpenAPI 바이트 단위 비교 통과. 최종 Docker/브라우저 Job 결과 확인 전. [실행 증빙](docs/evidence/runs/SEN-03-strict-45773698103.md)
+최신 검증 [CI 45773698103](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773698103): Java 34개, Vitest 12개, V1 테스트 및 Gitleaks 미분류 0건 (211개 커밋), 생성된 OpenAPI 바이트 단위 비교 통과. 전체 5개 Job 통과. [실행 증빙](docs/evidence/runs/SEN-03-pass-45773698103.md)
+
+### 키오스크 개발 검증
+[CI 45774770229](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45774770229): Java 단위 20개 및 PostgreSQL 통합 18개, Vitest 16개, OpenAPI diff, 기존 V1 및 Gitleaks 통과. 실제 브라우저 결과 및 캡처는 확인 전입니다. [검증 근거](docs/evidence/runs/SEN-04-kiosk-45774770229.md) / [학습 노트](docs/learning/phase-4.md)
+
+현재 한계: 브라우저 새로고침 후 장바구니 복구는 미구현이며, 세션 발급 응답 자체를 잃으면 활성 세션이 남을 수 있습니다. 활동 시간은 화면 표시 상태 기반 근사값입니다. 실제 이용자 연구와 운영 배포는 수행하지 않았습니다.

@@ -34,6 +34,7 @@ Backend: mvn -f v2/backend/pom.xml test
 Frontend: cd v2/frontend; npm ci; npm run lint; npm run typecheck; npm test; npm run build
 Browser: npm run test:e2e after services start.
 When changing an endpoint, generate OpenAPI with the PostgreSQL integration profile and commit the actual output; CI must diff it successfully. Shared scenario schema is under v2/contracts, consumed by networknt and Ajv. Never edit stored scenario definitions without bumping their version. Preserve existing scenario fixtures. Grade from the stored mission, normalize by menu/options/packing, and keep the original result on identical replay. Any mutation of completion status and result must share a database transaction; client timing is not server timing.
+Kiosk changes must preserve the explicit XState guards and frozen retry payload. Cancellation is server-confirmed; never clear a pending order on an ambiguous error. New scenarios are versioned fixture-only changes; generic browser test must complete each catalog scenario. Do not create screenshots except from actual browser runs.
 Check docs/evidence/INDEX.md for actual results; a configured CI workflow is not a passing run.
 
 ## Stop conditions

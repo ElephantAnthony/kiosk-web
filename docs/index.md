@@ -21,3 +21,5 @@ This repository keeps public technical evidence, not personal application drafts
 - [Grading ADR](adr/003-grading-and-idempotency.md) / [SEN-03 task](prompts/SEN-03.md) / [Phase 3 learning](learning/phase-3.md) / [API drift troubleshooting](troubleshooting/SEN-03-openapi-drift.md)
 
 - [SEN-03 strict verification](evidence/runs/SEN-03-strict-45773698103.md) / [Next kiosk flow task](prompts/SEN-04.md)
+
+- [Kiosk state machine ADR](adr/004-kiosk-state-machine.md) / [State diagram](design/KIOSK_FLOW.md) / [Phase 4 learning](learning/phase-4.md) / [Actor output troubleshooting](troubleshooting/SEN-04-actor-output.md) / [Event SDK task](prompts/SEN-05.md)

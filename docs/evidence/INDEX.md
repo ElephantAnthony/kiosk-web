@@ -24,3 +24,6 @@
 - [SEN-03 strict verification](runs/SEN-03-strict-45773698103.md): 34 Java, 12 Vitest, strict generated OpenAPI diff, legacy, history scan PASS; final Compose/browser pending at checkpoint.
 
 - [SEN-03 final gate](runs/SEN-03-pass-45773698103.md): all five jobs passed including three Playwright tests.
+
+- [Cancellation CI](runs/SEN-04-cancel-45774326789.md): PostgreSQL tests passed, generated contract drift resolved.
+- [Kiosk verification](runs/SEN-04-kiosk-45774770229.md): Java 38, Vitest 16, OpenAPI diff, V1, history scan PASS; final browser pending at checkpoint.
