@@ -15,3 +15,5 @@ This repository keeps public technical evidence, not personal application drafts
 - [Browser runner compatibility](troubleshooting/SEN-01-browser-runner.md) / [Latest verification checkpoint](evidence/runs/SEN-01-final-checkpoint.md)
 
 - [Training ERD](design/ERD.md) / [API contract](design/API.md) / [Scenario session ADR](adr/002-scenario-session-contract.md) / [Phase 2 learning](learning/phase-2.md) / [SEN-02 task](prompts/SEN-02.md)
+
+- [OpenAPI contract troubleshooting](troubleshooting/SEN-02-openapi.md)
