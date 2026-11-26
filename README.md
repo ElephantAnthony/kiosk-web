@@ -4,7 +4,7 @@
 
 시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
 
-> 현재 상태: 키오스크 화면, 서버 채점, 세션 취소, 두 매장 시나리오를 구현했습니다. Java 38개, Vitest 16개 테스트 통과. 두 매장의 실제 주문과 브라우저 테스트 7개를 모두 통과했으며 행동 로그와 관리자 분석은 후속 개발 범위입니다.
+> 현재 상태: 두 매장의 실제 주문 및 서버 채점, 취소, 브라우저 테스트 7개를 검증했습니다. IndexedDB 행동 기록과 서버 멱등 수집을 구현했으며 신규 프론트엔드 테스트까지 통과했습니다. 이벤트 전체 통합 검증과 관리자 분석은 아직 완료되지 않았습니다.
 
 ## 1. 프로젝트의 문제와 개선 방향
 
@@ -13,7 +13,7 @@
 | 전역 장바구니 사용 | 사용자별 HttpSession과 소유자 조건이 있는 DB 조회 | 실제 동시 세션 통합 테스트 통과 |
 | 공유 미션과 난수 기반 점수 | 세션별 미션 스냅샷, 결정론적 서버 채점 | 채점 단위 및 DB 통합 테스트 통과 |
 | 브랜드별 UI 분리 | 공통 시나리오 JSON 계약 | 두 매장 실제 주문 완료 검증 통과 |
-| 장애 시 기록 손실 가능성 | IndexedDB outbox와 멱등 수집 예정 | 미구현 |
+| 장애 시 기록 손실 가능성 | IndexedDB outbox와 멱등 수집 | 소스 구현, 통합 검증 중 |
 
 기존 V1의 장바구니 공유 문제는 Django test client 두 개를 사용해 재현했습니다. 원본 main 브랜치는 변경하지 않습니다.
 
@@ -121,15 +121,35 @@ stateDiagram-v2
 
 [상태 머신 전체 설계](docs/design/KIOSK_FLOW.md) / [기술 결정](docs/adr/004-kiosk-state-machine.md) / [도란 버거 fixture](v2/contracts/scenarios/doran-burger.v1.json)
 
+### 오프라인 행동 기록
+
+사용자가 수행한 메뉴 선택, 도움말, 상태 이동 등의 허용된 행동을 이벤트로 기록합니다. IndexedDB 트랜잭션에서 고유 ID와 세션별 순번을 저장하고 20개 또는 5초 기준으로 전송합니다. 서버는 PostgreSQL에 배치 단위로 저장한 뒤 ACK를 반환하며 동일 이벤트 재전송은 새로운 행을 만들지 않도록 설계했습니다. ACK가 없거나 잘못된 경우 기존 데이터를 보존합니다.
+
+```mermaid
+flowchart LR
+    X[XState 행동] --> T[track]
+    T --> I[(IndexedDB)]
+    I -->|20개 / 5초| S[Spring Event API]
+    S --> P[(PostgreSQL)]
+    P -->|COMMIT| S
+    S -->|ACK 검증 후 삭제| I
+```
+
+통신 장애, 응답 유실 및 429 Retry-After 처리를 구현했습니다. 기기 저장소 삭제, 세션 만료, 저장 트랜잭션 완료 전 종료까지 보장하지 않으며 pagehide 전송은 최선형 방식입니다. 실제 개인정보와 결제 정보는 수집하지 않습니다. 현재 실제 브라우저 장애 복구 검증은 진행 중입니다.
+
+[이벤트 계약](v2/contracts/event.schema.json) / [이벤트 아키텍처](docs/design/EVENT_PIPELINE.md) / [기술 결정](docs/adr/005-durable-event-outbox.md)
+
 ## 4. 아키텍처
 
 ```mermaid
 flowchart LR
     B[Browser] --> F[React / TypeScript / XState]
     F -->|Vite Proxy / HTTP| C[Spring MVC + Security]
-    C --> S[Scenario / Session / Grading Service]
+    C --> S[Scenario / Session / Grading / Event Service]
     S --> R[Spring JDBC Repository]
     R --> P[(PostgreSQL)]
+    F --> I[(IndexedDB Outbox)]
+    I --> C
     J[Shared JSON Schema] --> F
     J --> S
     M[Flyway] --> P
@@ -154,6 +174,8 @@ erDiagram
     SCENARIO_VERSION ||--o{ TRAINING_SESSION : references
     TRAINING_SESSION ||--|| MISSION : has
     TRAINING_SESSION ||--o| MISSION_RESULT : yields
+    TRAINING_SESSION ||--o{ TRAINING_EVENT : records
+    SCENARIO_VERSION ||--o{ TRAINING_EVENT : identifies
     SCENARIO_VERSION {
         varchar scenario_id PK
         integer version PK
@@ -190,9 +212,21 @@ erDiagram
         bigint client_active_ms
         timestamptz completed_at
     }
+    TRAINING_EVENT {
+        uuid event_id PK
+        uuid session_id FK
+        integer sequence
+        varchar event_type
+        varchar scenario_id FK
+        integer scenario_version FK
+        varchar ui_variant
+        timestamptz client_timestamp
+        timestamptz received_at
+        jsonb body
+    }
 ```
 
-[ERD 상세 설명](docs/design/ERD.md) / [Flyway V1 SQL](v2/backend/src/main/resources/db/migration/V1__training_domain.sql) / [Flyway V2 SQL](v2/backend/src/main/resources/db/migration/V2__mission_result.sql)
+[ERD 상세 설명](docs/design/ERD.md) / [Flyway V1 SQL](v2/backend/src/main/resources/db/migration/V1__training_domain.sql) / [Flyway V2 SQL](v2/backend/src/main/resources/db/migration/V2__mission_result.sql) / [Flyway V3 SQL](v2/backend/src/main/resources/db/migration/V3__training_event.sql)
 
 ## 6. REST API
 
@@ -207,6 +241,7 @@ erDiagram
 | POST | /api/sessions/{id}/submit | 모의 주문 채점 및 완료 |
 | GET | /api/sessions/{id}/result | 저장된 학습 결과 조회 |
 | POST | /api/sessions/{id}/cancel | 연습 취소 및 상태 보호 |
+| POST | /api/sessions/{id}/events | 이벤트 배치 수집 및 ACK (명세 재생성 중) |
 
 PowerShell에서 가상 세션 생성 예시:
 
@@ -245,12 +280,14 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)/result" -WebSession $web
 │   │       ├── scenario/
 │   │       ├── session/
 │   │       ├── mission/
-│   │       └── grading/
+│   │       ├── grading/
+│   │       └── event/
 │   ├── contracts/    # JSON Schema, fixture, OpenAPI
 │   ├── frontend/
 │   │   ├── src/api/
 │   │   ├── src/scenario/
 │   │   ├── src/kiosk/
+│   │   ├── src/analytics-sdk/
 │   │   └── e2e/
 │   ├── scripts/verify
 │   └── docker-compose.yml
@@ -287,7 +324,7 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)/result" -WebSession $web
 
 ## 10. 다음 개발 단계
 
-오프라인 이벤트 재전송, 관리자 분석 및 접근성 보완을 순서대로 개발합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
+이벤트 통합 검증 완료 후 관리자 분석 및 접근성 보완을 진행합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
 
 최신 검증: [CI 45772447666](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45772447666). OpenAPI 재생성 및 byte-for-byte diff 통과. 백엔드, 프론트엔드, V1, 보안 검사 통과. 이 실행은 JSON import 오류로 브라우저 검사 실패. 후속 CI 45773007930에서 5개 Job 모두 통과. [실행 증빙](docs/evidence/runs/SEN-02-strict-45772447666.md)
 
@@ -301,8 +338,11 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 최신 검증 [CI 45773698103](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773698103): Java 34개, Vitest 12개, V1 테스트 및 Gitleaks 미분류 0건 (211개 커밋), 생성된 OpenAPI 바이트 단위 비교 통과. 전체 5개 Job 통과. [실행 증빙](docs/evidence/runs/SEN-03-pass-45773698103.md)
 
 ### 키오스크 개발 검증
-[CI 45774770229](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45774770229): Java 단위 20개 및 PostgreSQL 통합 18개, Vitest 16개, OpenAPI diff, 기존 V1 및 Gitleaks 통과. 후속 CI 45775017053에서 브라우저 테스트 6개 통과, 1개 실패(도란 버거 카테고리 선택자 중복). 보람 카페 주문 성공, 잘못된 주문, 키보드와 고대비, 응답 유실 재시도, 서버 취소 검증을 확인했습니다. 선택자 수정 후 재검증 중이며 실제 캡처 커밋은 전체 검증 이후 진행합니다. [검증 근거](docs/evidence/runs/SEN-04-kiosk-45774770229.md) / [학습 노트](docs/learning/phase-4.md)
+[CI 45774770229](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45774770229): Java 단위 20개 및 PostgreSQL 통합 18개, Vitest 16개, OpenAPI diff, 기존 V1 및 Gitleaks 통과. 후속 CI 45775017053에서 브라우저 테스트 6개 통과, 1개 실패(도란 버거 카테고리 선택자 중복). 보람 카페 주문 성공, 잘못된 주문, 키보드와 고대비, 응답 유실 재시도, 서버 취소 검증을 확인했습니다. 후속 CI 45775831858에서 두 시나리오와 Playwright 7개, 전체 5개 Job이 통과했습니다. 실제 캡처의 SHA-256을 확인해 README에 삽입했습니다. [검증 근거](docs/evidence/runs/SEN-04-kiosk-45774770229.md) / [학습 노트](docs/learning/phase-4.md)
 
 현재 한계: 브라우저 새로고침 후 장바구니 복구는 미구현이며, 세션 발급 응답 자체를 잃으면 활성 세션이 남을 수 있습니다. 활동 시간은 화면 표시 상태 기반 근사값입니다. 실제 이용자 연구와 운영 배포는 수행하지 않았습니다.
 
 [브라우저 검증 결과 및 오류 수정](docs/evidence/runs/SEN-04-browser-45775017053.md) / [재검증 CI](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45775831858)
+
+### 이벤트 검증
+[CI 45776976931](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931): 프론트엔드 Vitest 22개 및 lint/typecheck/build 통과. 신규 백엔드 및 브라우저 검증 결과 확인 전입니다. [학습 노트](docs/learning/phase-5.md)

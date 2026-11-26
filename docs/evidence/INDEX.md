@@ -7,7 +7,7 @@
 - [Follow-up failure](runs/SEN-01-fix-45770554222.md): npm install and lint PASS, TypeScript type conflict and two documentation-quotation false positives.
 - [Dependency alignment](runs/SEN-01-fix-45770748724.md): frontend all checks and history scan PASS, Compose startup and readiness PASS, browser installation FAIL on unsupported runner. Actual lockfile committed.
 - [Latest checkpoint](runs/SEN-01-final-checkpoint.md): subsequently confirmed by final pass below.
-- Event recovery, funnel, full kiosk E2E and participant outcomes: NOT_RUN. Session isolation and grading have verified integration evidence below.
+- Full kiosk E2E verified below. Event recovery, funnel and participant outcomes still await final verification. Session isolation and grading have verified integration evidence below.
 
 - [Foundation final pass](runs/SEN-01-pass-45771026505.md): all five jobs green, live DB health and Chromium/axe smoke passed.
 
@@ -33,3 +33,5 @@
 - [Browser run 45775017053](runs/SEN-04-browser-45775017053.md): 6 browser passes, 1 locator failure, cafe success; repair 444830a and retry 45775831858. Event work gated.
 
 - [SEN-04 final gate](runs/SEN-04-pass-45775831858.md): both scenario flows, seven browser tests, all five jobs and actual capture verified.
+
+- SEN-05 source 8e483d7: [CI 45776976931](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931), Vitest 22, frontend build/typecheck/lint PASS. Backend and full browser result pending.

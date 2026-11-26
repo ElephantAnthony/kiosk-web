@@ -23,3 +23,5 @@ This repository keeps public technical evidence, not personal application drafts
 - [SEN-03 strict verification](evidence/runs/SEN-03-strict-45773698103.md) / [Next kiosk flow task](prompts/SEN-04.md)
 
 - [Kiosk state machine ADR](adr/004-kiosk-state-machine.md) / [State diagram](design/KIOSK_FLOW.md) / [Phase 4 learning](learning/phase-4.md) / [Actor output troubleshooting](troubleshooting/SEN-04-actor-output.md) / [Event SDK task](prompts/SEN-05.md)
+
+- [Event outbox ADR](adr/005-durable-event-outbox.md) / [Event pipeline](design/EVENT_PIPELINE.md) / [Phase 5 learning](learning/phase-5.md)
