@@ -1,4 +1,5 @@
-# SEN-01-FIX
-Resume from the current branch head; main must remain unchanged.
-Security first: privately triage all four findings from run 45769057010. Owner confirms revocation/rotation of real credentials or evidence of false positives. No secret values or raw reports in Git. No history rewrite or blanket suppression. If unresolved, stop code changes.
-Once security clearance is documented, resolve npm edgesOut with compatible pinned toolchain, create a real lockfile, use npm ci, and rerun backend, frontend, legacy, Compose, browser/axe and history scan. Record actual results and update README, PLAN and evidence. Advance to SEN-02 only when the required gates are satisfied.
+# SEN-01-FIX final verification
+
+Current source: ee6d55e1767fad76fe4813a83658c7b60380f6e2, branch portfolio/seniosk-v2. Review docs/PLAN.md, docs/evidence/INDEX.md and run 45771026505.
+Six reviewed historical false positives are documented with exact fingerprints; scan passed in run 45770748724. No credential rotation needed for these findings. Preserve scanner, main, and history.
+npm 11.21.2, Playwright/core 1.56.1, actual lockfile, npm ci and Ubuntu 24.04 are configured. Inspect final run, fix remaining actual failure if any, record evidence and link real browser artifact. If all jobs pass, finish foundation and proceed to SEN-02 (PostgreSQL migrations, scenario contracts and session API). Do not claim complete until observed.

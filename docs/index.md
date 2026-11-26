@@ -11,3 +11,5 @@
 This repository keeps public technical evidence, not personal application drafts.
 
 - [Security triage procedure](troubleshooting/SEN-01-security-triage.md) / [SEN-01-FIX task](prompts/SEN-01-FIX.md)
+
+- [Browser runner compatibility](troubleshooting/SEN-01-browser-runner.md) / [Latest verification checkpoint](evidence/runs/SEN-01-final-checkpoint.md)

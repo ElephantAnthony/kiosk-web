@@ -3,9 +3,9 @@
 ## ROADMAP
 | ID | Deliverable | State |
 |---|---|---|
-| SEN-00 | Branch, audit, hygiene, harness | Hygiene verified, V1 defect reproduced, security triage required |
-| SEN-01 | Spring and React foundation | SOURCE WRITTEN; BLOCKED by security scan and npm |
-| SEN-02 | Shared contract, database and grading | TODO, gated on SEN-01 |
+| SEN-00 | Branch, audit, hygiene, harness | Hygiene verified, V1 defect reproduced, security triage complete |
+| SEN-01 | Spring and React foundation | Most checks verified; final locked browser CI pending |
+| SEN-02 | Shared contract, database and grading | TODO, gated on final SEN-01 verification |
 | SEN-03 | Durable events | TODO |
 | SEN-04 | Admin and accessibility | TODO |
 | SEN-05 | E2E, evidence, README | TODO |
@@ -13,35 +13,13 @@
 ## ACTIVE
 - Branch: portfolio/seniosk-v2
 - Base main: 9477fe7ac6ebae0fbc2393d91dd7d1b0fc10756d
-- Last implementation commit: ae7bfbe166e1dbb6ef1b9ba99ff68fab367764c2
-- CI: https://github.com/ElephantAnthony/kiosk-web/actions/runs/45769057010
-- DONE: Spring source (Maven verify success, 3 tests), React source, Compose, CI, README initial, V1 runtime reproduction (1 test).
-- FAILED: npm install and frontend Docker image build; Gitleaks 4 findings across 192 commits, validity unknown.
-- NOT VERIFIED: full DB health runtime, frontend lint/typecheck/tests/build, Playwright/axe, lockfile, production security/deployment.
-- DECISION: no new feature implementation or remote code fixes pending security triage. Only non-sensitive documentation checkpoint records results.
-- NEXT: EXECUTION 01-FIX. Owner privately review redacted findings; revoke/rotate genuine secrets and confirm authorization to continue. Do not rewrite history or publish values. After cleared, investigate npm Arborist edgesOut (npm 11 pinned candidate, see troubleshooting); rerun CI and commit genuine lockfile. Only advance to SEN-02 after required checks pass.
-
-### SEN-01-FIX checkpoint
-- Re-read repository files, branch refs, CI jobs, scanner log and artifacts at 6ef79cdcb136f8b5e8c8c65f72ee26035eae31e9.
-- No detailed per-finding report was available; only 4 findings across 192 commits confirmed.
-- No code changes or new CI run; previous results remain valid only for their tested commit.
-- Owner action: [private security triage](troubleshooting/SEN-01-security-triage.md).
-- [Checkpoint evidence](evidence/runs/SEN-01-FIX-triage.md). Continue SEN-01-FIX, not SEN-02.
-
-### Security triage resolution
-- Run 45770313225: 4 findings, all exact upstream setuptools function aliases. Evidence: [security triage](evidence/runs/SEN-01-security-45770313225.md).
-- No genuine credential among these findings; no issuance needed. Four precise fingerprints added, scanner remains enforced. Re-scan pending.
-- Next: fix npm resolution, generate lockfile, rerun all foundation gates. Do not advance to SEN-02 until verified.
-
-### Foundation follow-up
-- Run 45770554222: npm pin/install, ESLint, Maven and V1 pass; TS2740 failure due to mismatched Playwright core versions. Two documented quotations detected as false positives; checked exact lines and extended fingerprint list only for those lines. No secret rotation needed.
-- Next attempt: align playwright-core, regenerate actual lockfile, validate security and integration. Source commit before fix: 8b0a04a9f0046266a2500695728f1c8291f07564.
-
-### Lockfile checkpoint
-- CI 45770748724: backend, legacy, frontend and filtered history scan passed; 198 commits, zero unclassified findings. Compose at checkpoint: pending.
-- Generated package-lock.json recovered from actual CI output and verified against digest, length and manifest. Switch to mandatory npm ci; remove bootstrap export.
-- Next: inspect final locked CI and capture real browser evidence. Do not advance until all required checks are confirmed.
-
-### Runner compatibility checkpoint
-- Run 45770748724 completed: Compose startup and both database-backed HTTP checks PASS. Browser installation FAIL (unsupported Ubuntu 26.04).
-- Lockfile committed in d922e8663c1febc3b674ecaf4aa2f49d8254070d; CI and Docker require npm ci. Pin runner Ubuntu 24.04, preserving all tests. Re-run and check final result before SEN-02.
+- Last implementation/CI change: ee6d55e1767fad76fe4813a83658c7b60380f6e2
+- Active CI: https://github.com/ElephantAnthony/kiosk-web/actions/runs/45771026505
+- DONE: all four original scanner findings plus two later documentation quotations verified as false positives. Exact historical fingerprints only; no credential rotation required. History scan passed with zero unclassified findings in run 45770748724.
+- DONE: npm 11.21.2 pin, Playwright/core 1.56.1 alignment, actual lockfile with verified SHA-256, mandatory npm ci. Frontend lint/typecheck/4 tests/build, Maven and V1 reproduction passed.
+- DONE: Compose services started and direct/proxied health returned UP in run 45770748724. Browser installation failed on unsupported Ubuntu 26.04. Runner changed to Ubuntu 24.04.
+- OBSERVED: run 45770967159 frontend npm ci and all subsequent checks passed; remaining jobs canceled by newer runner fix.
+- Latest run at checkpoint: compose: in_progress; backend: success; secret-scan: success; legacy: success; frontend: success.
+- NOT VERIFIED: final locked full CI and browser screenshot/axe until successful results observed. No claim that M1 or foundation is fully complete.
+- NEXT: inspect run 45771026505. If failure, repair only observed causes, rerun, and record. If all jobs pass, update README and evidence, link actual browser report and proceed with SEN-02 schema/data model/API. Preserve main, no deployment or paid services, no real participant data.
+- Evidence: [initial run](evidence/runs/SEN-01-ci-45769057010.md), [security source comparison](evidence/runs/SEN-01-security-45770313225.md), [npm/Playwright fix](evidence/runs/SEN-01-fix-45770554222.md), [lockfile and integration](evidence/runs/SEN-01-fix-45770748724.md), [latest checkpoint](evidence/runs/SEN-01-final-checkpoint.md).
