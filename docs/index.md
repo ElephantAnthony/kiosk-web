@@ -9,3 +9,5 @@
 - [Phase 1 learning](learning/phase-1.md)
 - [npm failure analysis](troubleshooting/SEN-01-npm-install.md)
 This repository keeps public technical evidence, not personal application drafts.
+
+- [Security triage procedure](troubleshooting/SEN-01-security-triage.md) / [SEN-01-FIX task](prompts/SEN-01-FIX.md)

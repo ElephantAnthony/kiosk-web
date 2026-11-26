@@ -20,3 +20,10 @@
 - NOT VERIFIED: full DB health runtime, frontend lint/typecheck/tests/build, Playwright/axe, lockfile, production security/deployment.
 - DECISION: no new feature implementation or remote code fixes pending security triage. Only non-sensitive documentation checkpoint records results.
 - NEXT: EXECUTION 01-FIX. Owner privately review redacted findings; revoke/rotate genuine secrets and confirm authorization to continue. Do not rewrite history or publish values. After cleared, investigate npm Arborist edgesOut (npm 11 pinned candidate, see troubleshooting); rerun CI and commit genuine lockfile. Only advance to SEN-02 after required checks pass.
+
+### SEN-01-FIX checkpoint
+- Re-read repository files, branch refs, CI jobs, scanner log and artifacts at 6ef79cdcb136f8b5e8c8c65f72ee26035eae31e9.
+- No detailed per-finding report was available; only 4 findings across 192 commits confirmed.
+- No code changes or new CI run; previous results remain valid only for their tested commit.
+- Owner action: [private security triage](troubleshooting/SEN-01-security-triage.md).
+- [Checkpoint evidence](evidence/runs/SEN-01-FIX-triage.md). Continue SEN-01-FIX, not SEN-02.

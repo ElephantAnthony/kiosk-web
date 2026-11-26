@@ -5,3 +5,5 @@
 - V2 session isolation, grading, event recovery, funnel, full browser and axe: NOT_RUN.
 - Actual participant outcomes: NOT_RUN.
 Release and next implementation gate: BLOCKED. No secret values stored.
+
+- [SEN-01-FIX triage checkpoint](runs/SEN-01-FIX-triage.md): previous CI results reconfirmed; no detailed security report available; owner action required. No new test run.
