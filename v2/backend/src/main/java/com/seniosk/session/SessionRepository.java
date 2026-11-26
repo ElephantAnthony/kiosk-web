@@ -65,6 +65,14 @@ public class SessionRepository {
         if (changed != 1) throw new IllegalStateException("Expected one active session update");
     }
 
+    public void markCancelled(UUID id, UUID owner) {
+        int changed = jdbc.update("""
+            UPDATE training_session SET status='CANCELLED'
+            WHERE id=? AND owner_id=? AND status='ACTIVE'
+            """, id, owner);
+        if (changed != 1) throw new IllegalStateException("Expected one active session update");
+    }
+
     private StoredSession read(ResultSet rs) throws SQLException {
         TrainingSession session = new TrainingSession(rs.getObject("id", UUID.class),
             rs.getObject("owner_id", UUID.class), rs.getString("scenario_id"), rs.getInt("scenario_version"),

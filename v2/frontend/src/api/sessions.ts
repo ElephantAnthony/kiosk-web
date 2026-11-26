@@ -109,3 +109,11 @@ export async function getResult(id: string, signal?: AbortSignal): Promise<Grade
     credentials: 'same-origin', cache: 'no-store', signal,
   })));
 }
+
+export async function cancelSession(id: string, signal?: AbortSignal): Promise<TrainingSession> {
+  const csrf = await getCsrf(signal);
+  return parseSession(await json(await fetch('/api/sessions/' + encodeURIComponent(id) + '/cancel', {
+    method: 'POST', credentials: 'same-origin', cache: 'no-store', signal,
+    headers: { [csrf.headerName]: csrf.token },
+  })));
+}

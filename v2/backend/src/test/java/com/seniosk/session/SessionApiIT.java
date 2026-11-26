@@ -104,6 +104,18 @@ class SessionApiIT {
             """, UUID.randomUUID(), UUID.randomUUID()));
     }
 
+    @Test void cancelIsOwnedCsrfProtectedAndIdempotent() throws Exception {
+        var a=browser(); var b=browser(); var id=start(a); start(b);
+        String path="/api/sessions/"+id+"/cancel";
+        mvc.perform(post(path).session(b.session()).header(b.header(),b.value())).andExpect(status().isNotFound());
+        mvc.perform(post(path).session(a.session())).andExpect(status().isForbidden());
+        mvc.perform(post(path).session(a.session()).header(a.header(),a.value())).andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("CANCELLED"));
+        mvc.perform(post(path).session(a.session()).header(a.header(),a.value())).andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("CANCELLED"));
+        assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM mission_result WHERE session_id=?",Integer.class,id));
+    }
+
     @Test void exportGeneratedOpenApi() throws Exception {
         var response = mvc.perform(get("/v3/api-docs")).andExpect(status().isOk()).andReturn().getResponse();
         ObjectNode spec = (ObjectNode) mapper.readTree(response.getContentAsString());
@@ -113,6 +125,7 @@ class SessionApiIT {
         assertTrue(spec.at("/paths/~1healthz/get/responses").has("503"));
         assertTrue(spec.at("/paths/~1api~1sessions~1{id}~1submit/post/responses").has("409"));
         assertTrue(spec.at("/paths/~1api~1sessions~1{id}~1result/get/responses").has("200"));
+        assertTrue(spec.at("/paths/~1api~1sessions~1{id}~1cancel/post/responses").has("409"));
         spec.remove("servers"); // Runtime address is environment-specific; retain relative server URL semantics.
         Path out = Path.of("target", "openapi.json");
         Files.createDirectories(out.getParent());

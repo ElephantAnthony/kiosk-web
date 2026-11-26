@@ -22,3 +22,5 @@
 - [SEN-03 grading verification](runs/SEN-03-grading-45773475536.md): Maven 19 unit + 15 real PostgreSQL IT passed; strict spec drift detected; generated file committed for re-run.
 
 - [SEN-03 strict verification](runs/SEN-03-strict-45773698103.md): 34 Java, 12 Vitest, strict generated OpenAPI diff, legacy, history scan PASS; final Compose/browser pending at checkpoint.
+
+- [SEN-03 final gate](runs/SEN-03-pass-45773698103.md): all five jobs passed including three Playwright tests.

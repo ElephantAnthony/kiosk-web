@@ -63,6 +63,19 @@ public class SessionController {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(view(service.read(owner, id)));
     }
 
+    @PostMapping("/sessions/{id}/cancel")
+    @Operation(summary = "Cancel an owned active training session",
+        description = "Repeated cancellation returns the same cancelled session. Completed sessions return 409.",
+        parameters = @Parameter(name = "X-CSRF-TOKEN", in = ParameterIn.HEADER, required = true))
+    @ApiResponse(responseCode = "200", description = "Cancelled session")
+    @ApiResponse(responseCode = "403", description = "Missing or invalid CSRF", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Session not found", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "409", description = "Already completed", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    public ResponseEntity<SessionView> cancel(@PathVariable UUID id, HttpServletRequest request) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+            .body(view(service.cancel(LearnerOwner.current(request), id)));
+    }
+
     private static SessionView view(SessionRepository.StoredSession stored) {
         var s = stored.session();
         var m = stored.mission();

@@ -6,8 +6,8 @@
 | EXECUTION 00 | Baseline, hygiene and harness | Verified |
 | EXECUTION 01 | Spring and React foundation | PASS: all five CI jobs |
 | EXECUTION 02 | Scenario contract and isolated sessions | PASS: all five CI jobs after JSON import fix |
-| EXECUTION 03 (SEN-02B) | Server grading and completion | Backend, frontend, OpenAPI and scan PASS; final Compose/browser pending |
-| EXECUTION 04 | Schema-driven kiosk XState UI and fixture extension | TODO, gated on EXECUTION 03 |
+| EXECUTION 03 (SEN-02B) | Server grading and completion | PASS: all five CI jobs |
+| EXECUTION 04 | Schema-driven kiosk XState UI and fixture extension | ACTIVE: cancellation and schema-driven UI |
 | EXECUTION 05 | Durable event ingestion and SDK | TODO |
 | EXECUTION 06 | Admin funnel and accessibility completion | TODO |
 | EXECUTION 07 | Release gate and portfolio evidence | TODO |
@@ -23,3 +23,5 @@
 - EXECUTION 04: XState START/MISSION/MENU/OPTION/CART/PAYMENT/COMPLETE; BACK/CANCEL/HELP, empty cart guard, one frozen submission on retry, server result display, large controls, keyboard/focus, high contrast. Add fictional fast-food fixture separately and prove renderer/machine unchanged. No event collection or admin until subsequent steps. Preserve all versioned contracts and source, regenerate actual OpenAPI only if API changes.
 - Real user outcomes, operational deployment, performance load and final M1 gate remain unverified. No real participant data or external paid resource.
 - [Evidence index](evidence/INDEX.md), [ERD](design/ERD.md), [API](design/API.md), [grading ADR](adr/003-grading-and-idempotency.md), [next task](prompts/SEN-04.md).
+
+Execution 03 final CI 45773698103 all five jobs passed, three browser tests. Execution 04 starts with transactional cancellation sharing the grading row lock. Strict generated contract must be regenerated and verified. Acceptance: accessible full kiosk path, frozen retry, no empty checkout, second fixture only, real browser evidence.

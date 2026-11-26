@@ -141,9 +141,31 @@ class GradingApiIT {
 
     @Test void cancelledSessionCannotBeCompleted() throws Exception {
         var b=browser(); var id=start(b);
-        jdbc.update("UPDATE training_session SET status='CANCELLED' WHERE id=?",id);
+        mvc.perform(post("/api/sessions/"+id+"/cancel").session(b.session()).header(b.header(),b.token()))
+            .andExpect(status().isOk());
         submit(b,id,request(2,"CARD")).andExpect(status().isConflict());
         assertEquals("CANCELLED",state(id)); assertEquals(0,count(id));
+    }
+
+    @Test void cancellationAndSubmissionSerializeOnSameRow() throws Exception {
+        var b=browser(); var id=start(b); var barrier=new CyclicBarrier(2);
+        try(var exec=Executors.newVirtualThreadPerTaskExecutor()) {
+            var a=exec.submit(()->{barrier.await(10,TimeUnit.SECONDS); return submit(b,id,request(2,"CARD")).andReturn().getResponse().getStatus();});
+            var c=exec.submit(()->{barrier.await(10,TimeUnit.SECONDS); return mvc.perform(post("/api/sessions/"+id+"/cancel")
+                .session(b.session()).header(b.header(),b.token())).andReturn().getResponse().getStatus();});
+            int submitted=a.get(20,TimeUnit.SECONDS), cancelled=c.get(20,TimeUnit.SECONDS);
+            assertEquals(List.of(200,409),List.of(submitted,cancelled).stream().sorted().toList());
+            assertEquals(submitted==200?"COMPLETED":"CANCELLED",state(id));
+            assertEquals(submitted==200?1:0,count(id));
+        }
+    }
+
+    @Test void completedSessionCannotBeCancelled() throws Exception {
+        var b=browser(); var id=start(b);
+        submit(b,id,request(2,"CARD")).andExpect(status().isOk());
+        mvc.perform(post("/api/sessions/"+id+"/cancel").session(b.session()).header(b.header(),b.token()))
+            .andExpect(status().isConflict());
+        assertEquals("COMPLETED",state(id)); assertEquals(1,count(id));
     }
 
     @Test void outerRollbackRevertsBothCompletionAndResult() throws Exception {

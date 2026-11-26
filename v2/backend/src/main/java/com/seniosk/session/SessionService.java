@@ -39,6 +39,16 @@ public class SessionService {
         if (owner == null) throw notFound();
         return sessions.findOwned(id, owner).orElseThrow(SessionService::notFound);
     }
+    @Transactional
+    public SessionRepository.StoredSession cancel(UUID owner, UUID id) {
+        if (owner == null) throw notFound();
+        var stored = sessions.findOwnedForUpdate(id, owner).orElseThrow(SessionService::notFound);
+        if (stored.session().status() == TrainingSession.Status.COMPLETED)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Completed session cannot be cancelled");
+        if (stored.session().status() == TrainingSession.Status.ACTIVE) sessions.markCancelled(id, owner);
+        return sessions.findOwned(id, owner).orElseThrow(SessionService::notFound);
+    }
+
     private static ResponseStatusException notFound() {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found");
     }
