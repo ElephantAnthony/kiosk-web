@@ -35,3 +35,11 @@ export async function getScenario(id: string, version: number, signal?: AbortSig
   if (!response.ok) throw new Error('Scenario request failed');
   return parseScenario(await response.json());
 }
+
+export async function listScenarios(signal?: AbortSignal): Promise<Scenario[]> {
+  const response = await fetch('/api/scenarios', { signal, cache: 'no-store', credentials: 'same-origin' });
+  if (!response.ok) throw new Error('Scenario list request failed');
+  const value: unknown = await response.json();
+  if (!Array.isArray(value) || value.length === 0) throw new Error('Invalid scenario list');
+  return value.map(parseScenario);
+}
