@@ -21,3 +21,5 @@
 - Next: inspect actual Compose/browser result, fix observed failures, verify both scenario UI success markers and screenshot export. Commit real screenshot bytes and link README only if source is verified. Do not advance to EXECUTION 05 until required verification passes.
 - Next task: [event SDK and ingestion](prompts/SEN-05.md). Existing state machine and fixture must remain data-driven. No actual participant data or real payments, deployment, or bulk performance claims.
 - Known limitations: orphan session if creation response lost, no browser reload recovery for cart yet, anonymous session expiry, approximate client active time. Event persistence and admin not implemented.
+
+SEN-05 preflight: CI 45775017053 completed with four jobs PASS, Compose health PASS, browser 6 PASS / 1 FAIL. Cafe correct flow demonstrated. Fast-food category selector ambiguous; scoped to category group and exact label. Require both scenarios. Screenshot export skipped. Re-run before implementing events. See [troubleshooting](troubleshooting/SEN-04-category-locator.md).

@@ -18,7 +18,7 @@ async function start(page:Page,title='보람 카페'){
 async function add(page:Page,s:Scenario,line:OrderLine){
   const menu=s.menus.find(m=>m.id===line.menuId)!;
   const category=s.categories.find(c=>c.id===menu.categoryId)!;
-  await button(page,category.label).click();
+  await page.getByRole('group',{name:'메뉴 카테고리'}).getByRole('button',{name:category.label,exact:true}).click();
   await button(page,new RegExp(menu.label)).click();
   for(const group of menu.optionGroups) for(const opt of group.options.filter(o=>line.optionIds.includes(o.id))) await button(page,new RegExp(opt.label)).click();
   await button(page,packing[line.packing]).click();
@@ -31,7 +31,7 @@ test('all registered scenarios can be completed by the same renderer',async({pag
   const raw:unknown=await (await page.request.get('/api/scenarios')).json();
   expect(Array.isArray(raw)).toBe(true);
   const scenarios=(raw as unknown[]).map(parseScenario);
-  expect(scenarios.length).toBeGreaterThanOrEqual(1);
+  expect(scenarios.map(s=>s.scenarioId)).toEqual(expect.arrayContaining(['boram-cafe','doran-burger']));
   for(const s of scenarios){
     await page.goto('/');
     await button(page,new RegExp(s.title)).click();
