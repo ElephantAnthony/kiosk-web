@@ -1,0 +1,2 @@
+# SEN-02 domain implementation task
+Foundation CI 45771026505 passed. Create a shared scenario contract and a fictional cafe fixture, PostgreSQL schema, immutable version catalog, transactionally created training session and mission, owner-scoped reads, CSRF protection, validation and generated OpenAPI. Add real PostgreSQL integration tests and verify frontend contract with Ajv. Commit source, then actual generated lockfile and spec; preserve evidence and main. Do not implement grading, event ingest or admin yet. No false success claims.

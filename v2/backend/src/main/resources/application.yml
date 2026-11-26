@@ -7,6 +7,9 @@ spring:
     password: ${DB_PASSWORD}
     hikari:
       connection-timeout: 3000
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
   flyway:
     enabled: true
 server:

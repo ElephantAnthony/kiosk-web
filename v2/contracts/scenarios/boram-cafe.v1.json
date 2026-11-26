@@ -1,0 +1,112 @@
+{
+  "scenarioId": "boram-cafe",
+  "version": 1,
+  "title": "보람 카페",
+  "description": "가상의 카페에서 음료와 간식을 선택하고 모의 결제를 연습합니다.",
+  "categories": [
+    {
+      "id": "drinks",
+      "label": "음료"
+    },
+    {
+      "id": "snacks",
+      "label": "간식"
+    }
+  ],
+  "menus": [
+    {
+      "id": "americano",
+      "categoryId": "drinks",
+      "label": "아메리카노",
+      "price": 2500,
+      "optionGroups": [
+        {
+          "id": "temperature",
+          "label": "온도",
+          "required": true,
+          "options": [
+            {
+              "id": "hot",
+              "label": "따뜻하게",
+              "priceDelta": 0
+            },
+            {
+              "id": "ice",
+              "label": "차갑게",
+              "priceDelta": 0
+            }
+          ]
+        },
+        {
+          "id": "size",
+          "label": "크기",
+          "required": false,
+          "options": [
+            {
+              "id": "large",
+              "label": "큰 컵",
+              "priceDelta": 500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tea",
+      "categoryId": "drinks",
+      "label": "유자차",
+      "price": 3500,
+      "optionGroups": [
+        {
+          "id": "temperature",
+          "label": "온도",
+          "required": true,
+          "options": [
+            {
+              "id": "hot",
+              "label": "따뜻하게",
+              "priceDelta": 0
+            },
+            {
+              "id": "ice",
+              "label": "차갑게",
+              "priceDelta": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cookie",
+      "categoryId": "snacks",
+      "label": "쿠키",
+      "price": 1800,
+      "optionGroups": []
+    }
+  ],
+  "packingOptions": [
+    "DINE_IN",
+    "TAKE_OUT"
+  ],
+  "paymentOptions": [
+    "CARD",
+    "CASH"
+  ],
+  "missions": [
+    {
+      "id": "coffee-takeout",
+      "instruction": "차가운 아메리카노 2잔을 포장하고 카드로 모의 결제하세요.",
+      "expected": [
+        {
+          "menuId": "americano",
+          "optionIds": [
+            "ice"
+          ],
+          "packing": "TAKE_OUT",
+          "quantity": 2
+        }
+      ],
+      "payment": "CARD"
+    }
+  ]
+}

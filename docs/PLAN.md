@@ -28,3 +28,5 @@
 Foundation final run 45771026505 completed: all five jobs passed including Chromium and axe. Evidence: [final pass](evidence/runs/SEN-01-pass-45771026505.md).
 SEN-02: shared scenario schema and fictional cafe, immutable scenario version, atomic training session plus mission persistence, CSRF-protected session API, owner isolation, PostgreSQL integration tests and generated OpenAPI. No grading submission, events, admin or real user study yet.
 Verification: Maven unit and PostgreSQL integration, schema validation on both runtimes, locked frontend build, generated API contract diff, regression CI. Record any incomplete check; do not advance until required tests pass.
+
+SEN-02 backend source authored: scenario schema + fixture, Flyway V1, catalog, transaction, ownership and API, unit/integration tests. Next: configure PostgreSQL integration CI and generate Ajv lock + OpenAPI. Verification pending.

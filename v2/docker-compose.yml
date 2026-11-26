@@ -16,7 +16,9 @@ services:
       timeout: 3s
       retries: 20
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: container
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-seniosk}
