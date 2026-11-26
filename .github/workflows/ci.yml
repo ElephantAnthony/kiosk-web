@@ -40,11 +40,7 @@ jobs:
       - name: Export and compare generated OpenAPI
         run: |
           python3 v2/scripts/export-generated-json.py OPENAPI v2/backend/target/openapi.json
-          if [ -f v2/contracts/openapi.json ]; then
-            diff -u v2/contracts/openapi.json v2/backend/target/openapi.json
-          else
-            echo "BOOTSTRAP: generated OpenAPI must be committed before the milestone is complete"
-          fi
+          diff -u v2/contracts/openapi.json v2/backend/target/openapi.json
       - uses: actions/upload-artifact@v4
         if: success()
         with:
