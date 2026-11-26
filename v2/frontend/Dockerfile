@@ -2,9 +2,9 @@ FROM node:22.16.0-alpine
 RUN npm install -g npm@11.21.2 && test "$(npm --version)" = "11.21.2"
 WORKDIR /app
 RUN chown node:node /app
-COPY --chown=node:node package*.json ./
+COPY --chown=node:node package.json package-lock.json ./
 USER node
-RUN if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
+RUN npm ci --no-audit --no-fund
 COPY --chown=node:node . .
 RUN npm run build
 EXPOSE 5173

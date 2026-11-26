@@ -11,3 +11,6 @@ Pin npm 11.21.2 in the frontend manifest, Docker, CI and local verification comm
 
 ## Observed follow-up: run 45770554222
 npm 11.21.2 installation and package resolution succeeded; ESLint passed. TypeScript failed with TS2740 for axe's Page argument. Actual generated lockfile contained playwright-core 1.65.1 at root and playwright-core 1.56.1 under playwright. The axe adapter's open peer range resolved to the newer root type, while @playwright/test 1.56.1 uses the nested older type. Pin the root playwright-core to the same 1.56.1 release; regenerate lockfile through CI. Do not cast away the incompatible type or downgrade checks. Previous successful lockfile is superseded by this manifest change.
+
+## Verified fixes
+Run 45770748724: npm install, lint, typecheck, 4 Vitest tests, Vite build all passed after aligning playwright-core 1.56.1. Generated lockfile validated against CI SHA-256, exact manifest and public registry URLs. Commit lockfile and require npm ci; full locked integration run remains necessary.

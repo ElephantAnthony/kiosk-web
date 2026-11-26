@@ -36,3 +36,8 @@
 ### Foundation follow-up
 - Run 45770554222: npm pin/install, ESLint, Maven and V1 pass; TS2740 failure due to mismatched Playwright core versions. Two documented quotations detected as false positives; checked exact lines and extended fingerprint list only for those lines. No secret rotation needed.
 - Next attempt: align playwright-core, regenerate actual lockfile, validate security and integration. Source commit before fix: 8b0a04a9f0046266a2500695728f1c8291f07564.
+
+### Lockfile checkpoint
+- CI 45770748724: backend, legacy, frontend and filtered history scan passed; 198 commits, zero unclassified findings. Compose at checkpoint: pending.
+- Generated package-lock.json recovered from actual CI output and verified against digest, length and manifest. Switch to mandatory npm ci; remove bootstrap export.
+- Next: inspect final locked CI and capture real browser evidence. Do not advance until all required checks are confirmed.

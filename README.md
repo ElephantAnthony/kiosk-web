@@ -15,7 +15,7 @@ Java 21 / Spring Boot / React / TypeScript / PostgreSQL
 
 > **개발 상태: Foundation / 검증 보류**
 > Spring 기반 서버의 Maven 빌드와 단위 테스트 3개가 통과했습니다.
-> React 설치 오류 해결 및 보안 검사 재실행이 필요합니다. 기존 보안 탐지 4건은 공식 라이브러리 소스 비교로 오탐임을 확인했습니다.
+> React 의존성 설치, lint, 타입 검사, 단위 테스트 4개, 빌드 및 Git 이력 보안 검사가 통과했습니다. 고정 lockfile 기반 최종 통합 검증은 진행 전입니다.
 > 주문 연습 기능은 아직 미구현이며, 현재 브랜치는 배포 또는 완성된 서비스가 아닙니다.
 
 ## 프로젝트 소개
@@ -135,9 +135,9 @@ Springdoc의 API 문서는 서버 기동 후 http://localhost:8080/swagger-ui.ht
 
 ## 실행 방법
 
-> 아래는 구성 파일 기준 실행 절차입니다. 현재 npm 오류로 전체 기동이 검증되지 않았습니다. 보안 검사 확인 전 외부 공개 또는 운영 배포를 하지 않습니다.
+> 아래는 구성 파일 기준 실행 절차입니다. 현재 의존성 설치 오류는 해결됐으며 고정 lockfile 기반 전체 기동 확인이 필요합니다. 보안 검사 확인 전 외부 공개 또는 운영 배포를 하지 않습니다.
 
-필요 환경: Docker Desktop 또는 Docker Engine과 Compose v2, 로컬 개발 시 Java 21, Maven 3.9 이상, Node.js 22.16 이상.
+필요 환경: Docker Desktop 또는 Docker Engine과 Compose v2, 로컬 개발 시 Java 21, Maven 3.9 이상, Node.js 22.16 이상, npm 11.21.2.
 
 ```bash
 git clone -b portfolio/seniosk-v2 https://github.com/ElephantAnthony/kiosk-web.git
@@ -165,14 +165,15 @@ Windows PowerShell에서는 파일 복사에 `Copy-Item .env.example .env`를 �
 ```bash
 mvn -B -ntp -f v2/backend/pom.xml verify
 cd v2/frontend
-npm install
+npm install -g npm@11.21.2
+npm ci
 npm run lint
 npm run typecheck
 npm test
 npm run build
 ```
 
-전체 개발 환경 검사: 루트에서 `bash v2/scripts/verify`. 현재 lockfile은 생성 전이며 npm 설치 오류를 해결한 후 실제 생성한 파일을 커밋해야 합니다.
+전체 개발 환경 검사: 루트에서 `bash v2/scripts/verify`. 실제 CI에서 생성하고 SHA-256을 확인한 lockfile을 사용합니다.
 
 ## 검증 결과
 
@@ -189,6 +190,9 @@ npm run build
 | Git history scan | FAIL | 192개 커밋 검사, 발견 4건, 모두 오탐 확인, 재검사 대기 |
 
 V1 테스트의 통과는 결함의 존재를 재현했다는 뜻입니다. V2 세션 격리 검증을 의미하지 않습니다. 실제 사용자 개선율, 운영 성능, 접근성 인증 등은 측정하거나 획득하지 않았습니다.
+
+### 후속 검증
+[CI run 45770748724](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45770748724): npm 설치, lint, typecheck, Vitest 4개, Vite build, Maven, V1 테스트, Gitleaks 통과. 정확한 6개 과거 오탐 지문만 예외 등록했으며 미분류 탐지 0건. Docker 상태 확인 시점: pending. lockfile 커밋 후 최종 검증 필요.
 
 ## 개발 기록
 
@@ -211,6 +215,6 @@ V1 테스트의 통과는 결함의 존재를 재현했다는 뜻입니다. V2 �
 
 ## 한계 및 후속 작업
 
-기존 보안 탐지 4건은 공식 setuptools 원본과 파일 및 Git blob SHA를 비교하여 오탐으로 분류했습니다. [보안 검증 근거](docs/evidence/runs/SEN-01-security-45770313225.md)를 남겼으며, 정확한 네 개의 이력 지문만 예외 처리합니다. 보안 검사 재실행과 npm 오류 수정이 필요합니다. 기존 Git 이력은 변경하지 않습니다.
+기존 보안 탐지 4건은 공식 setuptools 원본과 파일 및 Git blob SHA를 비교하여 오탐으로 분류했습니다. [보안 검증 근거](docs/evidence/runs/SEN-01-security-45770313225.md)를 남겼으며, 원래 네 건과 이후 문서 인용에서 발생한 두 건의 정확한 이력 지문만 예외 처리합니다. 보안 검사와 npm 설치는 후속 CI에서 통과했습니다. 기존 Git 이력은 변경하지 않습니다.
 
 이 프로젝트는 기존 교육용 프로토타입의 기술적 문제를 검증 가능한 방식으로 개선하기 위한 개인 고도화 작업입니다. AI 보조 개발 과정과 실제 검증을 문서화하며, 작성되지 않은 기능이나 측정되지 않은 사용자 성과는 완료로 표시하지 않습니다.
