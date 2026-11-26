@@ -91,3 +91,20 @@ Scripts/
 
 db.sqlite3
 
+
+# SENIOSK V2 and legacy generated artifacts
+/web_venv/
+/Lib/
+/.idea/
+/get-pip.py
+.DS_Store
+*.py[cod]
+.env.*
+!.env.example
+node_modules/
+dist/
+target/
+coverage/
+playwright-report/
+test-results/
+*.log

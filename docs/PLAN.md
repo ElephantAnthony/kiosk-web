@@ -14,8 +14,8 @@
 - Branch: portfolio/seniosk-v2
 - Base: 9477fe7ac6ebae0fbc2393d91dd7d1b0fc10756d
 - Branch creation: confirmed through GitHub branch list.
-- Current action: record approved scope and audit, then clean tracked build artifacts.
+- Current action: generated-file cleanup; next V1 reproduction test and CI verification.
 - Environment: Java 21 and Node 22 available in isolated container; Maven, Docker and gitleaks not found; direct GitHub DNS fails. GitHub API writes now succeed.
 - No local repository checkout available. Remote changes use GitHub Git object API.
 - Full secret history scan and V1 runtime reproduction remain release blockers.
-- Next: inspect tracked files and remove only approved generated files.
+- Next: add V1 reproduction test, then foundation. Full history scan remains BLOCKED locally.
