@@ -75,11 +75,22 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Scan history with redacted findings
+      - name: Scan history and emit safe diagnostic metadata
         run: |
-          docker run --rm --network none -v "$PWD:/repo:ro" \
+          set -euo pipefail
+          report="$(mktemp -d)"
+          trap 'rm -rf "$report"' EXIT
+          chmod 777 "$report"
+          set +e
+          docker run --rm --network none -v "$PWD:/repo:ro" -v "$report:/report" \
             -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
-            ghcr.io/gitleaks/gitleaks:v8.24.2 git --redact=100 --no-banner --log-opts=--all /repo
+            ghcr.io/gitleaks/gitleaks:v8.24.2 git --redact=100 --no-banner --log-opts=--all --report-format=json --report-path=/report/findings.json /repo
+          result=$?
+          set -e
+          if [ -f "$report/findings.json" ]; then
+            python3 v2/scripts/security-metadata.py "$report/findings.json"
+          fi
+          exit "$result"
   compose:
     runs-on: ubuntu-latest
     timeout-minutes: 25
