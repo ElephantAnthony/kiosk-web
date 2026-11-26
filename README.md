@@ -15,7 +15,7 @@ Java 21 / Spring Boot / React / TypeScript / PostgreSQL
 
 > **개발 상태: Foundation / 검증 보류**
 > Spring 기반 서버의 Maven 빌드와 단위 테스트 3개가 통과했습니다.
-> React 의존성 설치, lint, 타입 검사, 단위 테스트 4개, 빌드 및 Git 이력 보안 검사가 통과했습니다. 고정 lockfile 기반 최종 통합 검증은 진행 전입니다.
+> React 의존성 설치, lint, 타입 검사, 단위 테스트 4개, 빌드 및 Git 이력 보안 검사가 통과했습니다. Docker 기동 및 DB 연결은 확인했으며, 고정 lockfile과 Ubuntu 24.04 기반 최종 브라우저 검증이 필요합니다.
 > 주문 연습 기능은 아직 미구현이며, 현재 브랜치는 배포 또는 완성된 서비스가 아닙니다.
 
 ## 프로젝트 소개
@@ -192,7 +192,7 @@ npm run build
 V1 테스트의 통과는 결함의 존재를 재현했다는 뜻입니다. V2 세션 격리 검증을 의미하지 않습니다. 실제 사용자 개선율, 운영 성능, 접근성 인증 등은 측정하거나 획득하지 않았습니다.
 
 ### 후속 검증
-[CI run 45770748724](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45770748724): npm 설치, lint, typecheck, Vitest 4개, Vite build, Maven, V1 테스트, Gitleaks 통과. 정확한 6개 과거 오탐 지문만 예외 등록했으며 미분류 탐지 0건. Docker 상태 확인 시점: pending. lockfile 커밋 후 최종 검증 필요.
+[CI run 45770748724](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45770748724): npm 설치, lint, typecheck, Vitest 4개, Vite build, Maven, V1 테스트, Gitleaks 통과. 정확한 6개 과거 오탐 지문만 예외 등록했으며 미분류 탐지 0건. Docker 서비스 기동 및 직접/프록시 health 정상 응답 확인, 브라우저 설치는 Ubuntu 26.04 호환성 문제로 실패. lockfile 커밋 후 최종 검증 필요.
 
 ## 개발 기록
 

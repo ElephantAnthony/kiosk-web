@@ -1,0 +1,2 @@
+# Browser runner compatibility
+Run 45770748724, compose job 139742522992: Docker Compose started all services; both direct API and frontend proxy health requests returned status UP. Browser install failed because Playwright 1.56.1 does not support Chromium on ubuntu26.04-x64. This is an execution-environment incompatibility, not a passing browser test. Pin runner to Ubuntu 24.04, keeping the aligned Playwright core version and lockfile. Re-run all checks and capture the actual screenshot if browser test passes. No application feature change.

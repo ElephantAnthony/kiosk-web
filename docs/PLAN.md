@@ -41,3 +41,7 @@
 - CI 45770748724: backend, legacy, frontend and filtered history scan passed; 198 commits, zero unclassified findings. Compose at checkpoint: pending.
 - Generated package-lock.json recovered from actual CI output and verified against digest, length and manifest. Switch to mandatory npm ci; remove bootstrap export.
 - Next: inspect final locked CI and capture real browser evidence. Do not advance until all required checks are confirmed.
+
+### Runner compatibility checkpoint
+- Run 45770748724 completed: Compose startup and both database-backed HTTP checks PASS. Browser installation FAIL (unsupported Ubuntu 26.04).
+- Lockfile committed in d922e8663c1febc3b674ecaf4aa2f49d8254070d; CI and Docker require npm ci. Pin runner Ubuntu 24.04, preserving all tests. Re-run and check final result before SEN-02.

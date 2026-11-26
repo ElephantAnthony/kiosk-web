@@ -13,3 +13,5 @@ Release and next implementation gate: BLOCKED. No secret values stored.
 - [Foundation follow-up](runs/SEN-01-fix-45770554222.md): installation and lint pass; typecheck and security still failed; precise fixes applied, re-run required.
 
 - [Dependency alignment and lockfile](runs/SEN-01-fix-45770748724.md): frontend/backend/legacy and history scan PASS; lockfile verified and mandatory npm ci configured; final locked CI pending.
+
+- Compose startup and direct/proxied health PASS in run 45770748724; browser install FAIL on Ubuntu 26.04. Runner pinned to 24.04; final locked run required.
