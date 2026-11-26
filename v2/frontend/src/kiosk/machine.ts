@@ -59,7 +59,7 @@ export function createKioskMachine(client: KioskApi = api) {
   return setup({
     types: { context: {} as Context, events: {} as Event },
     actors: {
-      load: fromPromise(({ signal }) => client.list(signal)),
+      load: fromPromise<Scenario[]>(({ signal }) => client.list(signal)),
       start: fromPromise(async ({ input, signal }: { input: Scenario; signal: AbortSignal }) => {
         const session = await client.start(input.scenarioId, input.version, signal);
         if (session.scenarioId !== input.scenarioId || session.scenarioVersion !== input.version || session.status !== 'ACTIVE') throw new Error('Unexpected session');
