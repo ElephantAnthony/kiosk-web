@@ -6,6 +6,7 @@ cd "$ROOT"
 mvn -B -ntp -f v2/backend/pom.xml test
 (
   cd v2/frontend
+  [[ "$(npm --version)" == "11.21.2" ]] || { echo "Install npm@11.21.2 before verification" >&2; exit 1; }
   if [[ -f package-lock.json ]]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
   npm run lint
   npm run typecheck

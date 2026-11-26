@@ -1,4 +1,5 @@
 FROM node:22.16.0-alpine
+RUN npm install -g npm@11.21.2 && test "$(npm --version)" = "11.21.2"
 WORKDIR /app
 RUN chown node:node /app
 COPY --chown=node:node package*.json ./

@@ -43,8 +43,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.16.0'
+      - name: Pin npm toolchain
+        run: |
+          npm install -g npm@11.21.2
+          test "$(npm --version)" = "11.21.2"
       - run: |
           if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+      - name: Emit generated public lockfile for bootstrap
+        if: success()
+        run: node ../scripts/emit-lockfile.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: frontend-lockfile
@@ -101,6 +108,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.16.0'
+      - name: Pin npm toolchain
+        run: |
+          npm install -g npm@11.21.2
+          test "$(npm --version)" = "11.21.2"
       - name: Generate ephemeral database password
         run: |
           password="$(openssl rand -hex 24)"
