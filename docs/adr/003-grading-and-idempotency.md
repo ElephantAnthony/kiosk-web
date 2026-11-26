@@ -8,4 +8,4 @@ Store canonical actual order and simulated payment, score counts and accuracy, p
 
 Alternative: in-memory synchronized map loses state at process restart and does not coordinate PostgreSQL transactions. Client score is tamperable. Using only an HTTP idempotency key would not prevent two different keys from completing the same mission. Row lock plus unique constraint is a simpler single-result invariant.
 
-Verification pending at implementation commit. No production throughput or accessibility claims.
+Maven 19 unit and 15 real PostgreSQL integration tests passed in run 45773698103. Generated contract diff passed; final live proxy/browser CI pending. No production throughput or accessibility claims.

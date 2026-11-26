@@ -4,7 +4,7 @@
 
 시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
 
-> 현재 상태: 개발 환경과 시나리오/학습 세션 검증 완료, 서버 채점과 결과 저장 구현 및 PostgreSQL 테스트 통과. 전체 통합 CI는 재검증 중이며, 실제 주문 화면과 행동 로그, 관리자 화면은 후속 개발 범위입니다.
+> 현재 상태: 개발 환경과 시나리오/학습 세션 검증 완료, 서버 채점과 결과 저장 구현 및 PostgreSQL 테스트 통과. 최종 브라우저 CI를 재검증 중이며, 실제 주문 화면과 행동 로그, 관리자 화면은 후속 개발 범위입니다.
 
 ## 1. 프로젝트의 문제와 개선 방향
 
@@ -264,4 +264,6 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 
 
 ### 채점 검증
-[CI 45773475536](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773475536): Java 단위 19개, 실제 PostgreSQL 통합 15개 통과. Flyway V1/V2 적용, 동시 동일 제출과 충돌 제출, 소유자 격리, 롤백, 미션 스냅샷, 시간 분리 검증 성공. 새 API에 따른 명세 diff 실패를 확인하고 실제 생성본을 커밋했습니다. 프론트 채점 클라이언트와 프록시 검증을 추가했으며 최종 CI 결과 확인 전입니다. [증빙](docs/evidence/runs/SEN-03-grading-45773475536.md) / [학습 노트](docs/learning/phase-3.md)
+[CI 45773475536](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773475536): Java 단위 19개, 실제 PostgreSQL 통합 15개 통과. Flyway V1/V2 적용, 동시 동일 제출과 충돌 제출, 소유자 격리, 롤백, 미션 스냅샷, 시간 분리 검증 성공. 새 API에 따른 명세 diff 실패를 확인하고 실제 생성본을 커밋했습니다. 프론트 채점 클라이언트와 프록시 검증을 추가했습니다. [증빙](docs/evidence/runs/SEN-03-grading-45773475536.md) / [학습 노트](docs/learning/phase-3.md)
+
+최신 검증 [CI 45773698103](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773698103): Java 34개, Vitest 12개, V1 테스트 및 Gitleaks 미분류 0건 (211개 커밋), 생성된 OpenAPI 바이트 단위 비교 통과. 최종 Docker/브라우저 Job 결과 확인 전. [실행 증빙](docs/evidence/runs/SEN-03-strict-45773698103.md)

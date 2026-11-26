@@ -20,4 +20,4 @@ Use a multiset rather than comparing raw JSON strings; ordering and split lines 
 2. Why does a unique result constraint alone not define the intended replay response?
 3. What happens if an exception occurs after status update and result insertion inside the transaction?
 
-Understanding not assessed. No measured learner improvement. Initial Maven and PostgreSQL tests pass; strict OpenAPI and live proxy regression still require final check.
+Understanding not assessed. No measured learner improvement. Initial Maven and PostgreSQL tests pass; strict OpenAPI diff passed in run 45773698103. Live proxy/browser regression still requires final confirmation.

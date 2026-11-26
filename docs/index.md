@@ -19,3 +19,5 @@ This repository keeps public technical evidence, not personal application drafts
 - [OpenAPI contract troubleshooting](troubleshooting/SEN-02-openapi.md)
 
 - [Grading ADR](adr/003-grading-and-idempotency.md) / [SEN-03 task](prompts/SEN-03.md) / [Phase 3 learning](learning/phase-3.md) / [API drift troubleshooting](troubleshooting/SEN-03-openapi-drift.md)
+
+- [SEN-03 strict verification](evidence/runs/SEN-03-strict-45773698103.md) / [Next kiosk flow task](prompts/SEN-04.md)
