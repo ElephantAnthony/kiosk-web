@@ -1,15 +1,7 @@
 # Evidence index
-
-| Gate | State |
-|---|---|
-| Branch creation and main preservation | VERIFIED via API |
-| V1 static audit | VERIFIED by source inspection |
-| V1 runtime defect reproduction | NOT_RUN |
-| Full history secret scan | BLOCKED: no checkout or gitleaks |
-| Maven integration tests | NOT_RUN |
-| React and browser tests | NOT_RUN |
-| Docker startup | NOT_RUN |
-| CI result | NOT_RUN |
-| User outcomes | NOT_RUN, no participants |
-
-Record actual outputs only. Missing evidence is not a pass.
+- [Hygiene tree comparison](runs/SEN-00-hygiene.md): verified remote tree comparison, 10898 generated files removed.
+- V1 static audit: VERIFIED.
+- V1 characterization test: authored, NOT_RUN.
+- History secret scan: BLOCKED locally.
+- Maven, React, Docker, E2E, CI: NOT_RUN.
+- Actual participant outcomes: NOT_RUN.
