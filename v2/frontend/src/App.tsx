@@ -48,7 +48,7 @@ export function App() {
     <a className="skip" href="#content">본문 바로가기</a>
     <header className="header"><div><span className="brand">SENIOSK</span><span className="brand-sub"> 시니스크 2.0</span></div>
       <div className="tools"><button className="secondary" aria-pressed={contrast} onClick={()=>setContrast(v=>!v)}>고대비 모드</button>
-      <button className="secondary" aria-expanded={c.help} aria-controls="help-panel" onClick={()=>send({type:'HELP'})}>도움말</button></div></header>
+      <button className="secondary" aria-expanded={c.help} aria-controls={c.help?"help-panel":undefined} onClick={()=>send({type:'HELP'})}>도움말</button></div></header>
     <main id="content" className="shell" tabIndex={-1}>
       <div className="topline"><span>키오스크 주문 연습</span><span className="tag">실제 결제 없음</span></div>
       {stepIndex[state]!==undefined && <nav aria-label="연습 단계"><ol className="steps">{steps.map((step,i)=><li key={step} aria-current={i===stepIndex[state]?'step':undefined} className={i===stepIndex[state]?'current':i<stepIndex[state]?'done':''}><span>{i+1}</span>{step}</li>)}</ol></nav>}

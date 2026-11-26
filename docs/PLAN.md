@@ -25,3 +25,5 @@
 - [Evidence index](evidence/INDEX.md), [ERD](design/ERD.md), [API](design/API.md), [grading ADR](adr/003-grading-and-idempotency.md), [next task](prompts/SEN-04.md).
 
 Execution 03 final CI 45773698103 all five jobs passed, three browser tests. Execution 04 starts with transactional cancellation sharing the grading row lock. Strict generated contract must be regenerated and verified. Acceptance: accessible full kiosk path, frozen retry, no empty checkout, second fixture only, real browser evidence.
+
+Kiosk machine and renderer authored. Added state-transition and real-browser order, error, cancellation, keyboard and axe tests. Generic browser test iterates catalog; next add separate fixture without touching renderer or machine. Actual screenshot export is from Playwright only. Verification pending.

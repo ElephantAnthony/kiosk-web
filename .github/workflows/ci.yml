@@ -155,6 +155,9 @@ jobs:
           npm ci --no-audit --no-fund
           npx playwright install --with-deps chromium
           npm run test:e2e
+      - name: Export actual kiosk screenshot for README
+        if: success()
+        run: python3 v2/scripts/export-kiosk-screenshot.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

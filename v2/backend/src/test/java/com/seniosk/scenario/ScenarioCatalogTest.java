@@ -9,6 +9,12 @@ class ScenarioCatalogTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private final ScenarioCatalog catalog = new ScenarioCatalog(mapper);
 
+    @Test void allBundledScenariosRoundTrip() throws Exception {
+        for (var scenario : catalog.list()) {
+            assertEquals(scenario, catalog.parse(mapper.valueToTree(scenario)));
+            assertFalse(scenario.missions().isEmpty());
+        }
+    }
     @Test void acceptsBundledCafe() {
         var s = catalog.get("boram-cafe", 1);
         assertEquals(3, s.menus().size());
