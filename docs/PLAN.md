@@ -28,3 +28,5 @@
 - [Strict evidence](evidence/runs/SEN-02-strict-45772447666.md)
 
 Follow-up: Compose startup/health step in run 45772447666: success. Browser job state: in_progress. Do not mark browser/axe or full SEN-02 passed until final result. AGENTS commands updated to locked dependency install and generated API diff.
+
+SEN-02 gate failed in run 45772447666: Node ESM JSON import attribute missing. Corrected shared schema import; full regression required before grading. See [troubleshooting](troubleshooting/SEN-02-json-import.md).

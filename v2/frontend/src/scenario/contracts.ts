@@ -1,5 +1,5 @@
 import Ajv2020 from 'ajv/dist/2020.js';
-import schema from '../../../contracts/scenario.schema.json';
+import schema from '../../../contracts/scenario.schema.json' with { type: 'json' };
 
 export type Packing = 'DINE_IN' | 'TAKE_OUT';
 export type Payment = 'CARD' | 'CASH';

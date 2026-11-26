@@ -1,0 +1,2 @@
+# Playwright JSON import failure
+Run 45772447666: Compose health succeeded but Playwright failed before executing tests with TypeError: Module scenario.schema.json needs an import attribute of type json. Node 22 native ESM requires an explicit JSON import attribute; Vite had accepted the original bundler import. Add the attribute to the shared scenario module, preserving the same schema and actual browser/API tests. Re-run all gates. Status: pending.
