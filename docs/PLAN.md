@@ -29,3 +29,5 @@ SEN-05 preflight: CI 45775017053 completed with four jobs PASS, Compose health P
 - Repair source 444830a3c56b0cea2f5b8e630bcf1e76cc21c7d9. New CI 45775831858. Wait for actual final outcome, verify both success markers, screenshot bytes and digest, commit image and README only after successful suite. Event source not started. Local Maven/Docker absent; direct git DNS unavailable. Do not cancel ongoing CI by modifying v2 or workflow paths while verifying.
 
 SEN-04 final gate: CI 45775831858 all five jobs green; both scenario success markers and seven Playwright tests observed. JPEG 67443 bytes, SHA-256 c9025076f8394c97fc6e639f88bb89e9a514a0b355e58630e5eb872326cd3179 independently verified and committed. Begin SEN-05.
+
+SEN-05 backend: shared schema, V3 migration, atomic batch ACK with ownership and unique event ID/sequence, real PostgreSQL integration tests authored. Strict spec regeneration required. Frontend outbox and tests next. No real participant collection.
