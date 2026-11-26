@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT"
+# Run from Git Bash, WSL or Linux. No deployment; existing DB volume is preserved.
+mvn -B -ntp -f v2/backend/pom.xml test
+(
+  cd v2/frontend
+  if [[ -f package-lock.json ]]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+  npm run lint
+  npm run typecheck
+  npm test
+  npm run build
+)
+(
+  cd v2
+  docker compose config -q
+  docker compose up --build -d --wait --wait-timeout 180
+  curl --fail --silent --show-error http://127.0.0.1:8080/healthz
+  echo
+)
+(
+  cd v2/frontend
+  npx playwright install chromium
+  npm run test:e2e
+)
