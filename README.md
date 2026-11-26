@@ -13,10 +13,9 @@ Java 21 / Spring Boot / React / TypeScript / PostgreSQL
 
 </div>
 
-> **개발 상태: Foundation / 검증 보류**
-> Spring 기반 서버의 Maven 빌드와 단위 테스트 3개가 통과했습니다.
-> React 의존성 설치, lint, 타입 검사, 단위 테스트 4개, 빌드 및 Git 이력 보안 검사가 통과했습니다. Docker 기동 및 DB 연결은 확인했으며, 고정 lockfile과 Ubuntu 24.04 기반 최종 브라우저 검증이 필요합니다.
-> 주문 연습 기능은 아직 미구현이며, 현재 브랜치는 배포 또는 완성된 서비스가 아닙니다.
+> **개발 상태: Foundation 검증 완료 / 도메인 개발 시작**
+> Spring Boot, React, PostgreSQL, Docker Compose, 브라우저 및 보안 검사 등 5개 CI Job이 모두 통과했습니다.
+> 주문 연습과 채점 기능은 개발 중이며 완성된 서비스 또는 운영 배포를 의미하지 않습니다.
 
 ## 프로젝트 소개
 
@@ -34,7 +33,7 @@ V2는 기존 Django 프로토타입에서 발견한 세션 공유와 부정확�
 | 학습 점수 | 일부 난수 기반 저장 (소스 확인) | 서버의 결정론적 채점 예정 |
 | 학습 행동 | 제한적인 클릭 기록 | IndexedDB 큐와 멱등 수집 예정 |
 | 개발 검증 | 기존 테스트 스텁 | Maven 테스트 3개 통과, V1 재현 1개 통과 |
-| 배포 방식 | 기존 실행 환경 | Docker 서비스 기동 및 DB 연결 확인, 브라우저 검증 대기 |
+| 배포 방식 | 기존 실행 환경 | Docker 서비스 기동 및 DB 연결 확인, 초기 브라우저 검증 통과 |
 
 기존 코드 감사: [V1 baseline](docs/research/V1_BASELINE.md). 원본 브랜치와 팀 프로젝트 소스를 보존합니다.
 
@@ -48,7 +47,7 @@ V2는 기존 Django 프로토타입에서 발견한 세션 공유와 부정확�
 | 사용자 세션 격리 | 서로 다른 학습자의 상태 분리 | 예정 |
 | 오프라인 이벤트 전송 | 연결 장애에도 기록 보존 | 예정 |
 | 관리자 퍼널 | 학습 단계별 집계 | 예정 |
-| 접근성 | 큰 버튼, 키보드 및 명확한 상태 안내 | 초기 화면 CSS 및 검사 코드 작성, 최종 axe 검증 대기 |
+| 접근성 | 큰 버튼, 키보드 및 명확한 상태 안내 | 초기 화면 CSS 및 검사 코드 작성, 초기 화면 axe serious/critical 검사 통과 |
 
 시연 화면과 영상은 실제 실행에 성공한 후 등록합니다. 현재는 소스와 테스트 결과만 공개합니다.
 
@@ -68,7 +67,7 @@ Spring JDBC를 선택한 이유는 향후 이벤트 중복 제어에서 PostgreS
 
 ## 시스템 아키텍처
 
-아래 구성도는 이번 단계에서 작성한 소스와 실행 환경을 나타냅니다. 전체 기동 검증은 아직 통과하지 못했습니다.
+아래 구성도는 이번 단계에서 작성한 소스와 실행 환경을 나타냅니다. 초기 서비스 기동 및 DB 연결 검증을 완료했습니다.
 
 ```mermaid
 flowchart LR
@@ -135,7 +134,7 @@ Springdoc의 API 문서는 서버 기동 후 http://localhost:8080/swagger-ui.ht
 
 ## 실행 방법
 
-> 아래는 구성 파일 기준 실행 절차입니다. 현재 의존성 설치 오류는 해결됐으며 고정 lockfile 기반 전체 기동 확인이 필요합니다. 외부 공개 및 운영 배포는 범위에 포함하지 않습니다.
+> 아래는 구성 파일 기준 실행 절차입니다. 고정 lockfile 기반 Docker 기동 및 초기 브라우저 검증을 완료했습니다. 외부 공개 및 운영 배포는 범위에 포함하지 않습니다.
 
 필요 환경: Docker Desktop 또는 Docker Engine과 Compose v2, 로컬 개발 시 Java 21, Maven 3.9 이상, Node.js 22.16 이상, npm 11.21.2.
 
@@ -194,14 +193,17 @@ V1 테스트의 통과는 결함의 존재를 재현했다는 뜻입니다. V2 �
 ### 후속 검증
 [CI run 45770748724](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45770748724): npm 설치, lint, typecheck, Vitest 4개, Vite build, Maven, V1 테스트, Gitleaks 통과. 정확한 6개 과거 오탐 지문만 예외 등록했으며 미분류 탐지 0건. Docker 서비스 기동 및 직접/프록시 health 정상 응답 확인, 브라우저 설치는 Ubuntu 26.04 호환성 문제로 실패. lockfile 커밋 후 최종 검증 필요.
 
-최신 고정 lockfile CI: [run 45771026505](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45771026505). 이 실행의 최종 결과는 아직 확인 전입니다. 이전 npm ci 실행에서 프론트엔드 lint, 타입 검사, 단위 테스트, 빌드가 모두 통과했습니다.
+최신 고정 lockfile CI: [run 45771026505](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45771026505). 이 실행의 5개 Job은 모두 통과했습니다. 이전 npm ci 실행에서 프론트엔드 lint, 타입 검사, 단위 테스트, 빌드가 모두 통과했습니다.
+
+### 개발 환경 최종 검증
+[CI run 45771026505](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45771026505): 5개 Job 통과, 백엔드 테스트 3개, 프론트 테스트 4개, V1 재현 테스트 1개, 브라우저 테스트 1개 통과. PostgreSQL 연결과 직접/프록시 health 응답 정상. Gitleaks 미분류 탐지 0건. 초기 화면에서 axe serious/critical 위반 0건. [실제 브라우저 보고서](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45771026505/artifacts/15094117044) / [검증 증빙](docs/evidence/runs/SEN-01-pass-45771026505.md).
 
 ## 개발 기록
 
 | 단계 | 상태 |
 |---|---|
 | SEN-00 기존 코드 감사 및 정리 | 파일 정리, 결함 재현, 보안 오탐 확인 완료 |
-| SEN-01 개발 환경 | Maven, 프론트 빌드, DB 연결, 보안 검사 통과, 최종 브라우저 검증 대기 |
+| SEN-01 개발 환경 | 완료: 5개 CI Job 통과 |
 | SEN-02 시나리오 및 채점 | 대기 |
 | SEN-03 이벤트 수집 | 대기 |
 | SEN-04 관리자 및 접근성 | 대기 |

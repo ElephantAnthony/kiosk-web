@@ -23,3 +23,5 @@ Understanding: not assessed. CI proves backend build and unit tests, not complet
 
 ## Follow-up learning
 A scanner can identify code that looks like a secret without understanding its semantics; compare an exact historical blob against upstream before applying a narrow exception. An npm lockfile fixes transitive dependency versions and prevents independent peer resolution from drifting. Matching Playwright package versions prevents incompatible type definitions. Runner operating-system support is a distinct integration concern. Compose health proved DB connectivity, while browser/axe still require final confirmation.
+
+Final foundation CI 45771026505 passed all five jobs, including live health and Chromium/axe. Accessibility assertion covers serious and critical violations on the landing page only; no conformance certification.
