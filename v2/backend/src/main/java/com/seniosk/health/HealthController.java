@@ -1,6 +1,7 @@
 package com.seniosk.health;
 
 import java.util.Map;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,7 +16,9 @@ public class HealthController {
         this.jdbc = jdbc;
     }
 
-    @GetMapping("/healthz")
+    @GetMapping(value = "/healthz", produces = "application/json")
+    @ApiResponse(responseCode = "200", description = "Database available")
+    @ApiResponse(responseCode = "503", description = "Database unavailable")
     public ResponseEntity<Map<String, String>> health() {
         try {
             if (Integer.valueOf(1).equals(jdbc.queryForObject("SELECT 1", Integer.class))) {

@@ -30,3 +30,6 @@ SEN-02: shared scenario schema and fictional cafe, immutable scenario version, a
 Verification: Maven unit and PostgreSQL integration, schema validation on both runtimes, locked frontend build, generated API contract diff, regression CI. Record any incomplete check; do not advance until required tests pass.
 
 SEN-02 backend source authored: scenario schema + fixture, Flyway V1, catalog, transaction, ownership and API, unit/integration tests. Next: configure PostgreSQL integration CI and generate Ajv lock + OpenAPI. Verification pending.
+
+### SEN-02 domain bootstrap
+Run 45771847340: Maven 8 unit + 4 PostgreSQL IT PASS; Flyway migration applied, concurrent ownership test passed. Ajv lock generated and verified; frontend contract/client/proxy tests written. OpenAPI generated but review found missing GET success annotation; fixed and added contract assertions. Verify new source and regenerate actual spec before enforcing diff. Compose result pending at checkpoint.

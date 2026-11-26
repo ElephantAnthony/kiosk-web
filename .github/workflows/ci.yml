@@ -169,27 +169,3 @@ jobs:
         if: always()
         working-directory: v2
         run: docker compose down -v
-  contract-lock-bootstrap:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22.16.0'
-      - name: Generate Ajv dependency lock in isolated directory
-        run: |
-          npm install -g npm@11.21.2
-          mkdir -p "$RUNNER_TEMP/contract-lock"
-          cp v2/frontend/package.json v2/frontend/package-lock.json "$RUNNER_TEMP/contract-lock/"
-          cd "$RUNNER_TEMP/contract-lock"
-          npm install --package-lock-only --save-exact --no-audit --no-fund ajv@8.17.1
-      - name: Export actual generated dependency lock
-        run: |
-          python3 v2/scripts/export-generated-json.py AJV_LOCK "$RUNNER_TEMP/contract-lock/package-lock.json"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: contract-lock-bootstrap
-          path: ${{ runner.temp }}/contract-lock/package-lock.json

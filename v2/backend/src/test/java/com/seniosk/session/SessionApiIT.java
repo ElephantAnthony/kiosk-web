@@ -28,6 +28,8 @@ class SessionApiIT {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper mapper;
     @Autowired JdbcTemplate jdbc;
+    @Autowired com.seniosk.scenario.ScenarioCatalog catalog;
+    @Autowired com.seniosk.scenario.ScenarioRepository scenarios;
 
     private record Browser(MockHttpSession session, String header, String value) {}
     private Browser browser() throws Exception {
@@ -84,6 +86,17 @@ class SessionApiIT {
         assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM scenario_version WHERE scenario_id='boram-cafe' AND version=1", Integer.class));
     }
 
+    @Test void storedScenarioCannotBeReplacedUnderSameVersion() {
+        var original = catalog.get("boram-cafe", 1);
+        var changed = new com.seniosk.scenario.Scenario(original.scenarioId(), original.version(),
+            "Changed title", original.description(), original.categories(), original.menus(),
+            original.packingOptions(), original.paymentOptions(), original.missions());
+        assertThrows(IllegalStateException.class, () -> scenarios.ensureVersion(changed));
+        assertEquals(original.title(), jdbc.queryForObject("""
+            SELECT definition->>'title' FROM scenario_version WHERE scenario_id='boram-cafe' AND version=1
+            """, String.class));
+    }
+
     @Test void foreignKeyRejectsUnknownScenario() {
         assertThrows(DataIntegrityViolationException.class, () -> jdbc.update("""
             INSERT INTO training_session(id,owner_id,scenario_id,scenario_version,ui_variant,status,started_at)
@@ -96,6 +109,8 @@ class SessionApiIT {
         ObjectNode spec = (ObjectNode) mapper.readTree(response.getContentAsString());
         assertTrue(spec.path("paths").has("/api/sessions"));
         assertTrue(spec.path("paths").has("/api/scenarios"));
+        assertTrue(spec.at("/paths/~1api~1sessions~1{id}/get/responses").has("200"));
+        assertTrue(spec.at("/paths/~1healthz/get/responses").has("503"));
         spec.remove("servers"); // Runtime address is environment-specific; retain relative server URL semantics.
         Path out = Path.of("target", "openapi.json");
         Files.createDirectories(out.getParent());

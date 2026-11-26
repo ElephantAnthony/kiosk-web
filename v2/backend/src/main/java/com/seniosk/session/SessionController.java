@@ -2,6 +2,10 @@ package com.seniosk.session;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.http.ProblemDetail;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -17,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping(value = "/api", produces = "application/json")
 public class SessionController {
     private static final String OWNER_ATTRIBUTE = "seniosk.learner.owner";
     private final SessionService service;
@@ -39,11 +43,13 @@ public class SessionController {
     }
 
     @PostMapping("/sessions")
-    @Operation(summary = "Start an isolated training session and assign a mission")
+    @Operation(summary = "Start an isolated training session and assign a mission",
+        description = "First obtain a CSRF token from GET /api/csrf and retain the same session cookie.",
+        parameters = @Parameter(name = "X-CSRF-TOKEN", in = ParameterIn.HEADER, required = true))
     @ApiResponse(responseCode = "201", description = "Session created")
-    @ApiResponse(responseCode = "400", description = "Invalid request")
-    @ApiResponse(responseCode = "403", description = "Missing or invalid CSRF")
-    @ApiResponse(responseCode = "404", description = "Scenario not found")
+    @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "Missing or invalid CSRF", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Scenario not found", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     public ResponseEntity<SessionView> start(@Valid @RequestBody StartRequest input, HttpSession httpSession) {
         UUID owner;
         synchronized (WebUtils.getSessionMutex(httpSession)) {
@@ -59,7 +65,8 @@ public class SessionController {
 
     @GetMapping("/sessions/{id}")
     @Operation(summary = "Read a training session owned by this browser")
-    @ApiResponse(responseCode = "404", description = "Absent or owned by another browser")
+    @ApiResponse(responseCode = "200", description = "Owned training session")
+    @ApiResponse(responseCode = "404", description = "Absent or owned by another browser", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     public ResponseEntity<SessionView> detail(@PathVariable UUID id, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         UUID owner = session == null ? null : (UUID) session.getAttribute(OWNER_ATTRIBUTE);

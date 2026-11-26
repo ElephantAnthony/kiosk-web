@@ -36,7 +36,9 @@ services:
       retries: 20
       start_period: 20s
   frontend:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     environment:
       API_PROXY_TARGET: http://backend:8080
     ports:

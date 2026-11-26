@@ -10,3 +10,5 @@
 - V2 session isolation, grading, event recovery, funnel, kiosk E2E, participant outcomes: NOT_RUN.
 
 - [Foundation final pass](runs/SEN-01-pass-45771026505.md): all five jobs green, live DB health and Chromium/axe smoke passed.
+
+- [SEN-02 bootstrap](runs/SEN-02-bootstrap-45771847340.md): Java unit and PostgreSQL integration passed; generated Ajv lock verified; OpenAPI review found missing response annotation, fixed pending verification.
