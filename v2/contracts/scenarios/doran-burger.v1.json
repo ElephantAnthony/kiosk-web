@@ -1,0 +1,101 @@
+{
+  "scenarioId": "doran-burger",
+  "version": 1,
+  "title": "도란 버거",
+  "description": "가상의 햄버거 매장에서 메뉴와 곁들임을 고르고 모의 결제를 연습합니다.",
+  "categories": [
+    {
+      "id": "burgers",
+      "label": "버거"
+    },
+    {
+      "id": "sides",
+      "label": "사이드"
+    }
+  ],
+  "menus": [
+    {
+      "id": "veggie-burger",
+      "categoryId": "burgers",
+      "label": "채소 버거",
+      "price": 5500,
+      "optionGroups": [
+        {
+          "id": "sauce",
+          "label": "소스",
+          "required": true,
+          "options": [
+            {
+              "id": "mild",
+              "label": "순한 소스",
+              "priceDelta": 0
+            },
+            {
+              "id": "spicy",
+              "label": "매운 소스",
+              "priceDelta": 0
+            }
+          ]
+        },
+        {
+          "id": "cheese",
+          "label": "추가 토핑",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-cheese",
+              "label": "치즈 추가",
+              "priceDelta": 700
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fries",
+      "categoryId": "sides",
+      "label": "감자튀김",
+      "price": 2200,
+      "optionGroups": []
+    },
+    {
+      "id": "salad",
+      "categoryId": "sides",
+      "label": "샐러드",
+      "price": 3000,
+      "optionGroups": []
+    }
+  ],
+  "packingOptions": [
+    "DINE_IN",
+    "TAKE_OUT"
+  ],
+  "paymentOptions": [
+    "CARD",
+    "CASH"
+  ],
+  "missions": [
+    {
+      "id": "burger-meal",
+      "instruction": "순한 소스와 치즈를 추가한 채소 버거 1개, 감자튀김 2개를 매장에서 먹고 현금으로 모의 결제하세요.",
+      "expected": [
+        {
+          "menuId": "veggie-burger",
+          "optionIds": [
+            "mild",
+            "extra-cheese"
+          ],
+          "packing": "DINE_IN",
+          "quantity": 1
+        },
+        {
+          "menuId": "fries",
+          "optionIds": [],
+          "packing": "DINE_IN",
+          "quantity": 2
+        }
+      ],
+      "payment": "CASH"
+    }
+  ]
+}
