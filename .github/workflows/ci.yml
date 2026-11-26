@@ -23,12 +23,44 @@ jobs:
           java-version: '21'
           cache: maven
           cache-dependency-path: v2/backend/pom.xml
-      - run: mvn -B -ntp -f v2/backend/pom.xml verify
+      - name: Start disposable PostgreSQL for integration tests
+        run: |
+          set -euo pipefail
+          password="$(openssl rand -hex 24)"
+          echo "::add-mask::$password"
+          echo "DB_PASSWORD=$password" >> "$GITHUB_ENV"
+          export POSTGRES_PASSWORD="$password"
+          docker run --rm -d --name seniosk-db-it -p 127.0.0.1:5432:5432 -e POSTGRES_USER=seniosk -e POSTGRES_DB=seniosk -e POSTGRES_PASSWORD postgres:16-alpine
+          for attempt in $(seq 1 40); do
+            if docker exec seniosk-db-it pg_isready -U seniosk -d seniosk; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - run: mvn -B -ntp -f v2/backend/pom.xml -Ppostgres-it verify
+      - name: Export and compare generated OpenAPI
+        run: |
+          python3 v2/scripts/export-generated-json.py OPENAPI v2/backend/target/openapi.json
+          if [ -f v2/contracts/openapi.json ]; then
+            diff -u v2/contracts/openapi.json v2/backend/target/openapi.json
+          else
+            echo "BOOTSTRAP: generated OpenAPI must be committed before the milestone is complete"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: generated-openapi
+          path: v2/backend/target/openapi.json
+          if-no-files-found: error
+      - name: Stop disposable PostgreSQL
+        if: always()
+        run: docker stop seniosk-db-it || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backend-test-reports
-          path: v2/backend/target/surefire-reports/
+          path: |
+            v2/backend/target/surefire-reports/
+            v2/backend/target/failsafe-reports/
           if-no-files-found: warn
   frontend:
     runs-on: ubuntu-24.04
@@ -137,3 +169,27 @@ jobs:
         if: always()
         working-directory: v2
         run: docker compose down -v
+  contract-lock-bootstrap:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Generate Ajv dependency lock in isolated directory
+        run: |
+          npm install -g npm@11.21.2
+          mkdir -p "$RUNNER_TEMP/contract-lock"
+          cp v2/frontend/package.json v2/frontend/package-lock.json "$RUNNER_TEMP/contract-lock/"
+          cd "$RUNNER_TEMP/contract-lock"
+          npm install --package-lock-only --save-exact --no-audit --no-fund ajv@8.17.1
+      - name: Export actual generated dependency lock
+        run: |
+          python3 v2/scripts/export-generated-json.py AJV_LOCK "$RUNNER_TEMP/contract-lock/package-lock.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: contract-lock-bootstrap
+          path: ${{ runner.temp }}/contract-lock/package-lock.json
