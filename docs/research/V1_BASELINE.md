@@ -11,4 +11,4 @@ Reference: [main baseline](https://github.com/ElephantAnthony/kiosk-web/tree/947
 | Test coverage | mcdonaldapp/tests.py and introapp/tests.py are empty stubs | STATIC VERIFIED |
 | Tracked artifacts | root myvenv, web_venv, Lib, .idea, get-pip.py, .DS_Store; pyc files | STATIC VERIFIED |
 
-No runtime reproduction or history-wide secret scan has been completed. Do not treat static inspection as a test pass.
+Runtime characterization test: PASS in [CI run 45769057010](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45769057010), one test in 0.013s. This confirms the V1 shared-cart defect, not a V2 fix. History scan completed with 4 unclassified findings across 192 commits; no secret values recorded. See [CI evidence](../evidence/runs/SEN-01-ci-45769057010.md).
