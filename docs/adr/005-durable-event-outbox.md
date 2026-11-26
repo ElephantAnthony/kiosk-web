@@ -1,6 +1,6 @@
 # ADR-005: durable outbox and atomic event acknowledgment
 
-Status: source implemented, final verification pending.
+Status: source verified with 42 Java, 22 Vitest and 9 browser tests; mandatory generated OpenAPI re-verification pending. Evidence: ../evidence/runs/SEN-05-event-45776976931.md.
 
 Each accepted user action or state transition is mapped to an allowlisted event in telemetry.ts. track() creates a UUID, client timestamp and session/scenario metadata. One IndexedDB read-write transaction increments a per-session sequence and inserts the event. The sequence store is not reset when ACKed rows disappear. The persisted event is immutable during retries. Both Java and Ajv consume event.schema.json; the server also checks menu/category/group/option references against the stored scenario version. No names, free text, card details, or demographic fields. Client timestamps and events are behavioral reports, not proof of actual payment or successful completion. Use server mission_result for authoritative completion.
 

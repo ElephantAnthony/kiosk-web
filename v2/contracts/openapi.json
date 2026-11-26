@@ -1,6 +1,32 @@
 {
   "components" : {
     "schemas" : {
+      "Ack" : {
+        "properties" : {
+          "acknowledgedIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "Batch" : {
+        "properties" : {
+          "events" : {
+            "items" : {
+              "$ref" : "#/components/schemas/JsonNode"
+            },
+            "maxItems" : 20,
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [ "events" ],
+        "type" : "object"
+      },
       "Category" : {
         "properties" : {
           "id" : {
@@ -65,6 +91,7 @@
         },
         "type" : "object"
       },
+      "JsonNode" : { },
       "Line" : {
         "properties" : {
           "menuId" : {
@@ -609,6 +636,61 @@
         },
         "summary" : "Cancel an owned active training session",
         "tags" : [ "session-controller" ]
+      }
+    },
+    "/api/sessions/{id}/events" : {
+      "post" : {
+        "description" : "Each event must conform to v2/contracts/event.schema.json. A batch contains one owned session; identical replays are acknowledged. Any conflict rolls back the entire batch.",
+        "operationId" : "ingest",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-CSRF-TOKEN",
+          "required" : true
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Batch"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Ack"
+                }
+              }
+            },
+            "description" : "All event IDs acknowledged after transaction commit"
+          },
+          "400" : {
+            "description" : "Invalid batch or event"
+          },
+          "403" : {
+            "description" : "Invalid CSRF"
+          },
+          "404" : {
+            "description" : "Session not found"
+          },
+          "409" : {
+            "description" : "Event ID or sequence conflict"
+          }
+        },
+        "summary" : "Persist an atomic batch of training events",
+        "tags" : [ "event-controller" ]
       }
     },
     "/api/sessions/{id}/result" : {

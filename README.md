@@ -4,7 +4,7 @@
 
 시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
 
-> 현재 상태: 두 매장의 실제 주문 및 서버 채점, 취소, 브라우저 테스트 7개를 검증했습니다. IndexedDB 행동 기록과 서버 멱등 수집을 구현했으며 신규 프론트엔드 테스트까지 통과했습니다. 이벤트 전체 통합 검증과 관리자 분석은 아직 완료되지 않았습니다.
+> 현재 상태: 두 매장의 실제 주문 및 서버 채점, 취소, 브라우저 테스트 7개를 검증했습니다. IndexedDB 행동 기록과 서버 멱등 수집을 구현했으며 신규 프론트엔드 테스트까지 통과했습니다. 실제 PostgreSQL 및 브라우저 이벤트 복구 테스트를 통과했습니다. 생성된 OpenAPI의 최종 재검증과 관리자 분석은 남아 있습니다.
 
 ## 1. 프로젝트의 문제와 개선 방향
 
@@ -13,7 +13,7 @@
 | 전역 장바구니 사용 | 사용자별 HttpSession과 소유자 조건이 있는 DB 조회 | 실제 동시 세션 통합 테스트 통과 |
 | 공유 미션과 난수 기반 점수 | 세션별 미션 스냅샷, 결정론적 서버 채점 | 채점 단위 및 DB 통합 테스트 통과 |
 | 브랜드별 UI 분리 | 공통 시나리오 JSON 계약 | 두 매장 실제 주문 완료 검증 통과 |
-| 장애 시 기록 손실 가능성 | IndexedDB outbox와 멱등 수집 | 소스 구현, 통합 검증 중 |
+| 장애 시 기록 손실 가능성 | IndexedDB outbox와 멱등 수집 | DB 및 브라우저 이벤트 복구 테스트 통과 |
 
 기존 V1의 장바구니 공유 문제는 Django test client 두 개를 사용해 재현했습니다. 원본 main 브랜치는 변경하지 않습니다.
 
@@ -135,7 +135,7 @@ flowchart LR
     S -->|ACK 검증 후 삭제| I
 ```
 
-통신 장애, 응답 유실 및 429 Retry-After 처리를 구현했습니다. 기기 저장소 삭제, 세션 만료, 저장 트랜잭션 완료 전 종료까지 보장하지 않으며 pagehide 전송은 최선형 방식입니다. 실제 개인정보와 결제 정보는 수집하지 않습니다. 현재 실제 브라우저 장애 복구 검증은 진행 중입니다.
+통신 장애, 응답 유실 및 429 Retry-After 처리를 구현했습니다. 기기 저장소 삭제, 세션 만료, 저장 트랜잭션 완료 전 종료까지 보장하지 않으며 pagehide 전송은 최선형 방식입니다. 실제 개인정보와 결제 정보는 수집하지 않습니다. 실제 브라우저에서 오프라인 상태로 생성한 이벤트 8개를 새로고침 이후 복구하고 서버 ACK 유실 뒤 동일 ID로 재전송한 뒤 Outbox가 비워지는 것을 확인했습니다. 429 응답은 테스트에서 주입했으며 서버 자체의 rate limiter를 구현한 것은 아닙니다.
 
 [이벤트 계약](v2/contracts/event.schema.json) / [이벤트 아키텍처](docs/design/EVENT_PIPELINE.md) / [기술 결정](docs/adr/005-durable-event-outbox.md)
 
@@ -241,7 +241,7 @@ erDiagram
 | POST | /api/sessions/{id}/submit | 모의 주문 채점 및 완료 |
 | GET | /api/sessions/{id}/result | 저장된 학습 결과 조회 |
 | POST | /api/sessions/{id}/cancel | 연습 취소 및 상태 보호 |
-| POST | /api/sessions/{id}/events | 이벤트 배치 수집 및 ACK (명세 재생성 중) |
+| POST | /api/sessions/{id}/events | 이벤트 배치 수집 및 ACK |
 
 PowerShell에서 가상 세션 생성 예시:
 
@@ -345,4 +345,6 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 [브라우저 검증 결과 및 오류 수정](docs/evidence/runs/SEN-04-browser-45775017053.md) / [재검증 CI](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45775831858)
 
 ### 이벤트 검증
-[CI 45776976931](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931): 프론트엔드 Vitest 22개 및 lint/typecheck/build 통과. 신규 백엔드 및 브라우저 검증 결과 확인 전입니다. [학습 노트](docs/learning/phase-5.md)
+[CI 45776976931](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931): 프론트엔드 Vitest 22개 및 lint/typecheck/build 통과. Java 단위 20개 및 실제 PostgreSQL 통합 22개, Playwright 9개, Gitleaks 미분류 0건 (224개 커밋), 기존 V1 테스트 통과. 신규 API에 따른 OpenAPI diff 실패가 발생해 실제 생성본을 SHA-256으로 검증해 커밋했습니다. 최종 strict CI 재검증 필요. [학습 노트](docs/learning/phase-5.md)
+
+[이벤트 실제 검증 근거](docs/evidence/runs/SEN-05-event-45776976931.md) / [브라우저 보고서](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931/artifacts/15096611829)
