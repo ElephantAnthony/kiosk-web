@@ -107,6 +107,6 @@ export function App() {
         {['CANCELLED','EXPIRED'].includes(state) && <><p>{state==='CANCELLED'?'서버에서 취소를 확인했습니다. 새 연습을 시작할 수 있어요.':'기존 결과를 변경하지 않고 새 연습을 시작할 수 있어요.'}</p><button className="primary" onClick={()=>send({type:'RESTART'})}>다시 연습하기</button></>}
         {(back||cancel) && <div className="bottom-nav">{back&&<button className="secondary" onClick={()=>send({type:'BACK'})}>← 뒤로 가기</button>}{cancel&&<button className="danger" onClick={()=>send({type:'CANCEL'})}>연습 취소</button>}</div>}
       </section>
-    </main><footer>시니스크 2.0 / 실제 결제가 없는 교육용 프로젝트</footer>
+    </main><footer>시니스크 2.0 / 실제 결제가 없는 교육용 프로젝트 <a className="admin-link" href="/admin">관리자 화면</a></footer>
   </div>;
 }

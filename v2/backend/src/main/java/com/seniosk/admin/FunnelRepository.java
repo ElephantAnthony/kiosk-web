@@ -43,7 +43,7 @@ public class FunnelRepository {
             count(*) FILTER (WHERE status='ACTIVE' AND NOT stale) AS active,
             count(*) FILTER (WHERE status='ACTIVE' AND stale) AS abandoned,
             count(*) FILTER (WHERE correct) AS successful,
-            count(accuracy) AS graded, avg(accuracy) AS avg_accuracy, avg(server_elapsed_ms) AS avg_elapsed,
+            count(accuracy) AS graded, avg(accuracy)::double precision AS avg_accuracy, avg(server_elapsed_ms)::double precision AS avg_elapsed,
             count(*) FILTER (WHERE helped) AS helped,
             count(*) FILTER (WHERE mission) AS mission,
             count(*) FILTER (WHERE menu) AS menu,

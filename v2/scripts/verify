@@ -2,6 +2,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
+# Export ADMIN_USERNAME and ADMIN_PASSWORD matching the local Compose configuration before running.
+: "${ADMIN_USERNAME:?Export administrator username for E2E}"
+: "${ADMIN_PASSWORD:?Export administrator password for E2E}"
 # Run from Git Bash, WSL or Linux. No deployment; existing DB volume is preserved.
 # Isolate integration test rows from the persistent local application database.
 it_password="$(openssl rand -hex 24)"
