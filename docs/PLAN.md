@@ -20,3 +20,9 @@
 - Out of scope: operational deployment, real participant experiments, bulk performance. Existing limitations in [security](release/SECURITY.md). Historical checkpoints and failures preserved in evidence and Git history.
 
 - [Final release evidence](evidence/runs/SEN-07-pass-45922321237.md). Main unchanged; final documentation commit has the same application/test tree as tested source.
+
+## SEN-08 / ACTIVE - yellow cafe visual prototype
+- Scope: add a separate fictional cafe inspired by the approved yellow kiosk layout, original vector product art, paginated catalog, cart summary and simulated countdown display. Preserve M1 fixtures, machine, server contracts and grading.
+- Acceptance: catalog exposes the new fixture, menu/category/page navigation works, generic mission completes with 100% server grade, existing scenarios still pass and keyboard/contrast remain usable.
+- Initial implementation uses illustrative prices and fictional branding; no real brand assets. Packing remains per line, existing option/cart/payment workflow retained; countdown is informational and starts from existing active session time. Full reference fidelity and brand authorization are not verified.
+- Verification: NOT_RUN locally (GitHub DNS unavailable in execution container). CI and browser verification required before release. M1 historical checkpoint remains unchanged.

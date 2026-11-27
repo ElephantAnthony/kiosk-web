@@ -1,0 +1,228 @@
+{
+  "scenarioId": "yellow-cafe",
+  "version": 1,
+  "title": "옐로 카페",
+  "description": "실제 매장과 유사한 노란색 키오스크에서 주문을 연습합니다. 가상 메뉴와 연습용 가격입니다.",
+  "categories": [
+    {
+      "id": "coffee",
+      "label": "커피"
+    },
+    {
+      "id": "beverage",
+      "label": "음료"
+    },
+    {
+      "id": "tea",
+      "label": "티"
+    },
+    {
+      "id": "ade",
+      "label": "에이드"
+    },
+    {
+      "id": "smoothie",
+      "label": "스무디/프라페"
+    },
+    {
+      "id": "food",
+      "label": "푸드"
+    }
+  ],
+  "menus": [
+    {
+      "id": "americano-ice",
+      "label": "아메리카노 (ICE)",
+      "price": 2000,
+      "categoryId": "coffee",
+      "optionGroups": [
+        {
+          "id": "shot",
+          "label": "샷 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-shot",
+              "label": "샷 추가",
+              "priceDelta": 500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "americano-hot",
+      "label": "아메리카노 (HOT)",
+      "price": 1500,
+      "categoryId": "coffee",
+      "optionGroups": [
+        {
+          "id": "shot",
+          "label": "샷 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-shot",
+              "label": "샷 추가",
+              "priceDelta": 500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "latte-ice",
+      "label": "카페라떼 (ICE)",
+      "price": 3400,
+      "categoryId": "coffee",
+      "optionGroups": [
+        {
+          "id": "shot",
+          "label": "샷 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-shot",
+              "label": "샷 추가",
+              "priceDelta": 500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "latte-hot",
+      "label": "카페라떼 (HOT)",
+      "price": 3200,
+      "categoryId": "coffee",
+      "optionGroups": [
+        {
+          "id": "shot",
+          "label": "샷 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-shot",
+              "label": "샷 추가",
+              "priceDelta": 500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "strawberry",
+      "label": "딸기라떼",
+      "price": 3900,
+      "categoryId": "beverage",
+      "optionGroups": []
+    },
+    {
+      "id": "cube",
+      "label": "큐브라떼",
+      "price": 4400,
+      "categoryId": "coffee",
+      "optionGroups": [
+        {
+          "id": "shot",
+          "label": "샷 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-shot",
+              "label": "샷 추가",
+              "priceDelta": 500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lemon",
+      "label": "레몬에이드",
+      "price": 3900,
+      "categoryId": "ade",
+      "optionGroups": []
+    },
+    {
+      "id": "yogurt",
+      "label": "딸기요거트스무디",
+      "price": 4400,
+      "categoryId": "smoothie",
+      "optionGroups": []
+    },
+    {
+      "id": "choco",
+      "label": "초코프라페",
+      "price": 4400,
+      "categoryId": "smoothie",
+      "optionGroups": []
+    },
+    {
+      "id": "green",
+      "label": "녹차라떼 (ICE)",
+      "price": 3900,
+      "categoryId": "beverage",
+      "optionGroups": []
+    },
+    {
+      "id": "peach",
+      "label": "복숭아 아이스티",
+      "price": 3000,
+      "categoryId": "tea",
+      "optionGroups": []
+    },
+    {
+      "id": "caramel",
+      "label": "카라멜마끼아또 (ICE)",
+      "price": 4200,
+      "categoryId": "coffee",
+      "optionGroups": [
+        {
+          "id": "shot",
+          "label": "샷 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-shot",
+              "label": "샷 추가",
+              "priceDelta": 500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cookie",
+      "label": "초코 쿠키",
+      "price": 1800,
+      "categoryId": "food",
+      "optionGroups": []
+    }
+  ],
+  "packingOptions": [
+    "DINE_IN",
+    "TAKE_OUT"
+  ],
+  "paymentOptions": [
+    "CARD",
+    "CASH"
+  ],
+  "missions": [
+    {
+      "id": "ice-shot",
+      "instruction": "아메리카노 (ICE) 2잔에 샷을 추가하고 포장한 뒤 카드로 모의 결제하세요.",
+      "expected": [
+        {
+          "menuId": "americano-ice",
+          "optionIds": [
+            "extra-shot"
+          ],
+          "packing": "TAKE_OUT",
+          "quantity": 2
+        }
+      ],
+      "payment": "CARD"
+    }
+  ]
+}

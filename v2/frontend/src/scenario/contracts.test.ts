@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import fixture from '../../../contracts/scenarios/boram-cafe.v1.json';
+import yellow from '../../../contracts/scenarios/yellow-cafe.v1.json';
 import { parseScenario } from './contracts';
 
 describe('shared scenario JSON Schema', () => {
+  it('accepts the yellow cafe fixture with 13 distinct menus', () => {
+    const scenario=parseScenario(yellow);
+    expect(scenario.menus).toHaveLength(13);
+    expect(new Set(scenario.menus.map(m=>m.id)).size).toBe(13);
+  });
   it('accepts the bundled fictional cafe', () => {
     expect(parseScenario(fixture).scenarioId).toBe('boram-cafe');
   });

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getHealth, type ServiceStatus } from './api/health';
 import { useKiosk } from './kiosk/useKiosk';
+import { YellowMenu, ProductArt } from './brands/yellow/YellowMenu';
 import { draftValid } from './kiosk/machine';
 import type { OrderLine, Scenario, Packing, Payment } from './scenario/contracts';
 
@@ -71,13 +72,15 @@ export function App() {
         {c.session && ['MISSION','MENU','OPTION','CART','PAYMENT','SUBMIT_ERROR'].includes(state) &&
           <aside className="mission" aria-label="현재 미션"><strong>오늘의 미션</strong><p>{c.session.mission.instruction}</p></aside>}
         {state==='MISSION' && <><p>미션을 읽고 준비되면 시작 버튼을 눌러 주세요. 주문 중에도 미션을 다시 볼 수 있어요.</p><button className="primary" onClick={()=>send({type:'CONTINUE'})}>메뉴 선택 시작</button></>}
-        {state==='MENU' && s && <>
+        {state==='MENU' && s?.scenarioId==='yellow-cafe' && <YellowMenu scenario={s} category={c.category} cart={c.cart} total={total} count={count} send={send} activeMs={c.activeMs}/>}
+        {state==='MENU' && s && s.scenarioId!=='yellow-cafe' && <>
           <div className="choices" role="group" aria-label="메뉴 카테고리">{s.categories.map(category=><button key={category.id} className="choice" aria-pressed={c.category===category.id} onClick={()=>send({type:'CATEGORY',id:category.id})}>{category.label}</button>)}</div>
           <div className="cards">{s.menus.filter(m=>m.categoryId===c.category).map(menu=><button key={menu.id} className="card menu" onClick={()=>send({type:'SELECT_MENU',menuId:menu.id})}><span className="menu-mark" aria-hidden="true">{menu.label.slice(0,1)}</span><strong>{menu.label}</strong><span>{money(menu.price)}</span><span className="link-label">선택하기 →</span></button>)}</div>
           <button className="primary wide" onClick={()=>send({type:'VIEW_CART'})}>장바구니 보기 ({count}개)</button>
         </>}
         {state==='OPTION' && s && d && <>
           <h2>{s.menus.find(m=>m.id===d.menuId)?.label}</h2>
+          {s.scenarioId==='yellow-cafe' && <ProductArt id={d.menuId}/>}
           {s.menus.find(m=>m.id===d.menuId)?.optionGroups.map(g=><fieldset key={g.id}><legend>{g.label} {g.required?'(필수)':'(선택)'}</legend><div className="choices">
             {!g.required && <button className="choice" aria-pressed={!g.options.some(o=>d.optionIds.includes(o.id))} onClick={()=>send({type:'OPTION',groupId:g.id,optionId:null})}>기본 선택</button>}
             {g.options.map(o=><button className="choice" key={o.id} aria-pressed={d.optionIds.includes(o.id)} onClick={()=>send({type:'OPTION',groupId:g.id,optionId:o.id})}>{o.label}{o.priceDelta>0?' +'+money(o.priceDelta):''}</button>)}
