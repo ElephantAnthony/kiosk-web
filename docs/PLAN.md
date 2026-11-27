@@ -36,3 +36,7 @@
 - Previous CI 45945648427 completed successfully. New scope: independent option, cart, payment selection, simulated terminal and completion receipt; separate learning result; direct cart quantity with guarded machine event and existing CART_EDITED telemetry. Preserve server payload and grading.
 - Product photo paths support original generated WebP assets with vector fallback; binary assets are supplied separately because current GitHub connector accepts blob text/base64 but cannot ingest container file references directly. No actual coupon functionality or real payment. Prices remain illustrative. Full screenshot comparison pending.
 - Verification: NOT_RUN locally. Added browser journey with server grade and stage screenshots; CI required.
+
+### SEN-08 asset integration verification
+- User uploaded all 12 generated drink WebP assets and card terminal WebP in c346fcd. Verified paths in remote tree.
+- CI 45947029276 retry: Docker dependency resolution recovered; 11 browser tests passed, 1 failed because dedicated test used double-escaped parentheses in menu locator. Fix literal locator, assert all 12 photos and terminal decode in browser. New CI pending; visual inspection still required.
