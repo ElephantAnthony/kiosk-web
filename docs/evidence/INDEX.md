@@ -47,3 +47,5 @@
 - [SEN-06 initial verification](runs/SEN-06-initial-45919739819.md): 23 Vitest, 20 Java unit, 25/26 PostgreSQL IT; actual expected response, failed wildcard assertion; repair and full verification required.
 
 - [SEN-06 repaired backend and EXPLAIN](runs/SEN-06-backend-45919907679.md): 48 Java, frontend/V1/scan pass; exact synthetic counts; actual generated contract recovered; browser and strict gate pending.
+
+- [Admin filter accessibility repair](../troubleshooting/SEN-06-admin-filter-label.md): nine browser passes; admin test failed at exact scenario label, explicit labels required. Strict spec bytes recovered.

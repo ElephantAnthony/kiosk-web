@@ -26,7 +26,7 @@ test('administrator login, real cohort, filters, accessibility, logout',async({p
  expect((await page.request.get('/api/sessions/'+session.id)).status()).toBe(200);
  const report=await (await page.request.get('/api/admin/funnel?scenarioId=boram-cafe&version=1')).json();
  expect(report.metrics.completed).toBeGreaterThanOrEqual(1);expect(report.funnel[5].reached).toBeGreaterThanOrEqual(1);
- await page.getByLabel('시나리오',{exact:true}).selectOption('boram-cafe:1');
+ await page.getByRole('combobox',{name:'시나리오',exact:true}).selectOption('boram-cafe:1');
  await page.getByRole('button',{name:'통계 조회'}).click();
  await expect(page.getByRole('table',{name:'단계별 도달 및 다음 단계 미도달'})).toBeVisible();
  await page.getByRole('button',{name:'고대비 모드'}).focus();await page.keyboard.press('Enter');

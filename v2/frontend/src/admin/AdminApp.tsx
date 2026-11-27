@@ -69,9 +69,9 @@ export function AdminApp(){
      {auth==='admin'&&<>
        <p>실제 PostgreSQL에 저장된 교육용 연습 세션의 집계입니다. 사용자 개인 정보는 표시하지 않습니다.</p>
        <section className="panel admin-filter"><h2>조회 조건</h2><form className="filters" onSubmit={e=>{e.preventDefault();setApplied({...filters});}}>
-         <label>시작일 (UTC)<input type="date" required value={filters.from} onChange={e=>setFilters(v=>({...v,from:e.target.value}))}/></label>
-         <label>종료일 (제외)<input type="date" required value={filters.to} onChange={e=>setFilters(v=>({...v,to:e.target.value}))}/></label>
-         <label>시나리오<select value={filters.scenario} onChange={e=>setFilters(v=>({...v,scenario:e.target.value}))}><option value="">전체 매장</option>{catalog.map(s=><option key={s.scenarioId+':'+s.version} value={s.scenarioId+':'+s.version}>{s.title} (v{s.version})</option>)}</select></label>
+         <div className="filter-field"><label htmlFor="report-from">시작일 (UTC)</label><input id="report-from" type="date" required value={filters.from} onChange={e=>setFilters(v=>({...v,from:e.target.value}))}/></div>
+         <div className="filter-field"><label htmlFor="report-to">종료일 (제외)</label><input id="report-to" type="date" required value={filters.to} onChange={e=>setFilters(v=>({...v,to:e.target.value}))}/></div>
+         <div className="filter-field"><label htmlFor="report-scenario">시나리오</label><select id="report-scenario" value={filters.scenario} onChange={e=>setFilters(v=>({...v,scenario:e.target.value}))}><option value="">전체 매장</option>{catalog.map(s=><option key={s.scenarioId+':'+s.version} value={s.scenarioId+':'+s.version}>{s.title} (v{s.version})</option>)}</select></div>
          <button type="submit" disabled={loading}>통계 조회</button></form></section>
        {loading&&<p role="status">통계를 조회하고 있습니다.</p>}
        {report&&m&&<div className="admin-results">

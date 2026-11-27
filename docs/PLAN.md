@@ -30,4 +30,4 @@ SEN-06 acceptance: separate admin security context, env credentials, CSRF, login
 
 - Repair CI 45919907679: Maven 22 unit + 26 PostgreSQL IT all PASS, V4 applied, exact fixture and EXPLAIN verified; frontend/V1/scanner PASS, 232 commits scanned with zero unclassified findings. OpenAPI diff FAIL due new endpoint; actual output SHA-256 verified, blob f2000f5bb9e3fe201bed5fa63017ea5e01a7c7a1. Browser pending. [Evidence](evidence/runs/SEN-06-backend-45919907679.md).
 
-Generated administrator OpenAPI (31387 bytes, verified SHA-256 67d94eeb466962bb3fe1739c527e2e433128064334f2cda9d9fa35ee512e24c6) committed from actual CI output, not handwritten. Strict comparison and final browser gate required. Local preflight: Maven and Docker unavailable; direct git access fails DNS. Use GitHub Actions for integration.
+- CI 45919907679: browser 9 PASS, 1 FAIL at admin scenario exact label after real login and cohort API succeeded. Fix explicit filter labels and role locator, publish verified OpenAPI bytes together, rerun all checks and capture actual screenshot. No app or source regression results fabricated.
