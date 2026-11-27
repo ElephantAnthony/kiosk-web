@@ -1,6 +1,6 @@
 # ADR-006: isolated administrator context and cohort analytics
 
-Status: backend verification passed in CI 45919907679, including synthetic cohort/EXPLAIN; generated contract drift and browser gate pending.
+Status: all five jobs PASS in CI 45920332880; actual dashboard capture verified.
 
 Administrator authentication is restricted to a separate Spring Security filter chain for /api/admin/**. The role is stored in a separate HttpSessionSecurityContextRepository attribute. The existing learner owner UUID remains independent; administrator authentication never grants access to another browser's learner session. A successful login rotates the session ID and invalidates the CSRF token. Logout clears only the administrator context and rotates the CSRF token so pending learner events remain attributable to the same owner. The API requires a fresh CSRF token for each mutation. Every admin route except POST login requires ROLE_ADMIN; the login endpoint is also CSRF protected.
 
@@ -12,4 +12,4 @@ Active versus abandoned is an operational estimate: ACTIVE sessions with no serv
 
 React renders accessible native tables and CSS bars, no extra dependency. Empty denominators are null and displayed as a dash, never invented percentages. Screenshots are from actual Chromium runs with synthetic data and no credentials.
 
-Actual generated OpenAPI committed at cf4f8a6. Browser label failure repaired at 83d4f80; final strict CI 45920332880 pending. See ../evidence/runs/SEN-06-browser-45919907679.md.
+Actual generated OpenAPI committed at cf4f8a6. Browser label failure repaired at 83d4f80; final strict CI 45920332880 passed. See ../evidence/runs/SEN-06-browser-45919907679.md.

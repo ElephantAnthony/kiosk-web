@@ -51,3 +51,5 @@
 - [Admin filter accessibility repair](../troubleshooting/SEN-06-admin-filter-label.md): nine browser passes; admin test failed at exact scenario label, explicit labels required. Strict spec bytes recovered.
 
 - [SEN-06 browser repair and strict checkpoint](runs/SEN-06-browser-45919907679.md): 9 prior browser tests passed; admin label timeout repaired, actual OpenAPI committed, strict CI 45920332880 pending final outcome.
+
+- [SEN-06 final gate](runs/SEN-06-pass-45920332880.md): all five jobs pass, 48 Java, 23 Vitest, 10 Chromium; actual admin JPEG verified.

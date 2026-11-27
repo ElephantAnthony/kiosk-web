@@ -49,7 +49,7 @@ POST /api/sessions/{id}/events with the same owner cookie and CSRF header. Body 
 
 The example session ID must be replaced with the caller's real synthetic training session. HTTP 200 returns {"acknowledgedIds":[event UUIDs]}; ACK order is not significant. A repeated ID with identical JSONB content is accepted; changed content or sequence collision returns 409 and rolls back the entire batch. Other owner returns 404. Invalid schema or scenario references return 400; missing CSRF returns 403. The client supports 429 Retry-After from infrastructure; the server does not yet implement a rate limiter. No partial success ACK. Late records for terminal sessions are allowed without changing status or result.
 
-## Administrator endpoints (source verified; exact generated contract committed, strict diff pending)
+## Administrator endpoints (source verified; actual generated contract and strict diff verified in 45920332880)
 
 | Method | Path | Success | Errors |
 |---|---|---|---|

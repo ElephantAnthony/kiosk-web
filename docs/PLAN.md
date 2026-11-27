@@ -9,8 +9,8 @@
 | EXECUTION 03 | Server grading and completion | PASS |
 | EXECUTION 04 | Kiosk UI, cancellation and fixture extension | PASS: 45775831858, both stores, seven browser tests, capture committed |
 | EXECUTION 05 | Durable event ingestion and SDK | PASS: all five jobs, 45777346496 |
-| EXECUTION 06 | Admin funnel and accessibility completion | 48 Java, 23 Vitest, 9 prior browser tests PASS; admin filter repair and strict CI pending |
-| EXECUTION 07 | Release gate and portfolio evidence | TODO |
+| EXECUTION 06 | Admin funnel and accessibility completion | PASS: all five jobs 45920332880 |
+| EXECUTION 07 | Release gate and portfolio evidence | ACTIVE: final release audit and captures |
 
 ## ACTIVE
 - Branch: portfolio/seniosk-v2; main baseline 9477fe7ac6ebae0fbc2393d91dd7d1b0fc10756d preserved.
@@ -37,3 +37,5 @@ SEN-06 acceptance: separate admin security context, env credentials, CSRF, login
 - Strict CI [45920332880](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45920332880): secret-scan: in_progress; compose: in_progress; frontend: in_progress; backend: in_progress; legacy: in_progress at checkpoint. Do not cancel this run with unrelated code changes. Verify its final results; fix observed failures if any.
 - Prior CI 45919907679 browser 9 passed, administrator test reached successful login and real report API, then failed scenario field exact label lookup. Repair 83d4f80fbca8f106307ee637f2755b02d35d8611 explicitly associates labels with all three controls and uses the scenario combobox role/name. Actual browser screenshot export was skipped on failure. See evidence/runs/SEN-06-browser-45919907679.md.
 - Next: confirm actual strict diff, ten browser tests, ADMIN_UI_PASS, screenshot export. Recover ADMIN_IMAGE chunks, check contiguous order, JPEG markers, byte length and SHA-256. Commit the actual image and README. Only after green full CI and evidence, close SEN-06 and enter EXECUTION 07. No real learner data or deployment.
+
+- SEN-06 final gate PASS: all five jobs, actual admin capture verified and committed. SEN-07 active. Final review, additional screen captures, evidence reconciliation, README and release docs required. No production deployment or participant testing.
