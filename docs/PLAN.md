@@ -39,3 +39,5 @@ SEN-06 acceptance: separate admin security context, env credentials, CSRF, login
 - Next: confirm actual strict diff, ten browser tests, ADMIN_UI_PASS, screenshot export. Recover ADMIN_IMAGE chunks, check contiguous order, JPEG markers, byte length and SHA-256. Commit the actual image and README. Only after green full CI and evidence, close SEN-06 and enter EXECUTION 07. No real learner data or deployment.
 
 - SEN-06 final gate PASS: all five jobs, actual admin capture verified and committed. SEN-07 active. Final review, additional screen captures, evidence reconciliation, README and release docs required. No production deployment or participant testing.
+
+SEN-07 source review: inspect owner predicates, transaction boundaries, allowlisted events, separate admin context, fail-closed configuration and non-production limits. Add actual six-stage capture to existing successful cafe E2E, axe on each captured screen, and explicit loading reset on admin report 401. Verify full CI and capture hashes. No new runtime dependencies.

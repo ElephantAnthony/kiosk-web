@@ -31,7 +31,7 @@ export function AdminApp(){
    setLoading(true);setReport(null);setError('');
    getReport(applied,c.signal).then(data=>{if(!c.signal.aborted)setReport(data);}).catch(e=>{
      if(c.signal.aborted)return;
-     if(e instanceof ApiError&&e.status===401){setAuth('guest');setError('세션이 만료되었습니다. 다시 로그인해 주세요.');}
+     if(e instanceof ApiError&&e.status===401){setReport(null);setLoading(false);setAuth('guest');setError('세션이 만료되었습니다. 다시 로그인해 주세요.');}
      else setError(e instanceof ApiError&&e.status===400?'조회 기간을 확인해 주세요. 최대 366일입니다.':'통계를 불러오지 못했습니다. 다시 조회해 주세요.');
    }).finally(()=>{if(!c.signal.aborted)setLoading(false);});
    return()=>c.abort();

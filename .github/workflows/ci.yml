@@ -164,6 +164,7 @@ jobs:
         run: |
           python3 v2/scripts/export-kiosk-screenshot.py
           python3 v2/scripts/export-admin-screenshot.py
+          python3 v2/scripts/export-release-screens.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

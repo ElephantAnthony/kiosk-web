@@ -15,7 +15,13 @@ async function start(page:Page,title='보람 카페'){
   await expect(page.getByRole('heading',{level:1})).toHaveText('오늘의 연습 미션');
   await button(page,'메뉴 선택 시작').click();
 }
-async function add(page:Page,s:Scenario,line:OrderLine){
+async function capture(page:Page,name:string){
+  await axe(page);
+  const path=test.info().outputPath(name+'.jpg');
+  await page.screenshot({path,type:'jpeg',quality:72,fullPage:true});
+  await test.info().attach(name,{path,contentType:'image/jpeg'});
+}
+async function add(page:Page,s:Scenario,line:OrderLine,captureOption=false){
   const menu=s.menus.find(m=>m.id===line.menuId)!;
   const category=s.categories.find(c=>c.id===menu.categoryId)!;
   await page.getByRole('group',{name:'메뉴 카테고리'}).getByRole('button',{name:category.label,exact:true}).click();
@@ -23,6 +29,7 @@ async function add(page:Page,s:Scenario,line:OrderLine){
   for(const group of menu.optionGroups) for(const opt of group.options.filter(o=>line.optionIds.includes(o.id))) await button(page,new RegExp(opt.label)).click();
   await button(page,packing[line.packing]).click();
   for(let i=1;i<line.quantity;i++) await button(page,'수량 늘리기').click();
+  if(captureOption)await capture(page,'release-option');
   await button(page,'장바구니 담기').click();
 }
 const cafe=async(page:Page)=>parseScenario(await (await page.request.get('/api/scenarios/boram-cafe/1')).json());
@@ -34,10 +41,14 @@ test('all registered scenarios can be completed by the same renderer',async({pag
   expect(scenarios.map(s=>s.scenarioId)).toEqual(expect.arrayContaining(['boram-cafe','doran-burger']));
   for(const s of scenarios){
     await page.goto('/');
+    const record=s.scenarioId==='boram-cafe';
+    await expect(button(page,new RegExp(s.title))).toBeVisible();
+    if(record)await capture(page,'release-start');
     await button(page,new RegExp(s.title)).click();
     const missionText=await page.locator('.mission p').innerText();
     const mission=s.missions.find(m=>m.instruction===missionText)!;
     expect(mission).toBeDefined();
+    if(record)await capture(page,'release-mission');
     await button(page,'메뉴 선택 시작').click();
     if(s.scenarioId==='boram-cafe'){
       await axe(page);
@@ -46,15 +57,18 @@ test('all registered scenarios can be completed by the same renderer',async({pag
     }
     for(let i=0;i<mission.expected.length;i++){
       if(i>0) await button(page,'메뉴 추가').click();
-      await add(page,s,mission.expected[i]);
+      await add(page,s,mission.expected[i],record&&i===0);
     }
+    if(record)await capture(page,'release-cart');
     await button(page,'결제하기').click();
     await button(page,payment[mission.payment]).click();
+    if(record)await capture(page,'release-payment');
     await button(page,'모의 결제 완료').click();
     await expect(page.getByRole('heading',{level:1})).toHaveText('연습 결과');
     await expect(page.getByText('미션 성공!',{exact:true})).toBeVisible();
     await expect(page.locator('.score strong')).toHaveText('100%');
     await axe(page);
+    if(record)await capture(page,'release-result');
     await button(page,'다시 연습하기').click();
     await expect(page.getByRole('heading',{level:1})).toContainText('스스로 주문');
     console.log('SCENARIO_UI_PASS '+s.scenarioId+' v'+s.version);
