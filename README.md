@@ -4,7 +4,7 @@
 
 시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
 
-> 현재 상태: 두 매장의 실제 주문 및 서버 채점, 취소, 브라우저 테스트 7개를 검증했습니다. IndexedDB 행동 기록과 서버 멱등 수집을 구현했으며 신규 프론트엔드 테스트까지 통과했습니다. 실제 PostgreSQL 및 브라우저 이벤트 복구 테스트를 통과했습니다. 생성된 OpenAPI 비교도 통과했습니다. 최종 CI 브라우저 결과와 관리자 분석은 남아 있습니다.
+> 현재 상태: 두 매장의 실제 주문 및 서버 채점, 취소, 브라우저 테스트 7개를 검증했습니다. IndexedDB 행동 기록과 서버 멱등 수집을 구현했으며 신규 프론트엔드 테스트까지 통과했습니다. 실제 PostgreSQL 및 브라우저 이벤트 복구 테스트를 통과했습니다. 생성된 OpenAPI 비교도 통과했습니다. 최종 CI의 5개 Job과 브라우저 테스트 9개를 모두 통과했습니다. 관리자 분석은 후속 개발 범위입니다.
 
 ## 1. 프로젝트의 문제와 개선 방향
 
@@ -349,4 +349,6 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 
 [이벤트 실제 검증 근거](docs/evidence/runs/SEN-05-event-45776976931.md) / [브라우저 보고서](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931/artifacts/15096611829)
 
-[최종 strict CI 45777346496](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45777346496): Java 42개, Vitest 22개, OpenAPI diff, V1 및 보안 검사 통과. 최종 브라우저 Job 결과 확인 전이며 직전 소스 CI에서는 9개 브라우저 테스트가 통과했습니다. [증빙](docs/evidence/runs/SEN-05-strict-45777346496.md)
+[최종 strict CI 45777346496](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45777346496): Java 42개, Vitest 22개, OpenAPI diff, V1 및 보안 검사 통과. 최종 CI 전체 5개 Job 및 브라우저 테스트 9개 통과. [증빙](docs/evidence/runs/SEN-05-strict-45777346496.md)
+
+[이벤트 단계 최종 검증](docs/evidence/runs/SEN-05-pass-45777346496.md)

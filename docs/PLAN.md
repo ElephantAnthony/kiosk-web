@@ -8,8 +8,8 @@
 | EXECUTION 02 | Scenario contract and isolated sessions | PASS |
 | EXECUTION 03 | Server grading and completion | PASS |
 | EXECUTION 04 | Kiosk UI, cancellation and fixture extension | PASS: 45775831858, both stores, seven browser tests, capture committed |
-| EXECUTION 05 | Durable event ingestion and SDK | 42 Java, 22 Vitest, 9 browser PASS; strict diff PASS; final browser pending |
-| EXECUTION 06 | Admin funnel and accessibility completion | TODO, gated on 05 |
+| EXECUTION 05 | Durable event ingestion and SDK | PASS: all five jobs, 45777346496 |
+| EXECUTION 06 | Admin funnel and accessibility completion | ACTIVE: administrator authentication and cohort funnel |
 | EXECUTION 07 | Release gate and portfolio evidence | TODO |
 
 ## ACTIVE
@@ -19,5 +19,7 @@
 - Source CI 45776976931: Maven 42, Vitest 22, 9 Playwright, Compose, V1, scanner PASS; OpenAPI diff FAIL due to endpoint expansion. Actual generated spec bytes verified and committed. [Evidence](evidence/runs/SEN-05-event-45776976931.md).
 - Acceptance: shared event schema, atomic IndexedDB persistence and per-session sequence, batch 20/5s, exact ACK, offline/reload, lost ACK, 429, owner/CSRF, atomic batch rollback, same ID replay, concurrent batch, actual PostgreSQL persistence, old kiosk regression and full CI. Source authored. Regenerate exact OpenAPI from CI and enforce existing diff (do not bypass it). Record failed checks and fix.
 - Limitations: browser cart reload recovery not implemented, orphan sessions possible after lost start response, anonymous cookie expiry blocks old events, no protection against device storage eviction or user clearing data, pagehide best-effort, client event times not authoritative. No real participant data or admin feature.
-- Strict CI [45777346496](evidence/runs/SEN-05-strict-45777346496.md): secret-scan: success; compose: in_progress; backend: success; frontend: success; legacy: success. OpenAPI diff PASS, 226 commits scanned and zero unclassified findings. Inspect final Compose/browser conclusion before EXECUTION 06. If failure, repair actual cause and reverify.
+- Strict CI [45777346496](evidence/runs/SEN-05-pass-45777346496.md): all five jobs green. Begin SEN-06.
 - [Event design](design/EVENT_PIPELINE.md) / [ADR](adr/005-durable-event-outbox.md) / [Task](prompts/SEN-05.md) / [Evidence](evidence/INDEX.md).
+
+SEN-06 acceptance: separate admin security context, env credentials, CSRF, login/logout and ownership regression; PostgreSQL cohort aggregates with explicit denominators, UTC dates, 30-minute inactivity policy, fixture counts and EXPLAIN; accessible dashboard, actual capture, generated OpenAPI diff and full CI.
