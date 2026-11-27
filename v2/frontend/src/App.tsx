@@ -3,6 +3,8 @@ import { getHealth, type ServiceStatus } from './api/health';
 import { useKiosk } from './kiosk/useKiosk';
 import { YellowStages, YellowHeader } from './brands/yellow/YellowStages';
 import { YellowMenu, ProductArt } from './brands/yellow/YellowMenu';
+import { DoranStart,DoranMenu,DoranHeader } from './brands/doran/DoranMenu';
+import { DoranDetail } from './brands/doran/DoranDetail';
 import { draftValid } from './kiosk/machine';
 import type { OrderLine, Scenario, Packing, Payment } from './scenario/contracts';
 
@@ -45,11 +47,13 @@ export function App() {
     STARTING:'미션을 준비하고 있어요',MISSION:'오늘의 연습 미션',MENU:'메뉴를 골라 주세요',OPTION:'주문 옵션을 선택해 주세요',CART:'장바구니를 확인해 주세요',
     PAYMENT:'결제 방법을 선택해 주세요',SUBMITTING:'주문을 확인하고 있어요',SUBMIT_ERROR:'주문 결과를 확인하지 못했어요',COMPLETE:'연습 결과',CANCELLING:'연습을 취소하고 있어요',
     CANCEL_ERROR:'취소 결과를 확인하지 못했어요',CANCELLED:'연습을 취소했어요',EXPIRED:'연습 정보를 찾을 수 없어요' };
-  const yellowReceipt=s?.scenarioId==='yellow-cafe' && state==='COMPLETE' && gradeSession!==c.session?.id;
-  const yellow = s?.scenarioId==='yellow-cafe' && (['MENU','OPTION','CART','PAYMENT'].includes(state)||yellowReceipt);
+  const doran=s?.scenarioId==='doran-burger-lite';
+  const branded=doran||s?.scenarioId==='yellow-cafe';
+  const yellowReceipt=branded && state==='COMPLETE' && gradeSession!==c.session?.id;
+  const yellow = branded && (['MENU','OPTION','CART','PAYMENT'].includes(state)||yellowReceipt);
   const back = ['MENU','OPTION','CART','PAYMENT'].includes(state);
   const cancel = ['MISSION','MENU','OPTION','CART','PAYMENT','SUBMIT_ERROR'].includes(state);
-  return <div className={'app'+(contrast?' contrast':'')+(yellow?' yellow-mode':'')}>
+  return <div className={'app'+(contrast?' contrast':'')+(yellow?' yellow-mode':'')+(doran&&yellow?' doran-mode':'')}>
     <a className="skip" href="#content">본문 바로가기</a>
     <header className="header"><div><span className="brand">SENIOSK</span><span className="brand-sub"> 시니스크 2.0</span></div>
       <div className="tools"><button className="secondary" aria-pressed={contrast} onClick={()=>setContrast(v=>!v)}>고대비 모드</button>
@@ -60,7 +64,7 @@ export function App() {
       {stepIndex[state]!==undefined && <nav aria-label="연습 단계"><ol className="steps">{steps.map((step,i)=><li key={step} aria-current={i===stepIndex[state]?'step':undefined} className={i===stepIndex[state]?'current':i<stepIndex[state]?'done':''}><span>{i+1}</span>{step}</li>)}</ol></nav>}
       <section className={state==='START'?'panel hero':'panel'} aria-labelledby="page-title">
         <p className="eyebrow">{s && state!=='START' ? s.title : 'SENIOSK / PRACTICE'}</p>
-        {yellow && state!=='MENU' && <YellowHeader activeMs={c.activeMs} send={send} complete={yellowReceipt}/>}
+        {yellow && state!=='MENU' && (doran?<DoranHeader activeMs={c.activeMs} send={send} complete={yellowReceipt}/>:<YellowHeader activeMs={c.activeMs} send={send} complete={yellowReceipt}/>)}
         <h1 id="page-title" tabIndex={-1} ref={heading}>{yellowReceipt?'주문 완료':title[state]??state}</h1>
         {c.help && <aside id="help-panel" className="notice" aria-label="도움말"><h2>천천히 진행해도 괜찮아요</h2><p>미션에 적힌 메뉴와 옵션을 골라 장바구니에 담아 주세요. 뒤로 가서 수정할 수 있고 실제 돈은 사용하지 않습니다.</p><button className="secondary" onClick={()=>send({type:'HELP'})}>도움말 닫기</button></aside>}
         {c.error && <p role="alert" className="error">{c.error}</p>}
@@ -76,14 +80,17 @@ export function App() {
         {state==='STARTING' && <p>서버에서 연습 미션을 발급하는 중입니다.</p>}
         {c.session && (!yellow || c.help) && ['MISSION','MENU','OPTION','CART','PAYMENT','SUBMIT_ERROR'].includes(state) &&
           <aside className="mission" aria-label="현재 미션"><strong>오늘의 미션</strong><p>{c.session.mission.instruction}</p></aside>}
-        {state==='MISSION' && <><p>미션을 읽고 준비되면 시작 버튼을 눌러 주세요. 주문 중에도 미션을 다시 볼 수 있어요.</p><button className="primary" onClick={()=>send({type:'CONTINUE'})}>메뉴 선택 시작</button></>}
+        {state==='MISSION' && doran && <DoranStart onChoose={packing=>send({type:'START_ORDER',packing})}/>}
+        {state==='MISSION' && !doran && <><p>미션을 읽고 준비되면 시작 버튼을 눌러 주세요. 주문 중에도 미션을 다시 볼 수 있어요.</p><button className="primary" onClick={()=>send({type:'CONTINUE'})}>메뉴 선택 시작</button></>}
         {state==='MENU' && s?.scenarioId==='yellow-cafe' && <YellowMenu scenario={s} category={c.category} cart={c.cart} total={total} count={count} send={send} activeMs={c.activeMs}/>}
-        {state==='MENU' && s && s.scenarioId!=='yellow-cafe' && <>
+        {state==='MENU' && s && doran && <DoranMenu scenario={s} category={c.category} cart={c.cart} count={count} total={total} send={send} activeMs={c.activeMs}/>}
+        {state==='MENU' && s && !branded && <>
           <div className="choices" role="group" aria-label="메뉴 카테고리">{s.categories.map(category=><button key={category.id} className="choice" aria-pressed={c.category===category.id} onClick={()=>send({type:'CATEGORY',id:category.id})}>{category.label}</button>)}</div>
           <div className="cards">{s.menus.filter(m=>m.categoryId===c.category).map(menu=><button key={menu.id} className="card menu" onClick={()=>send({type:'SELECT_MENU',menuId:menu.id})}><span className="menu-mark" aria-hidden="true">{menu.label.slice(0,1)}</span><strong>{menu.label}</strong><span>{money(menu.price)}</span><span className="link-label">선택하기 →</span></button>)}</div>
           <button className="primary wide" onClick={()=>send({type:'VIEW_CART'})}>장바구니 보기 ({count}개)</button>
         </>}
-        {yellow && state!=='MENU' && <YellowStages snapshot={snapshot} send={send} total={total} count={count} onGrade={()=>setGradeSession(c.session?.id??null)}/>}
+        {doran && state==='OPTION' && d && <DoranDetail key={d.editIndex??'new'} snapshot={snapshot} send={send}/>}
+        {yellow && state!=='MENU' && !(doran&&state==='OPTION') && <YellowStages snapshot={snapshot} send={send} total={total} count={count} onGrade={()=>setGradeSession(c.session?.id??null)}/>}
         {state==='OPTION' && s && d && !yellow && <>
           <h2>{s.menus.find(m=>m.id===d.menuId)?.label}</h2>
           {s.scenarioId==='yellow-cafe' && <ProductArt id={d.menuId}/>}

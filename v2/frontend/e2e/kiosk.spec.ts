@@ -26,6 +26,7 @@ async function add(page:Page,s:Scenario,line:OrderLine,captureOption=false){
   const category=s.categories.find(c=>c.id===menu.categoryId)!;
   await page.getByRole('group',{name:'메뉴 카테고리'}).getByRole('button',{name:category.label,exact:true}).click();
   await button(page,menu.label).click();
+  if(s.scenarioId==='doran-burger-lite'&&['burgers','sets'].includes(menu.categoryId)) await button(page,menu.categoryId==='sets'?'세트 구성 선택':'주문 옵션 확인').click();
   for(const group of menu.optionGroups) for(const opt of group.options.filter(o=>line.optionIds.includes(o.id))) await button(page,new RegExp(opt.label)).click();
   await button(page,packing[line.packing]).click();
   for(let i=1;i<line.quantity;i++) await button(page,'수량 늘리기').click();
@@ -42,14 +43,15 @@ test('all registered scenarios can be completed by the same renderer',async({pag
   for(const s of scenarios){
     await page.goto('/');
     const record=s.scenarioId==='boram-cafe';
-    await expect(button(page,new RegExp(s.title))).toBeVisible();
+    await expect(page.getByRole('button').filter({has:page.locator('strong').getByText(s.title,{exact:true})})).toBeVisible();
     if(record)await capture(page,'release-start');
     await button(page,new RegExp(s.title)).click();
     const missionText=await page.locator('.mission p').innerText();
     const mission=s.missions.find(m=>m.instruction===missionText)!;
     expect(mission).toBeDefined();
     if(record)await capture(page,'release-mission');
-    await button(page,'메뉴 선택 시작').click();
+    if(s.scenarioId==='doran-burger-lite') await button(page,packing[mission.expected[0].packing]).click();
+    else await button(page,'메뉴 선택 시작').click();
     if(s.scenarioId==='boram-cafe'){
       await axe(page);
       await page.screenshot({path:test.info().outputPath('kiosk-menu.jpg'),type:'jpeg',quality:72,fullPage:true});
@@ -63,9 +65,9 @@ test('all registered scenarios can be completed by the same renderer',async({pag
     await button(page,'결제하기').click();
     await button(page,payment[mission.payment]).click();
     if(record)await capture(page,'release-payment');
-    if(s.scenarioId==='yellow-cafe') await button(page,'결제하기').click();
+    if(['yellow-cafe','doran-burger-lite'].includes(s.scenarioId)) await button(page,'결제하기').click();
     await button(page,'모의 결제 완료').click();
-    if(s.scenarioId==='yellow-cafe') await button(page,'연습 결과 확인').click();
+    if(['yellow-cafe','doran-burger-lite'].includes(s.scenarioId)) await button(page,'연습 결과 확인').click();
     await expect(page.getByRole('heading',{level:1})).toHaveText('연습 결과');
     await expect(page.getByText('미션 성공!',{exact:true})).toBeVisible();
     await expect(page.locator('.score strong')).toHaveText('100%');

@@ -8,6 +8,7 @@ interface Context {
   scenario: Scenario | null;
   session: TrainingSession | null;
   category: string;
+  preferredPacking: Packing | null;
   cart: OrderLine[];
   draft: Draft | null;
   payment: Payment | null;
@@ -21,6 +22,8 @@ type Event =
   | { type: 'CHOOSE_SCENARIO'; scenarioId: string; version: number }
   | { type: 'CATEGORY'; id: string }
   | { type: 'SELECT_MENU'; menuId: string }
+  | { type: 'SWITCH_PRODUCT'; menuId: string }
+  | { type: 'START_ORDER'; packing: Packing }
   | { type: 'EDIT'; index: number }
   | { type: 'OPTION'; groupId: string; optionId: string | null }
   | { type: 'PACKING'; packing: Packing }
@@ -37,7 +40,7 @@ export interface KioskApi {
   cancel: (id: string, signal: AbortSignal) => Promise<TrainingSession>;
 }
 const api: KioskApi = { list: listScenarios, start: startSession, submit: submitOrder, cancel: cancelSession };
-const blank = (): Context => ({ catalog: [], scenario: null, session: null, category: '', cart: [], draft: null,
+const blank = (): Context => ({ catalog: [], scenario: null, session: null, category: '', preferredPacking: null, cart: [], draft: null,
   payment: null, frozen: null, result: null, activeMs: 0, help: false, error: '' });
 export function draftValid(c: Context): boolean {
   const d = c.draft, s = c.scenario;
@@ -103,14 +106,15 @@ export function createKioskMachine(client: KioskApi = api) {
       STARTING: { invoke: { src: 'start', input: ({ context }) => context.scenario!,
         onDone: { target: 'MISSION', actions: assign({ session: ({ event }) => event.output }) },
         onError: { target: 'START', actions: assign({ error: ({ event }) => message(event.error) }) } } },
-      MISSION: { on: { CONTINUE: 'MENU', CANCEL: 'CANCELLING' } },
+      MISSION: { on: { CONTINUE: 'MENU', START_ORDER: { guard: ({context,event})=>context.scenario?.scenarioId==='doran-burger-lite' && context.scenario.packingOptions.includes(event.packing), target:'MENU', actions:assign({preferredPacking:({event})=>event.packing}) }, CANCEL: 'CANCELLING' } },
       MENU: { on: {
         CATEGORY: { guard: ({ context, event }) => !!context.scenario?.categories.some(c => c.id === event.id), actions: assign({ category: ({ event }) => event.id }) },
         SELECT_MENU: { guard: ({ context, event }) => !!context.scenario?.menus.some(m => m.id === event.menuId),
-          target: 'OPTION', actions: assign({ draft: ({ event }) => ({ menuId: event.menuId, optionIds: [], packing: null, quantity: 1, editIndex: null }) }) },
+          target: 'OPTION', actions: assign({ draft: ({ context,event }) => ({ menuId: event.menuId, optionIds: [], packing: context.preferredPacking, quantity: 1, editIndex: null }) }) },
         VIEW_CART: 'CART', BACK: 'MISSION', CANCEL: 'CANCELLING',
       } },
       OPTION: { on: {
+        SWITCH_PRODUCT: { guard: ({context,event})=>context.scenario?.scenarioId==='doran-burger-lite' && !!context.draft && context.draft.menuId.replace(/-set$/,'')===event.menuId.replace(/-set$/,'') && context.scenario.menus.some(m=>m.id===event.menuId && ['burgers','sets'].includes(m.categoryId)), actions:assign({draft:({context,event})=>({...context.draft!,menuId:event.menuId,optionIds:[]})}) },
         OPTION: { actions: assign({ draft: ({ context, event }) => {
           const d = context.draft!;
           const g = context.scenario!.menus.find(m => m.id === d.menuId)?.optionGroups.find(g => g.id === event.groupId);

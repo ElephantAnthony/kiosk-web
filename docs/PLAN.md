@@ -40,3 +40,7 @@
 ### SEN-08 asset integration verification
 - User uploaded all 12 generated drink WebP assets and card terminal WebP in c346fcd. Verified paths in remote tree.
 - CI 45947029276 retry: Docker dependency resolution recovered; 11 browser tests passed, 1 failed because dedicated test used double-escaped parentheses in menu locator. Fix literal locator, assert all 12 photos and terminal decode in browser. New CI pending; visual inspection still required.
+
+## SEN-09 / ACTIVE - Doran Burger kiosk
+- Approved muted white/gray kiosk with burgundy prices and yellow action buttons; original fictional brand. Preserve old Doran and cafe fixtures, add 21-menu doran-burger-lite fixture with set options and server mission. Use existing shared machine/checkout, guarded preferred packing and product switch. No real payments, coupons, loyalty, or invented order numbers. Set side/drink changes are supported; partial bundles are not yet offered.
+- Add dedicated menu, packing, product detail/customization, shared receipt and terminal with Doran theme. Original SVG fallback and local WebP paths; photorealistic binary assets not yet committed. Browser journey and captures added; verification NOT_RUN locally; CI required.

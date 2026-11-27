@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { EventFrom, SnapshotFrom } from 'xstate';
 import { draftValid, type kioskMachine } from '../../kiosk/machine';
 import type { Scenario, OrderLine } from '../../scenario/contracts';
+import { DoranArt } from '../doran/DoranArt';
 import { ProductArt } from './YellowMenu';
 
 const money=(n:number)=>n.toLocaleString('ko-KR')+'원';
@@ -20,7 +21,7 @@ function Receipt({scenario,cart,send}:{scenario:Scenario;cart:OrderLine[];send?:
   return <div className="yellow-receipt"><div className="yellow-summary-head"><strong>주문하신 메뉴</strong><strong>수량</strong><strong>주문금액</strong></div>{cart.length===0?<p className="yellow-empty">장바구니가 비어 있습니다. 메뉴를 추가해 주세요.</p>:cart.map((l,i)=>{
     const m=scenario.menus.find(m=>m.id===l.menuId)!;
     const labels=m.optionGroups.flatMap(g=>g.options).filter(o=>l.optionIds.includes(o.id)).map(o=>o.label);
-    return <div className="yellow-receipt-row" key={i}><div className="yellow-receipt-product"><ProductArt id={m.id}/><div><strong>{m.label}</strong><p>{[...labels,packing[l.packing]].join(' / ')}</p>{send&&<div className="yellow-row-actions"><button className="secondary" aria-label={m.label+' '+(i+1)+'번 수정'} onClick={()=>send({type:'EDIT',index:i})}>수정</button><button className="secondary" aria-label={m.label+' '+(i+1)+'번 삭제'} onClick={()=>send({type:'REMOVE',index:i})}>삭제</button></div>}</div></div><div className="yellow-row-qty">{send&&<button className="secondary" aria-label={m.label+' '+(i+1)+'번 수량 줄이기'} disabled={l.quantity<=1} onClick={()=>send({type:'CART_QUANTITY',index:i,delta:-1})}>−</button>}<strong>{l.quantity}개</strong>{send&&<button className="secondary" aria-label={m.label+' '+(i+1)+'번 수량 늘리기'} disabled={l.quantity>=20} onClick={()=>send({type:'CART_QUANTITY',index:i,delta:1})}>+</button>}</div><strong>{money(price(scenario,l))}</strong></div>;
+    return <div className="yellow-receipt-row" key={i}><div className="yellow-receipt-product">{scenario.scenarioId==='doran-burger-lite'?<DoranArt id={m.id}/>:<ProductArt id={m.id}/>}<div><strong>{m.label}</strong><p>{[...labels,packing[l.packing]].join(' / ')}</p>{send&&<div className="yellow-row-actions"><button className="secondary" aria-label={m.label+' '+(i+1)+'번 수정'} onClick={()=>send({type:'EDIT',index:i})}>수정</button><button className="secondary" aria-label={m.label+' '+(i+1)+'번 삭제'} onClick={()=>send({type:'REMOVE',index:i})}>삭제</button></div>}</div></div><div className="yellow-row-qty">{send&&<button className="secondary" aria-label={m.label+' '+(i+1)+'번 수량 줄이기'} disabled={l.quantity<=1} onClick={()=>send({type:'CART_QUANTITY',index:i,delta:-1})}>−</button>}<strong>{l.quantity}개</strong>{send&&<button className="secondary" aria-label={m.label+' '+(i+1)+'번 수량 늘리기'} disabled={l.quantity>=20} onClick={()=>send({type:'CART_QUANTITY',index:i,delta:1})}>+</button>}</div><strong>{money(price(scenario,l))}</strong></div>;
   })}</div>;
 }
 function Totals({total,count}:{total:number;count:number}){return <div className="yellow-totals"><div><span>주문수량</span><strong>{count}개</strong></div><div><span>총 결제금액</span><strong>{money(total)}</strong></div></div>;}
@@ -58,6 +59,6 @@ export function YellowStages({snapshot,send,total,count,onGrade}:Props){
   }
   if(state==='CART')return <div className="yellow-stage yellow-cart-stage"><Receipt scenario={s} cart={c.cart} send={send}/><div className="yellow-stage-bottom"><Totals total={total} count={count}/><div className="yellow-actions"><button className="secondary" onClick={()=>send({type:'BACK'})}>메뉴 추가</button><button className="yellow-action" disabled={c.cart.length===0} onClick={()=>send({type:'CHECKOUT'})}>결제하기</button></div></div></div>;
   if(state==='PAYMENT')return <PaymentStage snapshot={snapshot} send={send} total={total} count={count}/>;
-  if(state==='COMPLETE'&&c.result)return <div className="yellow-stage"><div className="yellow-completed"><span aria-hidden="true">✓</span><h2>주문이 완료되었습니다</h2><p>모의 결제가 완료되었습니다.</p><p>연습용 픽업 안내: 주문한 음료를 받아 주세요.</p></div><Receipt scenario={s} cart={c.cart}/><Totals total={total} count={count}/><p className="yellow-note">결제수단: {c.payment?payment[c.payment]:'—'} / 실제 결제 없음</p><button className="yellow-action wide" onClick={onGrade}>연습 결과 확인</button></div>;
+  if(state==='COMPLETE'&&c.result)return <div className="yellow-stage"><div className="yellow-completed"><span aria-hidden="true">✓</span><h2>주문이 완료되었습니다</h2><p>모의 결제가 완료되었습니다.</p><p>연습용 픽업 안내: 주문한 상품을 받아 주세요.</p></div><Receipt scenario={s} cart={c.cart}/><Totals total={total} count={count}/><p className="yellow-note">결제수단: {c.payment?payment[c.payment]:'—'} / 실제 결제 없음</p><button className="yellow-action wide" onClick={onGrade}>연습 결과 확인</button></div>;
   return null;
 }

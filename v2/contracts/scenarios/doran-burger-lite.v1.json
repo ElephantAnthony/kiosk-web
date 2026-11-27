@@ -1,0 +1,653 @@
+{
+  "scenarioId": "doran-burger-lite",
+  "version": 1,
+  "title": "도란 버거 키오스크",
+  "description": "패스트푸드 매장의 단품과 세트 구성, 모의 결제를 연습합니다.",
+  "categories": [
+    {
+      "id": "burgers",
+      "label": "버거"
+    },
+    {
+      "id": "sets",
+      "label": "세트"
+    },
+    {
+      "id": "sides",
+      "label": "사이드"
+    },
+    {
+      "id": "drinks",
+      "label": "음료"
+    },
+    {
+      "id": "desserts",
+      "label": "디저트"
+    }
+  ],
+  "menus": [
+    {
+      "id": "double-bacon",
+      "categoryId": "burgers",
+      "label": "더블베이컨 버거",
+      "price": 6900,
+      "optionGroups": []
+    },
+    {
+      "id": "mushroom",
+      "categoryId": "burgers",
+      "label": "트러플 머쉬룸 버거",
+      "price": 7400,
+      "optionGroups": []
+    },
+    {
+      "id": "chicken",
+      "categoryId": "burgers",
+      "label": "핫크리스피 치킨버거",
+      "price": 6500,
+      "optionGroups": []
+    },
+    {
+      "id": "classic",
+      "categoryId": "burgers",
+      "label": "클래식 치즈버거",
+      "price": 5500,
+      "optionGroups": []
+    },
+    {
+      "id": "bulgogi",
+      "categoryId": "burgers",
+      "label": "불고기 버거",
+      "price": 5700,
+      "optionGroups": []
+    },
+    {
+      "id": "shrimp",
+      "categoryId": "burgers",
+      "label": "새우버거",
+      "price": 6300,
+      "optionGroups": []
+    },
+    {
+      "id": "double-bacon-set",
+      "categoryId": "sets",
+      "label": "더블베이컨 버거 세트",
+      "price": 9900,
+      "optionGroups": [
+        {
+          "id": "side",
+          "label": "사이드 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "fries-m",
+              "label": "감자튀김 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "fries-l",
+              "label": "감자튀김 L",
+              "priceDelta": 500
+            },
+            {
+              "id": "salad-side",
+              "label": "샐러드 변경",
+              "priceDelta": 700
+            }
+          ]
+        },
+        {
+          "id": "drink",
+          "label": "음료 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "cola",
+              "label": "콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "zero",
+              "label": "제로콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "sprite",
+              "label": "사이다 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "coffee",
+              "label": "아메리카노",
+              "priceDelta": 500
+            }
+          ]
+        },
+        {
+          "id": "cheese",
+          "label": "치즈스틱 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-stick",
+              "label": "치즈스틱 추가",
+              "priceDelta": 2000
+            }
+          ]
+        },
+        {
+          "id": "nuggets",
+          "label": "너겟 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-nuggets",
+              "label": "너겟 4조각 추가",
+              "priceDelta": 2500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mushroom-set",
+      "categoryId": "sets",
+      "label": "트러플 머쉬룸 버거 세트",
+      "price": 10400,
+      "optionGroups": [
+        {
+          "id": "side",
+          "label": "사이드 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "fries-m",
+              "label": "감자튀김 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "fries-l",
+              "label": "감자튀김 L",
+              "priceDelta": 500
+            },
+            {
+              "id": "salad-side",
+              "label": "샐러드 변경",
+              "priceDelta": 700
+            }
+          ]
+        },
+        {
+          "id": "drink",
+          "label": "음료 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "cola",
+              "label": "콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "zero",
+              "label": "제로콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "sprite",
+              "label": "사이다 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "coffee",
+              "label": "아메리카노",
+              "priceDelta": 500
+            }
+          ]
+        },
+        {
+          "id": "cheese",
+          "label": "치즈스틱 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-stick",
+              "label": "치즈스틱 추가",
+              "priceDelta": 2000
+            }
+          ]
+        },
+        {
+          "id": "nuggets",
+          "label": "너겟 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-nuggets",
+              "label": "너겟 4조각 추가",
+              "priceDelta": 2500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chicken-set",
+      "categoryId": "sets",
+      "label": "핫크리스피 치킨버거 세트",
+      "price": 9500,
+      "optionGroups": [
+        {
+          "id": "side",
+          "label": "사이드 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "fries-m",
+              "label": "감자튀김 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "fries-l",
+              "label": "감자튀김 L",
+              "priceDelta": 500
+            },
+            {
+              "id": "salad-side",
+              "label": "샐러드 변경",
+              "priceDelta": 700
+            }
+          ]
+        },
+        {
+          "id": "drink",
+          "label": "음료 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "cola",
+              "label": "콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "zero",
+              "label": "제로콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "sprite",
+              "label": "사이다 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "coffee",
+              "label": "아메리카노",
+              "priceDelta": 500
+            }
+          ]
+        },
+        {
+          "id": "cheese",
+          "label": "치즈스틱 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-stick",
+              "label": "치즈스틱 추가",
+              "priceDelta": 2000
+            }
+          ]
+        },
+        {
+          "id": "nuggets",
+          "label": "너겟 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-nuggets",
+              "label": "너겟 4조각 추가",
+              "priceDelta": 2500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "classic-set",
+      "categoryId": "sets",
+      "label": "클래식 치즈버거 세트",
+      "price": 8500,
+      "optionGroups": [
+        {
+          "id": "side",
+          "label": "사이드 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "fries-m",
+              "label": "감자튀김 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "fries-l",
+              "label": "감자튀김 L",
+              "priceDelta": 500
+            },
+            {
+              "id": "salad-side",
+              "label": "샐러드 변경",
+              "priceDelta": 700
+            }
+          ]
+        },
+        {
+          "id": "drink",
+          "label": "음료 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "cola",
+              "label": "콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "zero",
+              "label": "제로콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "sprite",
+              "label": "사이다 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "coffee",
+              "label": "아메리카노",
+              "priceDelta": 500
+            }
+          ]
+        },
+        {
+          "id": "cheese",
+          "label": "치즈스틱 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-stick",
+              "label": "치즈스틱 추가",
+              "priceDelta": 2000
+            }
+          ]
+        },
+        {
+          "id": "nuggets",
+          "label": "너겟 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-nuggets",
+              "label": "너겟 4조각 추가",
+              "priceDelta": 2500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bulgogi-set",
+      "categoryId": "sets",
+      "label": "불고기 버거 세트",
+      "price": 8700,
+      "optionGroups": [
+        {
+          "id": "side",
+          "label": "사이드 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "fries-m",
+              "label": "감자튀김 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "fries-l",
+              "label": "감자튀김 L",
+              "priceDelta": 500
+            },
+            {
+              "id": "salad-side",
+              "label": "샐러드 변경",
+              "priceDelta": 700
+            }
+          ]
+        },
+        {
+          "id": "drink",
+          "label": "음료 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "cola",
+              "label": "콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "zero",
+              "label": "제로콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "sprite",
+              "label": "사이다 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "coffee",
+              "label": "아메리카노",
+              "priceDelta": 500
+            }
+          ]
+        },
+        {
+          "id": "cheese",
+          "label": "치즈스틱 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-stick",
+              "label": "치즈스틱 추가",
+              "priceDelta": 2000
+            }
+          ]
+        },
+        {
+          "id": "nuggets",
+          "label": "너겟 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-nuggets",
+              "label": "너겟 4조각 추가",
+              "priceDelta": 2500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shrimp-set",
+      "categoryId": "sets",
+      "label": "새우버거 세트",
+      "price": 9300,
+      "optionGroups": [
+        {
+          "id": "side",
+          "label": "사이드 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "fries-m",
+              "label": "감자튀김 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "fries-l",
+              "label": "감자튀김 L",
+              "priceDelta": 500
+            },
+            {
+              "id": "salad-side",
+              "label": "샐러드 변경",
+              "priceDelta": 700
+            }
+          ]
+        },
+        {
+          "id": "drink",
+          "label": "음료 선택",
+          "required": true,
+          "options": [
+            {
+              "id": "cola",
+              "label": "콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "zero",
+              "label": "제로콜라 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "sprite",
+              "label": "사이다 M",
+              "priceDelta": 0
+            },
+            {
+              "id": "coffee",
+              "label": "아메리카노",
+              "priceDelta": 500
+            }
+          ]
+        },
+        {
+          "id": "cheese",
+          "label": "치즈스틱 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-stick",
+              "label": "치즈스틱 추가",
+              "priceDelta": 2000
+            }
+          ]
+        },
+        {
+          "id": "nuggets",
+          "label": "너겟 추가",
+          "required": false,
+          "options": [
+            {
+              "id": "extra-nuggets",
+              "label": "너겟 4조각 추가",
+              "priceDelta": 2500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fries",
+      "label": "감자튀김",
+      "price": 2500,
+      "categoryId": "sides",
+      "optionGroups": []
+    },
+    {
+      "id": "sticks",
+      "label": "치즈스틱",
+      "price": 2500,
+      "categoryId": "sides",
+      "optionGroups": []
+    },
+    {
+      "id": "nuggets",
+      "label": "너겟 4조각",
+      "price": 3000,
+      "categoryId": "sides",
+      "optionGroups": []
+    },
+    {
+      "id": "salad",
+      "label": "샐러드",
+      "price": 3000,
+      "categoryId": "sides",
+      "optionGroups": []
+    },
+    {
+      "id": "cola",
+      "label": "콜라",
+      "price": 2000,
+      "categoryId": "drinks",
+      "optionGroups": []
+    },
+    {
+      "id": "zero",
+      "label": "제로콜라",
+      "price": 2000,
+      "categoryId": "drinks",
+      "optionGroups": []
+    },
+    {
+      "id": "sprite",
+      "label": "사이다",
+      "price": 2000,
+      "categoryId": "drinks",
+      "optionGroups": []
+    },
+    {
+      "id": "coffee",
+      "label": "아메리카노",
+      "price": 2000,
+      "categoryId": "drinks",
+      "optionGroups": []
+    },
+    {
+      "id": "icecream",
+      "label": "소프트 아이스크림",
+      "price": 1800,
+      "categoryId": "desserts",
+      "optionGroups": []
+    }
+  ],
+  "packingOptions": [
+    "DINE_IN",
+    "TAKE_OUT"
+  ],
+  "paymentOptions": [
+    "CARD",
+    "CASH"
+  ],
+  "missions": [
+    {
+      "id": "bacon-meal",
+      "instruction": "더블베이컨 버거 세트 1개를 감자튀김 L, 제로콜라 M으로 선택하고 치즈스틱 1개를 별도로 추가해 포장한 뒤 카드로 모의 결제하세요.",
+      "expected": [
+        {
+          "menuId": "double-bacon-set",
+          "optionIds": [
+            "fries-l",
+            "zero"
+          ],
+          "packing": "TAKE_OUT",
+          "quantity": 1
+        },
+        {
+          "menuId": "sticks",
+          "optionIds": [],
+          "packing": "TAKE_OUT",
+          "quantity": 1
+        }
+      ],
+      "payment": "CARD"
+    }
+  ]
+}

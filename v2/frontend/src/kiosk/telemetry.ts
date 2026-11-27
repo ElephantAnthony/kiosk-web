@@ -26,8 +26,10 @@ export function observeAction(sdk:EventSdk,before:Snapshot,after:Snapshot,event:
   if(!session)return;
   const a=before.context,b=after.context,changed=before.value!==after.value;
   switch(event.type){
+    case 'START_ORDER':
     case 'CONTINUE':if(changed)void sdk.track(session,'MISSION_CONFIRMED');break;
     case 'CATEGORY':if(b.category!==a.category)void sdk.track(session,'CATEGORY_SELECTED',{categoryId:b.category});break;
+    case 'SWITCH_PRODUCT':if(b.draft&&a.draft?.menuId!==b.draft.menuId)void sdk.track(session,'MENU_SELECTED',{menuId:b.draft.menuId});break;
     case 'SELECT_MENU':if(changed&&b.draft)void sdk.track(session,'MENU_SELECTED',{menuId:b.draft.menuId});break;
     case 'OPTION':
       if(a.draft&&b.draft&&a.draft!==b.draft&&JSON.stringify(a.draft.optionIds)!==JSON.stringify(b.draft.optionIds))
