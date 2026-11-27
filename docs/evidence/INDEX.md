@@ -43,3 +43,5 @@
 - [SEN-05 final gate](runs/SEN-05-pass-45777346496.md): all five jobs success, nine browser tests, eight persisted events recovered.
 
 - SEN-06 source CI [45919739819](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919739819): auth, cohort and dashboard tests authored; results pending.
+
+- [SEN-06 initial verification](runs/SEN-06-initial-45919739819.md): 23 Vitest, 20 Java unit, 25/26 PostgreSQL IT; actual expected response, failed wildcard assertion; repair and full verification required.
