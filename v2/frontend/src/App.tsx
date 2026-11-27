@@ -43,9 +43,10 @@ export function App() {
     STARTING:'미션을 준비하고 있어요',MISSION:'오늘의 연습 미션',MENU:'메뉴를 골라 주세요',OPTION:'주문 옵션을 선택해 주세요',CART:'장바구니를 확인해 주세요',
     PAYMENT:'결제 방법을 선택해 주세요',SUBMITTING:'주문을 확인하고 있어요',SUBMIT_ERROR:'주문 결과를 확인하지 못했어요',COMPLETE:'연습 결과',CANCELLING:'연습을 취소하고 있어요',
     CANCEL_ERROR:'취소 결과를 확인하지 못했어요',CANCELLED:'연습을 취소했어요',EXPIRED:'연습 정보를 찾을 수 없어요' };
+  const yellow = s?.scenarioId==='yellow-cafe' && ['MENU','OPTION','CART','PAYMENT'].includes(state);
   const back = ['MENU','OPTION','CART','PAYMENT'].includes(state);
   const cancel = ['MISSION','MENU','OPTION','CART','PAYMENT','SUBMIT_ERROR'].includes(state);
-  return <div className={contrast?'app contrast':'app'}>
+  return <div className={'app'+(contrast?' contrast':'')+(yellow?' yellow-mode':'')}>
     <a className="skip" href="#content">본문 바로가기</a>
     <header className="header"><div><span className="brand">SENIOSK</span><span className="brand-sub"> 시니스크 2.0</span></div>
       <div className="tools"><button className="secondary" aria-pressed={contrast} onClick={()=>setContrast(v=>!v)}>고대비 모드</button>
@@ -56,6 +57,7 @@ export function App() {
       {stepIndex[state]!==undefined && <nav aria-label="연습 단계"><ol className="steps">{steps.map((step,i)=><li key={step} aria-current={i===stepIndex[state]?'step':undefined} className={i===stepIndex[state]?'current':i<stepIndex[state]?'done':''}><span>{i+1}</span>{step}</li>)}</ol></nav>}
       <section className={state==='START'?'panel hero':'panel'} aria-labelledby="page-title">
         <p className="eyebrow">{s && state!=='START' ? s.title : 'SENIOSK / PRACTICE'}</p>
+        {yellow && state!=='MENU' && <div className="yellow-stage-head">YELLOW CAFE <span>연습용 키오스크</span></div>}
         <h1 id="page-title" tabIndex={-1} ref={heading}>{title[state]??state}</h1>
         {c.help && <aside id="help-panel" className="notice" aria-label="도움말"><h2>천천히 진행해도 괜찮아요</h2><p>미션에 적힌 메뉴와 옵션을 골라 장바구니에 담아 주세요. 뒤로 가서 수정할 수 있고 실제 돈은 사용하지 않습니다.</p><button className="secondary" onClick={()=>send({type:'HELP'})}>도움말 닫기</button></aside>}
         {c.error && <p role="alert" className="error">{c.error}</p>}
@@ -69,7 +71,7 @@ export function App() {
           </button>)}</div><HealthStatus/>
         </>}
         {state==='STARTING' && <p>서버에서 연습 미션을 발급하는 중입니다.</p>}
-        {c.session && ['MISSION','MENU','OPTION','CART','PAYMENT','SUBMIT_ERROR'].includes(state) &&
+        {c.session && (!yellow || c.help) && ['MISSION','MENU','OPTION','CART','PAYMENT','SUBMIT_ERROR'].includes(state) &&
           <aside className="mission" aria-label="현재 미션"><strong>오늘의 미션</strong><p>{c.session.mission.instruction}</p></aside>}
         {state==='MISSION' && <><p>미션을 읽고 준비되면 시작 버튼을 눌러 주세요. 주문 중에도 미션을 다시 볼 수 있어요.</p><button className="primary" onClick={()=>send({type:'CONTINUE'})}>메뉴 선택 시작</button></>}
         {state==='MENU' && s?.scenarioId==='yellow-cafe' && <YellowMenu scenario={s} category={c.category} cart={c.cart} total={total} count={count} send={send} activeMs={c.activeMs}/>}
@@ -94,7 +96,7 @@ export function App() {
         {state==='CART' && s && <>
           {c.cart.length===0 ? <p>장바구니가 비어 있습니다. 메뉴를 추가해 주세요.</p> : <ul className="cart">{c.cart.map((line,i)=>{
             const menu=s.menus.find(m=>m.id===line.menuId)!;const labels=menu.optionGroups.flatMap(g=>g.options).filter(o=>line.optionIds.includes(o.id)).map(o=>o.label);
-            return <li key={i}><div><strong>{menu.label} {line.quantity}개</strong><p>{[...labels,packingLabel[line.packing]].join(' / ')}</p><strong>{money(linePrice(s,line))}</strong></div><div className="choices"><button className="secondary" aria-label={menu.label+' '+(i+1)+'번 수정'} onClick={()=>send({type:'EDIT',index:i})}>수정</button><button className="secondary" aria-label={menu.label+' '+(i+1)+'번 삭제'} onClick={()=>send({type:'REMOVE',index:i})}>삭제</button></div></li>;
+            return <li key={i}><div>{yellow && <ProductArt id={menu.id}/>}<strong>{menu.label} {line.quantity}개</strong><p>{[...labels,packingLabel[line.packing]].join(' / ')}</p><strong>{money(linePrice(s,line))}</strong></div><div className="choices"><button className="secondary" aria-label={menu.label+' '+(i+1)+'번 수정'} onClick={()=>send({type:'EDIT',index:i})}>수정</button><button className="secondary" aria-label={menu.label+' '+(i+1)+'번 삭제'} onClick={()=>send({type:'REMOVE',index:i})}>삭제</button></div></li>;
           })}</ul>}
           <p className="total">합계 <strong>{money(total)}</strong></p><div className="choices"><button className="secondary" onClick={()=>send({type:'BACK'})}>메뉴 추가</button><button className="primary" disabled={c.cart.length===0} onClick={()=>send({type:'CHECKOUT'})}>결제하기</button></div>
         </>}

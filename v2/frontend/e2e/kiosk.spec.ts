@@ -25,7 +25,7 @@ async function add(page:Page,s:Scenario,line:OrderLine,captureOption=false){
   const menu=s.menus.find(m=>m.id===line.menuId)!;
   const category=s.categories.find(c=>c.id===menu.categoryId)!;
   await page.getByRole('group',{name:'메뉴 카테고리'}).getByRole('button',{name:category.label,exact:true}).click();
-  await button(page,new RegExp(menu.label)).click();
+  await button(page,menu.label).click();
   for(const group of menu.optionGroups) for(const opt of group.options.filter(o=>line.optionIds.includes(o.id))) await button(page,new RegExp(opt.label)).click();
   await button(page,packing[line.packing]).click();
   for(let i=1;i<line.quantity;i++) await button(page,'수량 늘리기').click();

@@ -26,3 +26,8 @@
 - Acceptance: catalog exposes the new fixture, menu/category/page navigation works, generic mission completes with 100% server grade, existing scenarios still pass and keyboard/contrast remain usable.
 - Initial implementation uses illustrative prices and fictional branding; no real brand assets. Packing remains per line, existing option/cart/payment workflow retained; countdown is informational and starts from existing active session time. Full reference fidelity and brand authorization are not verified.
 - Verification: NOT_RUN locally (GitHub DNS unavailable in execution container). CI and browser verification required before release. M1 historical checkpoint remains unchanged.
+
+### SEN-08 visual refinement
+- Previous CI 45944926832: frontend/backend/legacy/secret scan passed; compose failed generic catalog browser test because a literal menu label containing parentheses was treated as regex. Dedicated yellow navigation passed.
+- Refine dedicated kiosk surface, product SVG shading and toppings, cart table and yellow action styling. Preserve accessibility controls, machine and server contracts. Change generic menu locator to literal matching and capture actual yellow browser menu in CI.
+- Verification: NOT_RUN in current editing environment; next action inspect new CI, screenshot and full mission completion before release.

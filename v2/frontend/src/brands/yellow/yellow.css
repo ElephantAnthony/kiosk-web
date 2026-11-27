@@ -1,1 +1,45 @@
 .yellow-menu{--yellow:#ffd329;--yellow-ink:#181818;color:var(--yellow-ink);background:#fff;border:1px solid #ddd;border-radius:12px;overflow:hidden}.yellow-menu button{color:#181818;background:#fff;border:1px solid #aaa;border-radius:8px;padding:8px;min-width:48px;min-height:48px}.yellow-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:var(--yellow);padding:12px}.yellow-head strong{font-size:clamp(1rem,3vw,1.6rem)}.yellow-tabs{display:flex;overflow-x:auto;gap:4px;padding:8px;background:#f3f3f3}.yellow-tabs button{flex:1;white-space:nowrap}.yellow-tabs button[aria-pressed=true],.yellow-menu .yellow-pay{background:var(--yellow);font-weight:800;border-color:#806200}.yellow-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:8px;min-height:340px;align-content:start}.yellow-grid button{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:5px;text-align:center;overflow-wrap:anywhere;font-size:clamp(.75rem,1.8vw,1rem);min-width:0}.yellow-art{width:100%;max-width:100px;height:auto;display:block}.yellow-pages,.yellow-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;flex-wrap:wrap}.yellow-summary{border:1px solid #aaa;border-radius:8px;margin:8px;padding:12px;min-height:90px}.yellow-summary p{color:#555;text-align:center}.yellow-summary ul{max-height:140px;overflow:auto}.yellow-menu .hint{color:#555;padding:0 10px}.contrast .yellow-menu{--yellow:#ffdc52;color:#fff;background:#111;border-color:#fff}.contrast .yellow-head,.contrast .yellow-tabs{color:#fff;background:#252525}.contrast .yellow-menu button{color:#fff;background:#111;border-color:#fff}.contrast .yellow-tabs button[aria-pressed=true],.contrast .yellow-menu .yellow-pay{background:#ffdc52;color:#111}.contrast .yellow-summary p,.contrast .yellow-menu .hint{color:#fff}@media(max-width:550px){.yellow-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Dedicated practice surface: training controls remain reachable, but not in the order canvas. */
+.yellow-mode{--ink:#222;--on-ink:#fff;--paper:#fff;--bg:#eaeaea;--soft:#fff6c9;--line:#d0d0d0;--muted:#555;--focus:#8b5200}
+.yellow-mode.contrast{--ink:#fff;--on-ink:#111;--paper:#111;--bg:#000;--soft:#252525;--line:#fff;--muted:#fff;--focus:#ffdc52}
+.yellow-mode .header{max-width:850px;margin:auto;background:transparent;color:var(--ink);padding:8px 12px;justify-content:flex-end}
+.yellow-mode .header>div:first-child,.yellow-mode .topline,.yellow-mode .steps,.yellow-mode .eyebrow,.yellow-mode footer{display:none}
+.yellow-mode .header .secondary{border-color:var(--line);font-size:.8rem;min-height:48px;padding:6px 12px}
+.yellow-mode .shell{max-width:850px;padding:0 10px 12px}
+.yellow-mode .panel{padding:0;border:0;box-shadow:none;overflow:hidden;border-radius:16px}
+.yellow-mode .panel:has(.yellow-menu)>h1{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0}
+.yellow-mode .panel:has(.yellow-menu)>h1:focus-visible{position:static;width:auto;height:auto;clip-path:none;padding:10px}
+.yellow-mode .panel:not(:has(.yellow-menu)){padding:0 24px 20px}
+.yellow-stage-head{background:#ffd329;color:#171717;margin:0 -24px 20px;padding:20px 24px;font-size:1.6rem;font-weight:900;display:flex;align-items:center;justify-content:space-between}
+.yellow-stage-head span{font-size:.8rem;font-weight:600}
+.yellow-mode .panel:not(:has(.yellow-menu)) .primary,.yellow-mode .panel:not(:has(.yellow-menu)) .choice[aria-pressed=true]{background:#ffd329;color:#171717;border-color:#806200}
+.yellow-mode .panel:not(:has(.yellow-menu))>.yellow-art{max-width:180px;margin:0 auto}
+.yellow-mode .cart .yellow-art{width:65px}
+.yellow-mode .bottom-nav{margin:0;padding:10px 14px;border-top:1px solid var(--line)}
+.yellow-menu{border:0;border-radius:0}
+.yellow-head{padding:12px 16px;background:linear-gradient(105deg,#ffd329,#ffde59);min-height:72px}
+.yellow-head strong{font-weight:950;letter-spacing:-.055em;font-size:clamp(1.25rem,4vw,2rem)}
+.yellow-clock{font-size:.82rem;white-space:nowrap}.yellow-clock b{font-size:1rem}
+.yellow-tabs{background:#f5f5f5;border-radius:22px;margin:8px;gap:2px;padding:5px}
+.yellow-tabs button{background:transparent;border:0;font-size:clamp(.72rem,1.65vw,.95rem);padding:8px 10px}
+.yellow-tabs button[aria-pressed=true]{background:#ffd329;border-radius:17px}
+.yellow-grid{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(150px,auto);gap:7px;padding:4px 8px;min-height:0}
+.yellow-grid button{padding:7px 3px 10px;border:1px solid #d8d8d8;border-radius:14px;min-height:150px;background:linear-gradient(#fff,#fafafa);gap:3px;justify-content:flex-start}
+.yellow-grid button:hover{border-color:#c29200;box-shadow:inset 0 0 0 1px #c29200}
+.yellow-grid .yellow-art{max-width:132px;width:85%;height:clamp(78px,15vw,140px)}
+.yellow-grid button strong{font-size:clamp(.75rem,1.75vw,1.03rem);line-height:1.25;min-height:2.5em;display:grid;place-items:center}
+.yellow-grid button span{font-weight:800;margin-top:auto}
+.yellow-pages{padding:8px 12px}.yellow-pages button{border:0;background:#eee;border-radius:26px;min-width:64px;font-size:1.4rem;padding:0}
+.yellow-summary{margin:4px 8px;padding:0;overflow:hidden;border:1px solid #d0d0d0;min-height:110px}
+.yellow-summary-head,.yellow-summary li{display:grid;grid-template-columns:2fr .65fr 1fr;gap:6px;align-items:center;padding:8px 12px;font-size:.88rem}
+.yellow-summary-head{background:#eee}.yellow-summary-head>*:not(:first-child),.yellow-summary li>*:not(:first-child){text-align:right}
+.yellow-summary ul{margin:0;padding:0;list-style:none}.yellow-summary li{border-top:1px solid #ddd}
+.yellow-summary p{margin:20px 8px;font-size:.9rem}
+.yellow-footer{display:grid;grid-template-columns:auto 1fr 1.3fr 1.6fr;gap:8px;padding:8px;font-size:.85rem}
+.yellow-footer .yellow-pay{background:#ffd329;border:0;font-size:1.12rem;min-height:60px;border-radius:12px}
+.yellow-menu .hint{font-size:.72rem;margin:3px 0 8px}
+.contrast .yellow-head,.contrast .yellow-summary-head,.contrast .yellow-pages button{background:#252525;color:#fff}
+.contrast .yellow-grid button{background:#111;color:#fff;border-color:#fff}
+.contrast .yellow-tabs button[aria-pressed=true]{color:#111;background:#ffdc52}
+@media(max-width:550px){.yellow-mode .shell{padding:0 4px}.yellow-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.yellow-footer{grid-template-columns:1fr 1fr}.yellow-head strong{font-size:1.2rem}.yellow-mode .header{padding:4px 8px}}
