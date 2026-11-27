@@ -13,6 +13,14 @@
         },
         "type" : "object"
       },
+      "AdminView" : {
+        "properties" : {
+          "authenticated" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
       "Batch" : {
         "properties" : {
           "events" : {
@@ -44,6 +52,42 @@
             "type" : "string"
           },
           "token" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "Funnel" : {
+        "properties" : {
+          "asOf" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "from" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "funnel" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Stage"
+            },
+            "type" : "array"
+          },
+          "inactivityMinutes" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "metrics" : {
+            "$ref" : "#/components/schemas/Metrics"
+          },
+          "scenarios" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ScenarioMetrics"
+            },
+            "type" : "array"
+          },
+          "toExclusive" : {
+            "format" : "date",
             "type" : "string"
           }
         },
@@ -124,6 +168,23 @@
         "required" : [ "menuId", "optionIds", "packing", "quantity" ],
         "type" : "object"
       },
+      "LoginRequest" : {
+        "properties" : {
+          "password" : {
+            "maxLength" : 72,
+            "minLength" : 0,
+            "type" : "string",
+            "writeOnly" : true
+          },
+          "username" : {
+            "maxLength" : 80,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [ "password", "username" ],
+        "type" : "object"
+      },
       "Menu" : {
         "properties" : {
           "categoryId" : {
@@ -143,6 +204,55 @@
           },
           "price" : {
             "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "Metrics" : {
+        "properties" : {
+          "abandoned" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "active" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "averageAccuracy" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "averageElapsedMs" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "cancelled" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "completed" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "graded" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "helped" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "successRate" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "successful" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "total" : {
+            "format" : "int64",
             "type" : "integer"
           }
         },
@@ -314,6 +424,21 @@
         },
         "type" : "object"
       },
+      "ScenarioMetrics" : {
+        "properties" : {
+          "metrics" : {
+            "$ref" : "#/components/schemas/Metrics"
+          },
+          "scenarioId" : {
+            "type" : "string"
+          },
+          "version" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "SessionView" : {
         "properties" : {
           "id" : {
@@ -339,6 +464,26 @@
             "type" : "string"
           },
           "uiVariant" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "Stage" : {
+        "properties" : {
+          "conversionFromPrevious" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "notReachedNext" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "reached" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "stage" : {
             "type" : "string"
           }
         },
@@ -400,6 +545,214 @@
   },
   "openapi" : "3.1.0",
   "paths" : {
+    "/api/admin/funnel" : {
+      "get" : {
+        "description" : "UTC start-date cohort, exclusive end date, maximum 366 days. Requires administrator session. Observed cumulative stage coverage differs from authoritative server completion.",
+        "operationId" : "funnel",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "scenarioId",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "version",
+          "required" : false,
+          "schema" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Funnel"
+                }
+              }
+            },
+            "description" : "Aggregated cohort"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Funnel"
+                }
+              }
+            },
+            "description" : "Invalid filter"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Funnel"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Funnel"
+                }
+              }
+            },
+            "description" : "Insufficient role"
+          }
+        },
+        "summary" : "Aggregate an owned administrator report",
+        "tags" : [ "funnel-controller" ]
+      }
+    },
+    "/api/admin/login" : {
+      "post" : {
+        "operationId" : "login",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-CSRF-TOKEN",
+          "required" : true
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminView"
+                }
+              }
+            },
+            "description" : "Authenticated"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminView"
+                }
+              }
+            },
+            "description" : "Invalid input"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminView"
+                }
+              }
+            },
+            "description" : "Invalid credentials or administrator disabled"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminView"
+                }
+              }
+            },
+            "description" : "Invalid CSRF"
+          }
+        },
+        "summary" : "Authenticate an administrator",
+        "tags" : [ "admin-auth-controller" ]
+      }
+    },
+    "/api/admin/logout" : {
+      "post" : {
+        "operationId" : "logout",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "X-CSRF-TOKEN",
+          "required" : true
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Logged out"
+          },
+          "401" : {
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "description" : "Invalid CSRF or insufficient role"
+          }
+        },
+        "summary" : "Clear administrator authentication only",
+        "tags" : [ "admin-auth-controller" ]
+      }
+    },
+    "/api/admin/me" : {
+      "get" : {
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminView"
+                }
+              }
+            },
+            "description" : "Administrator authenticated"
+          },
+          "401" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminView"
+                }
+              }
+            },
+            "description" : "Not authenticated"
+          },
+          "403" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminView"
+                }
+              }
+            },
+            "description" : "Insufficient role"
+          }
+        },
+        "summary" : "Check administrator session",
+        "tags" : [ "admin-auth-controller" ]
+      }
+    },
     "/api/csrf" : {
       "get" : {
         "operationId" : "csrf",

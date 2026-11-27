@@ -1,0 +1,2 @@
+# Administrator OpenAPI drift
+CI 45919907679: all 48 Java tests passed, strict OpenAPI diff failed because the four new administrator endpoints changed the generated document. Recovered actual Springdoc export in 11 ordered chunks, 31387 bytes, independently verified SHA-256 67d94eeb466962bb3fe1739c527e2e433128064334f2cda9d9fa35ee512e24c6. Git blob f2000f5bb9e3fe201bed5fa63017ea5e01a7c7a1. Inspected login, me, logout and funnel paths. Commit exact bytes; do not weaken diff. A new full CI run must verify the committed output.
