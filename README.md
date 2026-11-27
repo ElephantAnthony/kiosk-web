@@ -1,106 +1,140 @@
+<div align="center">
+
 # SENIOSK 2.0 | 시니스크
 
-**키오스크 주문을 반복 연습할 수 있는 교육용 웹 서비스**
+**실제 결제 없이 반복하는 키오스크 주문 연습, 서버가 확인하는 학습 결과**
 
-시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
+Java 21 / Spring Boot / PostgreSQL / React / TypeScript
 
-> 현재 상태: 두 매장의 실제 주문 및 서버 채점, 취소, 브라우저 테스트 7개를 검증했습니다. IndexedDB 행동 기록과 서버 멱등 수집을 구현했으며 신규 프론트엔드 테스트까지 통과했습니다. 실제 PostgreSQL 및 브라우저 이벤트 복구 테스트를 통과했습니다. 생성된 OpenAPI 비교도 통과했습니다. 최종 CI의 5개 Job과 브라우저 테스트 9개를 모두 통과했습니다. 관리자 인증과 행동 분석의 전체 CI 및 브라우저 10개 테스트를 통과했습니다. 최종 릴리스 정리 단계입니다.
+[실행 방법](#6-실행-방법) | [기술 설계](#4-시스템-설계) | [검증 결과](#7-검증-결과) | [엔지니어링 문서](docs/index.md)
 
-## 1. 프로젝트의 문제와 개선 방향
+</div>
 
-| 기존 V1 문제 | V2 개선 설계 | 확인 상태 |
+## 1. 프로젝트 소개
+
+디지털 기기에 익숙하지 않은 사람이 실제 매장에서 주문하기 전에 메뉴 선택부터 모의 결제까지 반복해서 연습할 수 있는 웹 서비스입니다. 가상의 보람 카페와 도란 버거에서 주어진 미션을 수행하면 서버가 주문 결과를 채점합니다. 관리자는 개인 정보가 아닌 세션 단위의 학습 통계를 확인할 수 있습니다.
+
+V2는 기존 Django 프로젝트에서 발견된 데이터 공유 결함과 측정의 한계를 Spring Boot 기반 구조로 개선한 리엔지니어링 프로젝트입니다. 새로운 기능의 수보다 재현 가능한 오류 해결과 데이터 정합성에 중점을 둡니다.
+
+> 로컬 실행용 M1 개발 범위입니다. 관리자 기능까지 전체 CI를 통과했으며 최종 시연 캡처와 재검증을 진행 중입니다. 실제 이용자 연구, 운영 배포 및 대량 성능 시험은 수행하지 않았습니다.
+
+## 2. 문제 정의 및 개선
+
+| 기존 V1의 문제 | V2의 해결 방법 | 검증 |
 |---|---|---|
-| 전역 장바구니 사용 | 사용자별 HttpSession과 소유자 조건이 있는 DB 조회 | 실제 동시 세션 통합 테스트 통과 |
-| 공유 미션과 난수 기반 점수 | 세션별 미션 스냅샷, 결정론적 서버 채점 | 채점 단위 및 DB 통합 테스트 통과 |
-| 브랜드별 UI 분리 | 공통 시나리오 JSON 계약 | 두 매장 실제 주문 완료 검증 통과 |
-| 장애 시 기록 손실 가능성 | IndexedDB outbox와 멱등 수집 | DB 및 브라우저 이벤트 복구 테스트 통과 |
+| 전역 장바구니로 다른 사용자의 주문이 공유될 수 있음 | 서버 세션 소유자 조건과 PostgreSQL 행 잠금 | Django 결함 재현 및 V2 교차 세션 테스트 |
+| 공유 미션과 난수 기반 결과 | 미션 스냅샷과 결정론적 서버 채점 | 단위 테스트 및 DB 트랜잭션 검증 |
+| 브랜드별 별도 화면 | 버전이 있는 공통 JSON Schema와 XState | 두 매장의 실제 주문 성공 |
+| 통신 장애 시 행동 기록 손실 위험 | IndexedDB Outbox와 멱등 배치 수집 | 오프라인, 새로고침, ACK 유실 검증 |
+| 실제 학습 과정 분석의 한계 | 인증된 관리자와 세션 단위 집계 | PostgreSQL 합성 데이터, EXPLAIN, 브라우저 검증 |
 
-기존 V1의 장바구니 공유 문제는 Django test client 두 개를 사용해 재현했습니다. 원본 main 브랜치는 변경하지 않습니다.
+[기존 코드 분석](docs/research/V1_BASELINE.md) / [기존 main 브랜치](https://github.com/ElephantAnthony/kiosk-web/tree/main)
 
-## 2. 실행 방법
+## 3. 서비스 기능 및 실제 화면
 
-필요 환경: Docker Desktop 또는 Docker Engine + Compose v2. 소스 검증 시 Java 21, Maven, Node 22.16 이상, npm 11.21.2, openssl, Git Bash/WSL/Linux.
+### 학습자: 미션부터 결과까지
 
-```bash
-git clone -b portfolio/seniosk-v2 https://github.com/ElephantAnthony/kiosk-web.git
-cd kiosk-web/v2
-cp .env.example .env
-# .env의 DB_PASSWORD에 로컬 개발용 비밀번호를 설정
-# 관리자 화면 사용 시 ADMIN_USERNAME과 ADMIN_PASSWORD도 직접 설정 (16자 이상, UTF-8 72바이트 이하)
-docker compose up --build -d --wait
-```
+보람 카페에서는 음료와 간식, 도란 버거에서는 버거 등 서로 다른 메뉴를 동일한 렌더러에서 선택합니다. 필수 옵션, 수량, 매장 이용 또는 포장 여부와 모의 결제 수단을 선택하고 주문을 제출합니다.
 
-- React: http://localhost:5173
-- 관리자: http://localhost:5173/admin (설정된 관리자 인증정보 필요)
-- Spring Boot: http://localhost:8080/healthz
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- 종료: `docker compose down` (기존 볼륨은 보존)
+![실제 메뉴 선택 화면](docs/evidence/images/kiosk-menu.jpg)
 
-서비스는 로컬 루프백 인터페이스에 바인딩합니다. 실제 사용자나 결제정보는 입력하지 않습니다. 운영 배포는 현재 범위가 아닙니다.
+위 화면은 실제 Chromium에서 캡처했습니다. [출처 및 무결성 증빙](docs/evidence/runs/SEN-04-pass-45775831858.md)
 
-## 3. 구현된 기능
+<!-- RELEASE_GALLERY -->
 
-### 시나리오 계약
+- 서버가 정한 미션 안내, 도움말, 뒤로 가기와 장바구니 수정
+- 필수 옵션 검증, 빈 장바구니 결제 차단
+- 서버 결과가 도착한 후에만 완료 처리
+- 응답 유실 시 동일 주문으로 재시도, 서버 확인 후 취소
+- 키보드 조작, 고대비 전환, 포커스 표시와 큰 버튼
 
-가상의 **보람 카페** 시나리오에 음료, 간식, 가격, 옵션 그룹, 포장 및 결제 선택, 미션을 JSON으로 정의했습니다. Java의 networknt와 TypeScript의 Ajv가 동일한 JSON Schema Draft 2020-12 파일을 사용합니다. 서버는 메뉴 참조, 옵션 그룹 선택 및 식별자 중복도 검증합니다.
+### 관리자: 실제 PostgreSQL 학습 분석
 
-[공통 JSON Schema](v2/contracts/scenario.schema.json) / [카페 데이터](v2/contracts/scenarios/boram-cafe.v1.json)
+![실제 관리자 대시보드](docs/evidence/images/admin-dashboard.jpg)
 
-### 학습 세션 및 미션
+Playwright에서 합성 연습 세션으로 실행한 실제 관리자 화면입니다. 실사용자 통계가 아닙니다. [검증 근거](docs/evidence/runs/SEN-06-pass-45920332880.md)
 
-- 시나리오 ID와 버전으로 학습 세션을 시작합니다.
-- 서버가 미션과 시작 시각을 생성합니다.
-- 시나리오 버전과 미션의 기대 주문이 PostgreSQL에 저장됩니다.
-- 세션 생성 및 미션 저장이 하나의 트랜잭션에서 처리됩니다.
-- CSRF 검증 및 서버의 소유자 식별 조건으로 교차 조회를 차단합니다.
+관리자 로그인 후 날짜 및 시나리오를 필터링하여 전체, 완료, 취소, 활성, 이탈 추정 세션 수와 성공률, 평균 정확도, 서버 경과 시간, 도움말 사용을 확인합니다. 단계별 퍼널은 중복 이벤트를 제외한 세션 단위 관측값입니다. 30분 기준 이탈 추정은 실제 포기 여부를 확정하지 않습니다. 빈 분모는 비율을 계산하지 않습니다.
 
-이는 익명 브라우저 세션 격리입니다. 회원가입 또는 다중 서버 세션 공유를 구현했다는 의미가 아닙니다. 관리자 권한은 별도 보안 컨텍스트에서 관리합니다.
+[집계 정의와 분모](docs/design/FUNNEL.md) / [인증 및 집계 ADR](docs/adr/006-admin-and-funnel.md)
 
-### 서버 채점과 주문 완료
-
-미션에 필요한 주문을 정답으로 저장하고 제출 주문을 메뉴 ID, 정렬된 옵션, 포장 여부로 정규화합니다. 일치, 누락, 초과 수량을 각각 계산합니다.
-
-| 주문 예시 (정답: 차가운 아메리카노 2잔 포장) | 일치 | 누락 | 초과 | 정확도 |
-|---|---:|---:|---:|---:|
-| 정확한 주문 2잔 | 2 | 0 | 0 | 100% |
-| 1잔만 주문 | 1 | 1 | 0 | 50% |
-| 3잔 주문 | 2 | 0 | 1 | 66.67% |
-| 다른 온도로 2잔 | 0 | 2 | 2 | 0% |
-
-정확도 = matched / (matched + missing + extra), 소수점 6자리 반올림. 주문이 완전히 맞고 모의 결제 수단도 일치할 때만 미션 성공입니다. 실제 결제를 하지 않습니다.
+## 4. 시스템 설계
 
 ```mermaid
-sequenceDiagram
-    participant A as 요청 A
-    participant B as 동시 요청 B
-    participant S as Spring Service
-    participant DB as PostgreSQL
-    A->>S: 주문 제출
-    S->>DB: 소유자 조건 + FOR UPDATE
-    B->>S: 같은 세션 제출
-    S->>DB: 상태 완료 및 결과 1행 저장
-    DB-->>S: COMMIT
-    S-->>A: 200 저장된 결과
-    S->>DB: 후속 요청 비교
-    alt 동일 주문, 결제 및 활동 시간
-        S-->>B: 200 기존 결과
-    else 다른 제출
-        S-->>B: 409 충돌
-    end
+flowchart LR
+    B[학습자 브라우저] --> F[React / XState]
+    A[관리자 브라우저] --> U[React 관리자 UI]
+    F --> I[(IndexedDB Outbox)]
+    F -->|HTTP / CSRF| S[Spring MVC + Security]
+    I -->|Batch / ACK| S
+    U -->|관리자 권한| S
+    S --> D[Scenario / Session / Grading / Event / Admin]
+    D --> J[Spring JDBC]
+    J --> P[(PostgreSQL 16)]
+    M[Flyway] --> P
+    C[공통 JSON Schema] --> F
+    C --> D
+    S --> O[Springdoc OpenAPI]
 ```
 
-행 잠금, 유일 제약 및 트랜잭션으로 상태와 결과의 정합성을 보호합니다. 클라이언트의 점수는 받지 않으며 서버에서 생성한 미션 스냅샷으로 채점합니다. 서버 경과 시간과 클라이언트 보고 활동 시간은 각각 저장합니다. 서버 경과 시간에는 대기 및 통신 시간이 포함되고 클라이언트 활동 시간은 신뢰 가능한 독립 측정치가 아닙니다.
+| 계층 | 기술 | 선택 이유 |
+|---|---|---|
+| Frontend | React 19, TypeScript, Vite, XState 5 | 명시적인 화면 상태와 타입 기반 데이터 처리 |
+| Backend | Java 21, Spring Boot 3.5.16, MVC, Security, JDBC | 모듈 단위 분리, 트랜잭션과 행 잠금의 직접 제어 |
+| Database | PostgreSQL 16, Flyway | JSONB, 유일 제약조건, 스키마 버전 관리 |
+| Contract | JSON Schema 2020-12, Ajv, networknt, OpenAPI 3.1 | 서버와 브라우저의 공통 데이터 검증 |
+| Test | JUnit, MockMvc, Vitest, Playwright, axe-core | 실제 DB 및 브라우저 회귀 검증 |
+| DevOps | Docker Compose, GitHub Actions, Gitleaks | 재현 가능한 실행 및 자동 검증 |
 
-[채점 설계 ADR](docs/adr/003-grading-and-idempotency.md)
+외부 AI 호출, 실결제 시스템, 추가 메시지 브로커나 유료 인프라는 사용하지 않습니다.
 
-### 실제 키오스크 주문 화면
+### 데이터베이스 ERD
 
-![실제 보람 카페 메뉴 화면](docs/evidence/images/kiosk-menu.jpg)
+```mermaid
+erDiagram
+    SCENARIO_VERSION ||--o{ TRAINING_SESSION : references
+    TRAINING_SESSION ||--|| MISSION : assigns
+    TRAINING_SESSION ||--o| MISSION_RESULT : grades
+    TRAINING_SESSION ||--o{ TRAINING_EVENT : records
+    SCENARIO_VERSION ||--o{ TRAINING_EVENT : references
+    SCENARIO_VERSION {
+      varchar scenario_id PK
+      integer version PK
+      jsonb definition
+    }
+    TRAINING_SESSION {
+      uuid id PK
+      uuid owner_id
+      varchar scenario_id FK
+      integer scenario_version FK
+      varchar status
+      timestamptz started_at
+    }
+    MISSION {
+      uuid id PK
+      uuid session_id FK
+      jsonb expected_order
+      varchar expected_payment
+    }
+    MISSION_RESULT {
+      uuid session_id PK
+      numeric accuracy
+      boolean correct
+      bigint server_elapsed_ms
+      bigint client_active_ms
+    }
+    TRAINING_EVENT {
+      uuid event_id PK
+      uuid session_id FK
+      integer sequence
+      jsonb body
+      timestamptz received_at
+    }
+```
 
-Playwright가 CI 45775831858에서 직접 캡처한 화면입니다. [검증 근거](docs/evidence/runs/SEN-04-pass-45775831858.md)
+미션과 결과는 세션당 최대 1행, 이벤트는 event_id 및 (session_id, sequence) 유일 제약조건을 가집니다. V4는 시작 시각 및 시나리오 집계용 인덱스를 추가합니다. [전체 ERD와 제약조건](docs/design/ERD.md)
 
-
-메뉴와 옵션은 매장별 JSON으로 구성합니다. 보람 카페와 도란 버거는 서로 다른 메뉴, 옵션, 미션을 하나의 상태 머신과 화면에서 처리합니다. 두 번째 매장 추가 커밋 [f4668ee](https://github.com/ElephantAnthony/kiosk-web/commit/f4668ee64cfe573e6bc14b4661f7786f0b9914ec)은 JSON 1개, 101줄만 추가했고 렌더러와 상태 머신 변경은 0줄입니다.
+### 상태 머신
 
 ```mermaid
 stateDiagram-v2
@@ -117,270 +151,193 @@ stateDiagram-v2
     COMPLETE --> START: 다시 연습
 ```
 
-- 필수 옵션 선택, 포장 여부, 수량, 장바구니 수정, 모의 결제
-- 도움말, 키보드 탐색, 포커스 표시, 고대비 모드, 최소 48 CSS px 버튼
-- 서버 결과를 받기 전 완료 처리 금지, 재전송 데이터 고정, 서버 취소 확인 후 초기화
+위 다이어그램은 정상 주문 및 재시도 핵심 경로입니다. 실제 취소, 도움말, 뒤로 가기와 오류 전이는 [전체 상태 머신](docs/design/KIOSK_FLOW.md)을 참고하세요.
 
-[상태 머신 전체 설계](docs/design/KIOSK_FLOW.md) / [기술 결정](docs/adr/004-kiosk-state-machine.md) / [도란 버거 fixture](v2/contracts/scenarios/doran-burger.v1.json)
+## 5. 기술적 문제 해결
 
-### 오프라인 행동 기록
+### 5-1. 동시 요청에도 동일한 결과 유지
 
-사용자가 수행한 메뉴 선택, 도움말, 상태 이동 등의 허용된 행동을 이벤트로 기록합니다. IndexedDB 트랜잭션에서 고유 ID와 세션별 순번을 저장하고 20개 또는 5초 기준으로 전송합니다. 서버는 PostgreSQL에 배치 단위로 저장한 뒤 ACK를 반환하며 동일 이벤트 재전송은 새로운 행을 만들지 않도록 설계했습니다. ACK가 없거나 잘못된 경우 기존 데이터를 보존합니다.
+메뉴 ID, 정렬된 옵션, 포장 여부를 복합 키로 만들고 동일 키의 수량을 합산합니다. 서버에 저장된 미션과 주문을 비교하여 일치, 누락, 초과 수량을 구합니다.
 
-```mermaid
-flowchart LR
-    X[XState 행동] --> T[track]
-    T --> I[(IndexedDB)]
-    I -->|20개 / 5초| S[Spring Event API]
-    S --> P[(PostgreSQL)]
-    P -->|COMMIT| S
-    S -->|ACK 검증 후 삭제| I
-```
+정확도 = matched / (matched + missing + extra). 정답은 누락과 초과가 모두 0이고 모의 결제 수단까지 같을 때입니다.
 
-통신 장애, 응답 유실 및 429 Retry-After 처리를 구현했습니다. 기기 저장소 삭제, 세션 만료, 저장 트랜잭션 완료 전 종료까지 보장하지 않으며 pagehide 전송은 최선형 방식입니다. 실제 개인정보와 결제 정보는 수집하지 않습니다. 실제 브라우저에서 오프라인 상태로 생성한 이벤트 8개를 새로고침 이후 복구하고 서버 ACK 유실 뒤 동일 ID로 재전송한 뒤 Outbox가 비워지는 것을 확인했습니다. 429 응답은 테스트에서 주입했으며 서버 자체의 rate limiter를 구현한 것은 아닙니다.
-
-[이벤트 계약](v2/contracts/event.schema.json) / [이벤트 아키텍처](docs/design/EVENT_PIPELINE.md) / [기술 결정](docs/adr/005-durable-event-outbox.md)
-
-### 관리자 학습 분석
-
-관리자는 Spring Security의 별도 보안 컨텍스트를 통해 로그인하고 PostgreSQL에서 실제 연습 데이터를 집계합니다. 환경변수에 유효한 관리자 인증정보가 없으면 로그인할 수 없습니다. 비밀번호는 시작 시 BCrypt로 해싱하며 저장소에 기록하지 않습니다. 학습자 소유권과 관리자 역할을 분리했습니다.
-
-- 세션 완료, 취소, 활성, 이탈 추정과 성공률, 평균 정확도, 서버 경과 시간, 도움말 사용
-- 시나리오 및 UTC 시작일 기준 필터, 종료일 제외, 최대 366일
-- 누적 관측 단계별 도달 및 미도달 세션, 이전 단계 대비 전환율
-- 실제 결과가 없는 경우 비율과 평균을 계산하지 않으며 허위 샘플 통계를 표시하지 않음
-
-30분간 서버 수신 기록이 없는 활성 세션을 이탈 추정으로 집계합니다. 이는 실제 이탈 확정이 아니며 늦게 수신된 이벤트에 따라 바뀔 수 있습니다. 서버 완료와 이벤트로 관측한 퍼널 마지막 단계는 구분합니다. [정확한 지표 정의](docs/design/FUNNEL.md) / [관리자 설계 ADR](docs/adr/006-admin-and-funnel.md)
-
-## 4. 아키텍처
+| 정답: 차가운 아메리카노 2잔 포장 | 일치 | 누락 | 초과 | 정확도 |
+|---|---:|---:|---:|---:|
+| 정확한 주문 | 2 | 0 | 0 | 100% |
+| 1잔만 주문 | 1 | 1 | 0 | 50% |
+| 3잔 주문 | 2 | 0 | 1 | 66.67% |
+| 다른 온도로 주문 | 0 | 2 | 2 | 0% |
 
 ```mermaid
-flowchart LR
-    B[Browser] --> F[React / TypeScript / XState]
-    F -->|Vite Proxy / HTTP| C[Spring MVC + Security]
-    C --> S[Scenario / Session / Grading / Event / Admin Service]
-    S --> R[Spring JDBC Repository]
-    R --> P[(PostgreSQL)]
-    F --> I[(IndexedDB Outbox)]
-    I --> C
-    J[Shared JSON Schema] --> F
-    J --> S
-    M[Flyway] --> P
-    C --> O[Springdoc OpenAPI]
+sequenceDiagram
+    participant B as 브라우저
+    participant S as 채점 Service
+    participant P as PostgreSQL
+    B->>S: 주문 제출
+    S->>P: 소유자 조건 + FOR UPDATE
+    S->>P: 결과 및 완료 상태 저장
+    P-->>S: COMMIT
+    S--xB: 응답 유실
+    B->>S: 동일 제출 데이터 재전송
+    S->>P: 잠금 후 기존 결과 비교
+    alt 동일 제출
+      S-->>B: 200 기존 결과
+    else 다른 제출
+      S-->>B: 409
+    end
 ```
 
-| 계층 | 기술 |
-|---|---|
-| Frontend | React 19, TypeScript, Vite, XState 5, Ajv 8.17.1 |
-| Backend | Java 21, Spring Boot 3.5.16, Spring MVC, Security, JDBC |
-| Contract | JSON Schema Draft 2020-12, networknt 1.5.9, OpenAPI 3.1 |
-| Database | PostgreSQL 16, Flyway |
-| Test | JUnit, MockMvc, Vitest, Playwright, axe-core |
-| DevOps | Docker Compose, GitHub Actions, Gitleaks, npm lockfile |
+서버 경과 시간과 브라우저가 보고하는 활동 시간은 분리하여 저장합니다. [채점 ADR](docs/adr/003-grading-and-idempotency.md)
 
-XState 5를 주문 상태 머신에 사용합니다. 외부 AI 호출이나 유료 인프라에 의존하지 않습니다.
+### 5-2. 매장이 달라도 동일한 주문 엔진
 
-## 5. 데이터베이스 설계
+시나리오를 JSON 계약으로 분리하고 백엔드와 프론트엔드가 같은 스키마를 사용합니다. 두 번째 매장 추가 [커밋 f4668ee](https://github.com/ElephantAnthony/kiosk-web/commit/f4668ee64cfe573e6bc14b4661f7786f0b9914ec)은 JSON 파일 1개만 추가했습니다. 렌더러와 상태 머신 변경은 0줄이며 실제 브라우저에서 두 매장의 정상 주문을 검증했습니다.
+
+[시나리오 계약](v2/contracts/scenario.schema.json) / [보람 카페](v2/contracts/scenarios/boram-cafe.v1.json) / [도란 버거](v2/contracts/scenarios/doran-burger.v1.json)
+
+### 5-3. 오프라인 저장 및 ACK 유실 복구
 
 ```mermaid
-erDiagram
-    SCENARIO_VERSION ||--o{ TRAINING_SESSION : references
-    TRAINING_SESSION ||--|| MISSION : has
-    TRAINING_SESSION ||--o| MISSION_RESULT : yields
-    TRAINING_SESSION ||--o{ TRAINING_EVENT : records
-    SCENARIO_VERSION ||--o{ TRAINING_EVENT : identifies
-    SCENARIO_VERSION {
-        varchar scenario_id PK
-        integer version PK
-        jsonb definition
-    }
-    TRAINING_SESSION {
-        uuid id PK
-        uuid owner_id
-        varchar scenario_id FK
-        integer scenario_version FK
-        varchar ui_variant
-        varchar status
-        timestamptz started_at
-    }
-    MISSION {
-        uuid id PK
-        uuid session_id FK,UK
-        varchar template_id
-        varchar instruction
-        jsonb expected_order
-        varchar expected_payment
-    }
-    MISSION_RESULT {
-        uuid session_id PK,FK
-        jsonb actual_order
-        varchar actual_payment
-        integer matched
-        integer missing
-        integer extra
-        numeric accuracy
-        boolean payment_matched
-        boolean correct
-        bigint server_elapsed_ms
-        bigint client_active_ms
-        timestamptz completed_at
-    }
-    TRAINING_EVENT {
-        uuid event_id PK
-        uuid session_id FK
-        integer sequence
-        varchar event_type
-        varchar scenario_id FK
-        integer scenario_version FK
-        varchar ui_variant
-        timestamptz client_timestamp
-        timestamptz received_at
-        jsonb body
-    }
+sequenceDiagram
+    participant K as XState
+    participant I as IndexedDB
+    participant S as Event API
+    participant P as PostgreSQL
+    K->>I: UUID 및 순번을 트랜잭션으로 저장
+    Note over I: 오프라인 또는 새로고침 후 유지
+    I->>S: 온라인 복구, 최대 20개 배치
+    S->>P: 유일 제약과 동일 내용 검사
+    P-->>S: COMMIT
+    S--xI: ACK 유실
+    I->>S: 같은 이벤트 ID로 재전송
+    S->>P: 동일 내용 확인, 새 행 없음
+    S-->>I: 전체 ACK
+    I->>I: ACK 검증 후 삭제
 ```
 
-[ERD 상세 설명](docs/design/ERD.md) / [Flyway V1 SQL](v2/backend/src/main/resources/db/migration/V1__training_domain.sql) / [Flyway V2 SQL](v2/backend/src/main/resources/db/migration/V2__mission_result.sql) / [Flyway V3 SQL](v2/backend/src/main/resources/db/migration/V3__training_event.sql)
+5초 또는 20개 기준 배치, 지수 백오프와 jitter, HTTP 429 Retry-After를 적용합니다. 동일 ID의 다른 내용은 409로 거부하며 전체 배치를 롤백합니다. 실제 Chromium에서 오프라인 이벤트 8개 복구 및 ACK 유실을 검증했습니다. 429는 테스트에서 주입한 응답입니다. [이벤트 설계](docs/design/EVENT_PIPELINE.md)
 
-## 6. REST API
+### 5-4. 신뢰 가능한 집계와 접근 권한
 
-| Method | Endpoint | 기능 |
-|---|---|---|
-| GET | /healthz | DB 연결 상태 확인 |
-| GET | /api/scenarios | 시나리오 목록 |
-| GET | /api/scenarios/{scenarioId}/{version} | 시나리오 버전 조회 |
-| GET | /api/csrf | 세션 기반 CSRF 토큰 |
-| POST | /api/sessions | 학습 세션과 미션 생성 |
-| GET | /api/sessions/{id} | 소유한 세션 조회 |
-| POST | /api/sessions/{id}/submit | 모의 주문 채점 및 완료 |
-| GET | /api/sessions/{id}/result | 저장된 학습 결과 조회 |
-| POST | /api/sessions/{id}/cancel | 연습 취소 및 상태 보호 |
-| POST | /api/sessions/{id}/events | 이벤트 배치 수집 및 ACK |
+관리자용 Spring Security 컨텍스트를 학습자 소유권과 분리합니다. 환경변수로 유효한 계정이 설정되지 않으면 관리자 로그인이 비활성화됩니다. 비밀번호는 시작 시 BCrypt로 해싱하고 로그인 시 세션 ID와 CSRF 토큰을 변경합니다.
 
-PowerShell에서 가상 세션 생성 예시:
+집계는 이벤트를 세션별 한 행으로 먼저 축약한 뒤 서버 채점 결과와 결합합니다. 합성 5개 세션의 전체/완료/취소/활성/이탈 추정 = 5/2/1/1/1, 관측 퍼널 = 5/5/4/2/1/1로 검증했습니다. 실제 EXPLAIN에서 날짜 범위, 결과 PK, 세션별 이벤트 인덱스 사용을 확인했습니다. 이는 운영 성능 측정이 아닙니다.
+
+[집계 테스트 및 EXPLAIN](docs/evidence/runs/SEN-06-backend-45919907679.md)
+
+## 6. 실행 방법
+
+Docker Desktop 또는 Docker Engine과 Compose v2를 준비합니다. Windows PowerShell:
 
 ```powershell
-$base = 'http://localhost:5173'
-$csrf = Invoke-RestMethod "$base/api/csrf" -SessionVariable web
-$body = @{scenarioId='boram-cafe'; version=1; uiVariant='standard'} | ConvertTo-Json
-$result = Invoke-RestMethod "$base/api/sessions" -Method Post -WebSession $web -Headers @{'X-CSRF-TOKEN'=$csrf.token} -ContentType 'application/json' -Body $body
-Invoke-RestMethod "$base/api/sessions/$($result.id)" -WebSession $web
-$order = @{order=@(@{menuId="americano";optionIds=@("ice");packing="TAKE_OUT";quantity=2});payment="CARD";clientActiveMs=1000} | ConvertTo-Json -Depth 5
-Invoke-RestMethod "$base/api/sessions/$($result.id)/submit" -Method Post -WebSession $web -Headers @{'X-CSRF-TOKEN'=$csrf.token} -ContentType 'application/json' -Body $order
-Invoke-RestMethod "$base/api/sessions/$($result.id)/result" -WebSession $web
+git clone -b portfolio/seniosk-v2 https://github.com/ElephantAnthony/kiosk-web.git
+cd kiosk-web/v2
+Copy-Item .env.example .env
+notepad .env
+docker compose up --build -d --wait
 ```
 
-[생성된 OpenAPI 3.1](v2/contracts/openapi.json) / [API 설명](docs/design/API.md)
+.env에서 DB_PASSWORD를 직접 설정하세요. 관리자를 사용하려면 ADMIN_USERNAME과 ADMIN_PASSWORD도 설정합니다. 관리자 비밀번호는 최소 16자, UTF-8 최대 72바이트입니다. 비밀번호는 Git에 커밋하지 않습니다.
 
-## 7. 프로젝트 구조
+| 주소 | 기능 |
+|---|---|
+| http://localhost:5173 | 학습자 화면 |
+| http://localhost:5173/admin | 관리자 화면 |
+| http://localhost:8080/healthz | DB 연결 상태 |
+| http://localhost:8080/swagger-ui.html | API 문서 |
+
+종료는 v2에서 `docker compose down`을 실행합니다. 기존 데이터 볼륨은 유지됩니다. `down -v`는 데이터 삭제이므로 일반 종료에 사용하지 않습니다. 모든 포트는 루프백에 바인딩하는 로컬 데모입니다.
+
+[상세 실행 및 장애 확인](docs/release/RUNBOOK.md)
+
+## 7. 검증 결과
+
+[관리자 완료 CI 45920332880](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45920332880): 전체 5개 Job 성공.
+
+| 검증 | 관측 결과 |
+|---|---|
+| JUnit 단위 | 22개 통과 |
+| 실제 PostgreSQL 통합 | 26개 통과 |
+| Vitest | 23개 통과 |
+| Chromium Playwright | 10개 통과 |
+| 기존 Django 결함 재현 | 1개 통과 |
+| OpenAPI 실제 재생성 diff | 일치 |
+| Compose 전체 기동 및 health | 통과 |
+| ESLint, typecheck, build | 통과 |
+| Gitleaks | 236개 커밋 검사, 미분류 탐지 0건 |
+
+테스트 합계 82개(브라우저, V1 포함). 자동 접근성 검사는 검사한 화면에서 serious/critical 위반 0건을 요구합니다. 전체 WCAG 인증이나 실제 사용자 개선 효과를 의미하지 않습니다. [최종 관리자 검증](docs/evidence/runs/SEN-06-pass-45920332880.md)
+
+최종 시연 및 추가 접근성 검사 CI: [45922321237](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45922321237), 결과 확인 전.
+
+소스 전체 검증은 Java 21, Maven, Node 22.16, npm 11.21.2, Docker, openssl 및 Git Bash/WSL/Linux 환경에서 저장소 루트 기준 `bash v2/scripts/verify`를 실행합니다. 관리자 환경변수도 셸에 설정해야 합니다. [검증 체크리스트](docs/release/CHECKLIST.md)
+
+## 8. API 및 프로젝트 구조
+
+| HTTP | Endpoint | 기능 |
+|---|---|---|
+| GET | /healthz | DB 연결 |
+| GET | /api/scenarios, /api/scenarios/{scenarioId}/{version} | 시나리오 조회 |
+| GET | /api/csrf | 세션 기반 CSRF |
+| POST | /api/sessions | 미션과 학습 세션 생성 |
+| GET | /api/sessions/{id} | 소유 세션 조회 |
+| POST | /api/sessions/{id}/submit | 주문 제출 및 채점 |
+| GET | /api/sessions/{id}/result | 결과 조회 |
+| POST | /api/sessions/{id}/cancel | 취소 |
+| POST | /api/sessions/{id}/events | 이벤트 배치 수집 |
+| POST | /api/admin/login | 관리자 로그인 |
+| GET | /api/admin/me | 인증 상태 |
+| GET | /api/admin/funnel | 집계 조회 |
+| POST | /api/admin/logout | 로그아웃 |
+
+[실제 생성 OpenAPI](v2/contracts/openapi.json) / [API 계약 설명](docs/design/API.md)
 
 ```text
 .
 ├── AGENTS.md
 ├── docs/
-│   ├── adr/          # 기술 결정
-│   ├── decisions/    # 승인된 범위
-│   ├── design/       # ERD, API
-│   ├── evidence/     # 실제 검증 결과
-│   ├── learning/     # 학습 및 면접 대비
-│   ├── prompts/      # 작업 단위 프롬프트
-│   └── PLAN.md
+│   ├── adr/           기술 결정
+│   ├── design/        ERD, API, 상태 머신, 이벤트 및 퍼널
+│   ├── evidence/      테스트 증빙, 실제 화면
+│   ├── learning/      기술 학습
+│   ├── prompts/       작업별 수용 기준
+│   ├── release/       릴리스 및 운영 가이드
+│   └── troubleshooting/
 ├── v2/
-│   ├── backend/
-│   │   └── src/main/java/com/seniosk/
-│   │       ├── common/
-│   │       ├── config/
-│   │       ├── health/
-│   │       ├── scenario/
-│   │       ├── session/
-│   │       ├── mission/
-│   │       ├── grading/
-│   │       ├── event/
-│   │       └── admin/
-│   ├── contracts/    # JSON Schema, fixture, OpenAPI
-│   ├── frontend/
-│   │   ├── src/api/
-│   │   ├── src/scenario/
-│   │   ├── src/kiosk/
-│   │   ├── src/analytics-sdk/
-│   │   ├── src/admin/
-│   │   └── e2e/
-│   ├── scripts/verify
+│   ├── backend/       Spring MVC, Service, JDBC Repository, Flyway
+│   ├── contracts/     JSON Schema, 시나리오, OpenAPI
+│   ├── frontend/      React, XState, IndexedDB SDK, E2E
+│   ├── scripts/
 │   └── docker-compose.yml
-└── 기존 V1 Django 코드 (보존)
+└── V1 Django 애플리케이션 소스 (보존)
 ```
 
-## 8. 실제 검증 결과
+## 9. 개발 이력과 하네스 엔지니어링
 
-| 검증 | 증빙 |
+| 단계 | 작업 |
 |---|---|
-| 기존 결함 재현 | Django test client 2개, characterization test 1개 PASS |
-| 개발 환경 | [CI 45771026505](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45771026505), 5개 Job PASS |
-| 초기 화면 브라우저 및 접근성 | Chromium 1개 테스트 PASS, axe serious/critical 위반 0건 |
-| 도메인 Java 테스트 | [CI 45772148779](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45772148779), 단위 8개 + PostgreSQL 통합 5개 PASS |
-| 프론트엔드 계약 테스트 | Vitest 8개 PASS, lint/typecheck/build PASS |
-| 보안 검사 | 206개 커밋 검사, 검증된 과거 오탐 6개 외 미분류 탐지 0건 |
-| OpenAPI | CI 생성본 SHA-256 확인, 커밋 및 strict diff 통과 |
-| 도메인 프록시 E2E | 통과 (JSON import 수정 후) |
+| 00~01 | 기존 결함 분석, 저장소 정리, Spring/React 실행 기반 |
+| 02 | 공통 계약, 시나리오, 학습 세션 |
+| 03 | 서버 채점, 결과 저장, 동시성 |
+| 04 | 키오스크 화면과 상태 머신, 두 번째 매장 |
+| 05 | 영속 이벤트 Outbox 및 멱등 수집 |
+| 06 | 관리자 인증과 행동 분석 |
+| 07 | 최종 검증과 실제 시연 자료, 문서 정리 |
 
-[초기 화면 실제 브라우저 보고서](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45771026505/artifacts/15094117044) / [도메인 검증 기록](docs/evidence/runs/SEN-02-domain-45772148779.md)
+수용 기준을 프롬프트로 기록하고, 기능별 소스 변경과 테스트 실패/수정/재검증을 Git 커밋으로 보존합니다. AI 지원을 활용한 리엔지니어링이며 개인의 구현 이해도와 실제 기여 범위는 별도 확인이 필요합니다.
 
-브라우저 접근성 테스트는 초기 화면의 일부 자동 기준만 검증하며 WCAG 준수 인증을 의미하지 않습니다. 사용성 개선률과 운영 성능 수치는 실제 측정하지 않았습니다.
+[작업 규칙](AGENTS.md) / [진행 계획](docs/PLAN.md) / [전체 기술 문서](docs/index.md) / [검증 증빙](docs/evidence/INDEX.md) / [트러블슈팅](docs/release/TROUBLESHOOTING.md) / [면접 학습](docs/learning/phase-7.md) / [커밋 기록](https://github.com/ElephantAnthony/kiosk-web/commits/portfolio/seniosk-v2/)
 
-전체 로컬 검증은 저장소 루트에서 `bash v2/scripts/verify`로 실행합니다. 통합 테스트는 별도의 임시 PostgreSQL 컨테이너를 사용해 로컬 개발 데이터와 분리합니다.
+## 10. 한계 및 후속 과제
 
-## 9. 하네스 엔지니어링
+- 실제 학습자 대상으로 사용성, 학습 향상률, 접근성을 검증하지 않았습니다.
+- 운영 배포, TLS 운영 설정, 다중 서버 세션, MFA, 관리자 계정 수명주기 및 로그인 rate limit은 구현하지 않았습니다.
+- 네트워크 장애 복구는 테스트한 범위에서 확인했습니다. 저장소 삭제, 세션 만료, 브라우저 강제 종료 전 미완료 트랜잭션까지 보장하지 않습니다.
+- 새로고침 시 장바구니 복구는 미구현이고 세션 시작 응답 유실 시 고립된 활성 세션이 생길 수 있습니다.
+- pagehide 전송은 최선형 방식이며 독립된 종료 상황 시험은 미실행입니다.
+- 30분 이탈 추정과 행동 이벤트는 실제 포기나 학습 효과의 증거가 아닙니다.
+- 대량 성능, 부하, 침투 및 의존성 취약점 전수 검사는 미실행입니다. Gitleaks는 비밀정보 탐지 검사입니다.
 
-- [AGENTS.md](AGENTS.md): 작업 규칙, 정지 조건, 검증 명령
-- [작업 계획 및 재개](docs/PLAN.md): 실제 완료 상태와 다음 작업
-- [작업 프롬프트](docs/prompts/SEN-02.md): 수용 기준
-- [기술 결정](docs/adr/002-scenario-session-contract.md): 기술 선택과 대안
-- [증빙 색인](docs/evidence/INDEX.md): 성공 및 실패 기록
-- [학습 노트](docs/learning/phase-2.md): 구현 원리 및 면접 질문
+[보안 및 한계 상세](docs/release/SECURITY.md) / [릴리스 검토](docs/release/REVIEW.md)
 
-## 10. 다음 개발 단계
-
-관리자 분석 통합 검증 후 최종 릴리스 검증과 포트폴리오를 정리합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
-
-최신 검증: [CI 45772447666](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45772447666). OpenAPI 재생성 및 byte-for-byte diff 통과. 백엔드, 프론트엔드, V1, 보안 검사 통과. 이 실행은 JSON import 오류로 브라우저 검사 실패. 후속 CI 45773007930에서 5개 Job 모두 통과. [실행 증빙](docs/evidence/runs/SEN-02-strict-45772447666.md)
-
-
-SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 검증과 OpenAPI 재생성은 진행 중입니다. 기존 시나리오 API 전체 검증은 [CI 45773007930](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773007930)에서 통과했습니다.
-
-
-### 채점 검증
-[CI 45773475536](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773475536): Java 단위 19개, 실제 PostgreSQL 통합 15개 통과. Flyway V1/V2 적용, 동시 동일 제출과 충돌 제출, 소유자 격리, 롤백, 미션 스냅샷, 시간 분리 검증 성공. 새 API에 따른 명세 diff 실패를 확인하고 실제 생성본을 커밋했습니다. 프론트 채점 클라이언트와 프록시 검증을 추가했습니다. [증빙](docs/evidence/runs/SEN-03-grading-45773475536.md) / [학습 노트](docs/learning/phase-3.md)
-
-최신 검증 [CI 45773698103](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45773698103): Java 34개, Vitest 12개, V1 테스트 및 Gitleaks 미분류 0건 (211개 커밋), 생성된 OpenAPI 바이트 단위 비교 통과. 전체 5개 Job 통과. [실행 증빙](docs/evidence/runs/SEN-03-pass-45773698103.md)
-
-### 키오스크 개발 검증
-[CI 45774770229](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45774770229): Java 단위 20개 및 PostgreSQL 통합 18개, Vitest 16개, OpenAPI diff, 기존 V1 및 Gitleaks 통과. 후속 CI 45775017053에서 브라우저 테스트 6개 통과, 1개 실패(도란 버거 카테고리 선택자 중복). 보람 카페 주문 성공, 잘못된 주문, 키보드와 고대비, 응답 유실 재시도, 서버 취소 검증을 확인했습니다. 후속 CI 45775831858에서 두 시나리오와 Playwright 7개, 전체 5개 Job이 통과했습니다. 실제 캡처의 SHA-256을 확인해 README에 삽입했습니다. [검증 근거](docs/evidence/runs/SEN-04-kiosk-45774770229.md) / [학습 노트](docs/learning/phase-4.md)
-
-현재 한계: 브라우저 새로고침 후 장바구니 복구는 미구현이며, 세션 발급 응답 자체를 잃으면 활성 세션이 남을 수 있습니다. 활동 시간은 화면 표시 상태 기반 근사값입니다. 실제 이용자 연구와 운영 배포는 수행하지 않았습니다.
-
-[브라우저 검증 결과 및 오류 수정](docs/evidence/runs/SEN-04-browser-45775017053.md) / [재검증 CI](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45775831858)
-
-### 이벤트 검증
-[CI 45776976931](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931): 프론트엔드 Vitest 22개 및 lint/typecheck/build 통과. Java 단위 20개 및 실제 PostgreSQL 통합 22개, Playwright 9개, Gitleaks 미분류 0건 (224개 커밋), 기존 V1 테스트 통과. 신규 API에 따른 OpenAPI diff 실패가 발생해 실제 생성본을 SHA-256으로 검증해 커밋했습니다. 최종 strict CI에서 생성 명세 비교 통과. [학습 노트](docs/learning/phase-5.md)
-
-[이벤트 실제 검증 근거](docs/evidence/runs/SEN-05-event-45776976931.md) / [브라우저 보고서](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45776976931/artifacts/15096611829)
-
-[최종 strict CI 45777346496](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45777346496): Java 42개, Vitest 22개, OpenAPI diff, V1 및 보안 검사 통과. 최종 CI 전체 5개 Job 및 브라우저 테스트 9개 통과. [증빙](docs/evidence/runs/SEN-05-strict-45777346496.md)
-
-[이벤트 단계 최종 검증](docs/evidence/runs/SEN-05-pass-45777346496.md)
-
-### 관리자 검증
-[CI 45919739819](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919739819): 관리자 인증 및 합성 fixture 집계, 브라우저 접근성 테스트를 추가했습니다. 첫 CI에서 프론트엔드 23개 테스트, Java 단위 20개 및 통합 25개 테스트가 통과했고, 퍼널 응답의 예상 수치는 일치했으나 JSONPath 배열 검증 1개가 실패했습니다. 테스트를 수정하고 재검증 중입니다. 로컬 전체 검증 시 ADMIN_USERNAME 및 ADMIN_PASSWORD를 셸 환경변수로도 설정해야 합니다. 관리자 인증은 로컬 데모용이며 MFA, 운영 계정 관리, 로그인 rate limit은 구현하지 않았습니다.
-
-[관리자 초기 검증 및 수정 기록](docs/evidence/runs/SEN-06-initial-45919739819.md) / [재검증 CI 45919907679](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919907679)
-
-[관리자 PostgreSQL 검증 및 EXPLAIN](docs/evidence/runs/SEN-06-backend-45919907679.md): 합성 세션 집계, 관리자 인증 및 권한 분리 검증 통과. Java 단위 22개, 실제 PostgreSQL 통합 26개 통과. Flyway V4와 집계 인덱스 사용을 확인했습니다. 생성된 OpenAPI의 변경을 감지했고 실제 출력의 SHA-256을 검증했습니다. 관리자 브라우저 테스트와 최종 명세 비교는 확인 전입니다.
-
-관리자 화면 첫 브라우저 검증에서 로그인과 실제 집계 API 조회까지 성공했지만 시나리오 선택 필드의 이름 탐색 오류가 발생했습니다. 기존 키오스크 브라우저 테스트 9개는 통과했습니다. 명시적 접근성 라벨과 실제 생성 OpenAPI를 반영하고 재검증합니다.
-
-[관리자 브라우저 검증 기록](docs/evidence/runs/SEN-06-browser-45919907679.md) / [최신 strict CI 45920332880](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45920332880): 실제 생성 OpenAPI 커밋 및 명시적 필터 라벨 수정 완료. 최종 명세 비교, 관리자 전체 브라우저 흐름 및 실제 대시보드 캡처는 검증 결과 확인 전입니다.
-
-### 실제 관리자 화면
-
-![실제 관리자 대시보드](docs/evidence/images/admin-dashboard.jpg)
-
-합성 연습 데이터로 실행한 Playwright 실제 화면입니다. [검증 근거](docs/evidence/runs/SEN-06-pass-45920332880.md)
+문서 구성 참고: [Jumi 캡스톤 프로젝트](https://github.com/kookmin-sw/capstone-2024-24). 기능 설명과 시연 중심의 전달 방식만 참고했으며 소스와 화면은 복제하지 않았습니다.
