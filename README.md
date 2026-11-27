@@ -16,7 +16,7 @@ Java 21 / Spring Boot / PostgreSQL / React / TypeScript
 
 V2는 기존 Django 프로젝트에서 발견된 데이터 공유 결함과 측정의 한계를 Spring Boot 기반 구조로 개선한 리엔지니어링 프로젝트입니다. 새로운 기능의 수보다 재현 가능한 오류 해결과 데이터 정합성에 중점을 둡니다.
 
-> 로컬 실행용 M1 개발 범위입니다. 관리자 기능까지 전체 CI를 통과했으며 최종 시연 캡처와 재검증을 진행 중입니다. 실제 이용자 연구, 운영 배포 및 대량 성능 시험은 수행하지 않았습니다.
+> **로컬 실행용 M1 개발 및 검증 완료.** 전체 CI 5개 Job 및 82개 테스트를 통과했고 실제 브라우저 시연 화면 8개를 확보했습니다. 실제 이용자 연구, 운영 배포 및 대량 성능 시험은 수행하지 않았습니다.
 
 ## 2. 문제 정의 및 개선
 
@@ -40,7 +40,16 @@ V2는 기존 Django 프로젝트에서 발견된 데이터 공유 결함과 측�
 
 위 화면은 실제 Chromium에서 캡처했습니다. [출처 및 무결성 증빙](docs/evidence/runs/SEN-04-pass-45775831858.md)
 
-<!-- RELEASE_GALLERY -->
+<table>
+<tr><th>1. 매장 선택</th><th>2. 미션 안내</th></tr>
+<tr><td><img src="docs/evidence/images/release-start.jpg" alt="실제 매장 선택 화면" width="100%"></td><td><img src="docs/evidence/images/release-mission.jpg" alt="실제 미션 안내 화면" width="100%"></td></tr>
+<tr><th>3. 옵션 선택</th><th>4. 장바구니</th></tr>
+<tr><td><img src="docs/evidence/images/release-option.jpg" alt="실제 주문 옵션 화면" width="100%"></td><td><img src="docs/evidence/images/release-cart.jpg" alt="실제 장바구니 화면" width="100%"></td></tr>
+<tr><th>5. 모의 결제</th><th>6. 서버 채점 결과</th></tr>
+<tr><td><img src="docs/evidence/images/release-payment.jpg" alt="실제 모의 결제 화면" width="100%"></td><td><img src="docs/evidence/images/release-result.jpg" alt="실제 서버 채점 결과" width="100%"></td></tr>
+</table>
+
+같은 보람 카페 주문 흐름에서 실제로 캡처한 화면입니다. [최종 실행 증빙 및 SHA-256](docs/evidence/runs/SEN-07-pass-45922321237.md) / [전체 시연 화면](docs/evidence/images/)
 
 - 서버가 정한 미션 안내, 도움말, 뒤로 가기와 장바구니 수정
 - 필수 옵션 검증, 빈 장바구니 결제 차단
@@ -252,7 +261,7 @@ docker compose up --build -d --wait
 
 ## 7. 검증 결과
 
-[관리자 완료 CI 45920332880](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45920332880): 전체 5개 Job 성공.
+[최종 CI 45922321237](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45922321237): 전체 5개 Job 성공.
 
 | 검증 | 관측 결과 |
 |---|---|
@@ -264,11 +273,11 @@ docker compose up --build -d --wait
 | OpenAPI 실제 재생성 diff | 일치 |
 | Compose 전체 기동 및 health | 통과 |
 | ESLint, typecheck, build | 통과 |
-| Gitleaks | 236개 커밋 검사, 미분류 탐지 0건 |
+| Gitleaks | 239개 커밋 검사, 미분류 탐지 0건 |
 
 테스트 합계 82개(브라우저, V1 포함). 자동 접근성 검사는 검사한 화면에서 serious/critical 위반 0건을 요구합니다. 전체 WCAG 인증이나 실제 사용자 개선 효과를 의미하지 않습니다. [최종 관리자 검증](docs/evidence/runs/SEN-06-pass-45920332880.md)
 
-최종 시연 및 추가 접근성 검사 CI: [45922321237](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45922321237), 결과 확인 전.
+추가 시연 화면 6개에서 자동 접근성 검사와 캡처를 완료했습니다. [최종 검증 및 화면 무결성 증빙](docs/evidence/runs/SEN-07-pass-45922321237.md) / [실제 브라우저 보고서](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45922321237/artifacts/15165086733)
 
 소스 전체 검증은 Java 21, Maven, Node 22.16, npm 11.21.2, Docker, openssl 및 Git Bash/WSL/Linux 환경에서 저장소 루트 기준 `bash v2/scripts/verify`를 실행합니다. 관리자 환경변수도 셸에 설정해야 합니다. [검증 체크리스트](docs/release/CHECKLIST.md)
 

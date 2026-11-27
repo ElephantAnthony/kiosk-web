@@ -22,3 +22,6 @@
 - [Phase 0](learning/phase-0.md), [Phase 1](learning/phase-1.md), [Phase 2](learning/phase-2.md), [Phase 3](learning/phase-3.md), [Phase 4](learning/phase-4.md), [Phase 5](learning/phase-5.md), [Phase 6](learning/phase-6.md), [Phase 7](learning/phase-7.md)
 
 Public technical evidence only. No personal application drafts or claimed individual learning outcomes.
+
+## Final verified checkpoint
+- [M1 final results and screenshot hashes](evidence/runs/SEN-07-pass-45922321237.md)

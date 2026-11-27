@@ -53,3 +53,5 @@
 - [SEN-06 browser repair and strict checkpoint](runs/SEN-06-browser-45919907679.md): 9 prior browser tests passed; admin label timeout repaired, actual OpenAPI committed, strict CI 45920332880 pending final outcome.
 
 - [SEN-06 final gate](runs/SEN-06-pass-45920332880.md): all five jobs pass, 48 Java, 23 Vitest, 10 Chromium; actual admin JPEG verified.
+
+- [SEN-07 final M1 release](runs/SEN-07-pass-45922321237.md): all five jobs green, 82 tests, six additional actual captures with verified digests, total eight images. Final evidence supersedes older pending checkpoints.

@@ -9,4 +9,4 @@ Reviewed existing GradingService, EventService, learner session ownership, Admin
 - Additional capture of start, mission, option, cart, payment and result in existing real cafe flow, each with axe serious/critical check. Existing tests cover keyboard interaction, high contrast and button sizing on selected screens, not a complete manual WCAG conformance audit.
 - No additional runtime libraries, external participant data, bulk benchmark or deployment. Gitleaks is secret scanning, not dependency vulnerability scanning or penetration testing.
 
-Release decision requires all M1 checks, actual screenshots and documentation; pending next CI.
+Release decision requires all M1 checks, actual screenshots and documentation; all five jobs passed in CI 45922321237, including full regression, six extra captures and per-capture axe checks. The admin expiry fix is source-reviewed and regression-tested, not independently exercised by a targeted expiry test.

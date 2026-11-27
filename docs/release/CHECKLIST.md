@@ -1,11 +1,11 @@
 # M1 release gate
 
-Based on [approved decisions](../decisions/REVIEW_DECISIONS_v1.1.md). PASS below refers to observed CI 45920332880 and earlier linked evidence, not unexecuted release changes. Final rerun 45922321237 pending.
+Based on [approved decisions](../decisions/REVIEW_DECISIONS_v1.1.md). PASS below refers to observed final CI 45922321237 and earlier linked evidence.
 
-| Gate | Evidence | Result before final rerun |
+| Gate | Evidence | Result |
 |---|---|---|
 | Legacy shared cart characterization | SEN-01 foundation and latest legacy job | PASS |
-| Hygiene and history scan | SEN-00 hygiene, 236 commits/0 unclassified in SEN-06 | PASS |
+| Hygiene and history scan | SEN-00 hygiene, 239 commits/0 unclassified in SEN-07 | PASS |
 | Compose DB and frontend/backend health | SEN-06 strict CI | PASS |
 | Flyway V1-V4 | SEN-06 PostgreSQL evidence | PASS |
 | Shared scenario and event contracts | Java/Vitest and actual APIs | PASS |
@@ -18,10 +18,10 @@ Based on [approved decisions](../decisions/REVIEW_DECISIONS_v1.1.md). PASS below
 | Selected screen axe, keyboard, high contrast, target sizes | SEN-06 browser | PASS |
 | Generated OpenAPI strict diff | SEN-06 strict backend | PASS |
 | Actual menu/admin image bytes and digests | SEN-04 and SEN-06 gate evidence | PASS |
-| Remaining six actual screen captures and extra axe | CI 45922321237 | PENDING |
-| Final README, docs and release consistency | final tree review | PENDING |
-| Latest application/test CI all five jobs | 45922321237 | PENDING |
+| Remaining six actual screen captures and extra axe | CI 45922321237 | PASS |
+| Final README, docs and release consistency | final tree review | PASS |
+| Latest application/test CI all five jobs | 45922321237 | PASS |
 
 Out of approved scope / NOT_RUN: real learner trial, operational deployment, bulk performance, independent manual WCAG audit, full vulnerability and penetration test. Pagehide termination independently NOT_RUN. Browser cart reload not implemented; telemetry durability is bounded.
 
-See [evidence index](../evidence/INDEX.md) for actual logs and source SHAs. No M1 completion until final required checks and image provenance are verified.
+See [evidence index](../evidence/INDEX.md) for actual logs and source SHAs. M1 local-demo release gate PASS; actual verification and eight captures documented in [SEN-07 final evidence](../evidence/runs/SEN-07-pass-45922321237.md). Not a production-readiness certification.
