@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
@@ -24,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(print=MockMvcPrint.NONE)
 @ActiveProfiles("local")
 class AdminApiIT {
     private static final String USER="fixture-admin";
@@ -61,11 +62,16 @@ class AdminApiIT {
             .andExpect(status().isCreated()).andReturn();
         String owned=mapper.readTree(started.getResponse().getContentAsString()).get("id").asText();
         String before=b.session().getId();
+        var otherStarted=mvc.perform(post("/api/sessions").session(other.session()).header("X-CSRF-TOKEN",other.token()).contentType("application/json")
+            .content("{\"scenarioId\":\"boram-cafe\",\"version\":1,\"uiVariant\":\"standard\"}"))
+            .andExpect(status().isCreated()).andReturn();
+        String otherOwned=mapper.readTree(otherStarted.getResponse().getContentAsString()).get("id").asText();
         var admin=login(b);
         assertNotEquals(before,admin.getId());
         mvc.perform(get("/api/admin/me").session(admin)).andExpect(status().isOk());
         mvc.perform(get("/api/admin/funnel").session(other.session())).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/sessions/"+owned).session(admin)).andExpect(status().isOk());
+        mvc.perform(get("/api/sessions/"+otherOwned).session(admin)).andExpect(status().isNotFound());
         mvc.perform(get("/api/sessions/"+owned).session(other.session())).andExpect(status().isNotFound());
         mvc.perform(post("/api/admin/logout").session(admin).header("X-CSRF-TOKEN",b.token())).andExpect(status().isForbidden());
         var fresh=csrf(admin);
@@ -127,7 +133,12 @@ class AdminApiIT {
             .andExpect(jsonPath("$.metrics.graded").value(2)).andExpect(jsonPath("$.metrics.successRate").value(0.5))
             .andExpect(jsonPath("$.metrics.averageAccuracy").value(0.75)).andExpect(jsonPath("$.metrics.averageElapsedMs").value(2000.0))
             .andExpect(jsonPath("$.metrics.helped").value(1))
-            .andExpect(jsonPath("$.funnel[*].reached").value(List.of(5,5,4,2,1,1)))
+            .andExpect(jsonPath("$.funnel[0].reached").value(5))
+            .andExpect(jsonPath("$.funnel[1].reached").value(5))
+            .andExpect(jsonPath("$.funnel[2].reached").value(4))
+            .andExpect(jsonPath("$.funnel[3].reached").value(2))
+            .andExpect(jsonPath("$.funnel[4].reached").value(1))
+            .andExpect(jsonPath("$.funnel[5].reached").value(1))
             .andExpect(jsonPath("$.funnel[2].notReachedNext").value(2))
             .andExpect(jsonPath("$.scenarios.length()").value(1));
         mvc.perform(get(url).session(admin)).andExpect(status().isOk()).andExpect(jsonPath("$.metrics.total").value(6))
