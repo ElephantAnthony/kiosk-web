@@ -4,7 +4,7 @@ test('yellow cafe shows original product art, paging and category navigation',as
   await page.getByRole('button',{name:/옐로 카페/}).click();
   await page.getByRole('button',{name:'메뉴 선택 시작'}).click();
   await expect(page.locator('.yellow-grid button')).toHaveCount(12);
-  await expect(page.locator('.yellow-grid svg')).toHaveCount(12);
+  await expect(page.locator('.yellow-grid .yellow-art')).toHaveCount(12);
   await expect(page.locator('.yellow-mode .topline')).toBeHidden();
   await expect(page.locator('.yellow-mode .steps')).toBeHidden();
   await expect(page.getByRole('button',{name:'결제하기'})).toBeVisible();
@@ -15,4 +15,31 @@ test('yellow cafe shows original product art, paging and category navigation',as
   await page.getByRole('group',{name:'메뉴 카테고리'}).getByRole('button',{name:'커피',exact:true}).click();
   await expect(page.getByRole('button',{name:/아메리카노 \(ICE\)/})).toBeVisible();
   await expect(page.getByRole('button',{name:'이전 메뉴 페이지'})).toBeDisabled();
+});
+
+test('yellow checkout stages and receipt use server grading',async({page})=>{
+  await page.setViewportSize({width:800,height:1400});
+  await page.goto('/');
+  await page.getByRole('button',{name:/옐로 카페/}).click();
+  await page.getByRole('button',{name:'메뉴 선택 시작'}).click();
+  const capture=async(name:string)=>{const path=test.info().outputPath(name+'.jpg');await page.screenshot({path,type:'jpeg',quality:85,fullPage:true});await test.info().attach(name,{path,contentType:'image/jpeg'});};
+  await page.getByRole('button',{name:/아메리카노 \\(ICE\\)/}).click();
+  await page.getByRole('button',{name:/샷 추가/}).click();
+  await page.getByRole('button',{name:'포장하기'}).click();
+  await capture('yellow-option');
+  await page.getByRole('button',{name:'장바구니 담기'}).click();
+  await page.getByRole('button',{name:/1번 수량 늘리기/}).click();
+  await expect(page.locator('.yellow-totals')).toContainText('5,000원');
+  await capture('yellow-cart');
+  await page.getByRole('button',{name:'결제하기'}).click();
+  await page.getByRole('button',{name:'카드 결제'}).click();
+  await capture('yellow-payment');
+  await page.getByRole('button',{name:'결제하기'}).click();
+  await expect(page.getByText('카드를 단말기에 삽입하거나 태그해 주세요')).toBeVisible();
+  await capture('yellow-terminal');
+  await page.getByRole('button',{name:'모의 결제 완료'}).click();
+  await expect(page.getByText('주문이 완료되었습니다')).toBeVisible();
+  await capture('yellow-complete');
+  await page.getByRole('button',{name:'연습 결과 확인'}).click();
+  await expect(page.locator('.score strong')).toHaveText('100%');
 });

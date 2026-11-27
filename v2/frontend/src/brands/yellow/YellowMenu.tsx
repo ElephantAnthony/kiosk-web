@@ -14,7 +14,7 @@ const colors: Record<string,[string,string]> = {
   choco:['#81513e','#bd9274'], green:['#739540','#c0d28b'],
   peach:['#c7671d','#ffba53'], caramel:['#f5e5ce','#a6602d']
 };
-export function ProductArt({id}:{id:string}) {
+function VectorArt({id}:{id:string}) {
   const uid=useId().replace(/:/g,'');
   const [lower,upper]=colors[id]??['#ae7640','#e2b477'];
   const hot=id.endsWith('-hot');
@@ -50,6 +50,12 @@ export function ProductArt({id}:{id:string}) {
     </>}
   </svg>;
 }
+
+function PhotoArt({id}:{id:string}) {
+  const [failed,setFailed]=useState(false);
+  return failed||id==='cookie'?<VectorArt id={id}/>:<img className="yellow-art yellow-photo" src={'/yellow/products/'+id+'.webp'} alt="" onError={()=>setFailed(true)}/>;
+}
+export function ProductArt({id}:{id:string}){return <PhotoArt key={id} id={id}/>;}
 
 type Props={scenario:Scenario;category:string;cart:OrderLine[];total:number;count:number;send:(event:EventFrom<typeof kioskMachine>)=>void;activeMs:number};
 export function YellowMenu({scenario,category,cart,total,count,send,activeMs}:Props){

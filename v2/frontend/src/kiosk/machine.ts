@@ -26,6 +26,7 @@ type Event =
   | { type: 'PACKING'; packing: Packing }
   | { type: 'QUANTITY'; delta: number }
   | { type: 'REMOVE'; index: number }
+  | { type: 'CART_QUANTITY'; index: number; delta: number }
   | { type: 'PAY_METHOD'; payment: Payment }
   | { type: 'TICK'; ms: number }
   | { type: 'CONTINUE' | 'ADD' | 'VIEW_CART' | 'CHECKOUT' | 'SUBMIT' | 'BACK' | 'CANCEL' | 'HELP' | 'RETRY' | 'RESTART' };
@@ -132,6 +133,7 @@ export function createKioskMachine(client: KioskApi = api) {
         CANCEL: 'CANCELLING',
       } },
       CART: { on: {
+        CART_QUANTITY: { guard: ({ context, event }) => Number.isInteger(event.index) && !!context.cart[event.index] && (event.delta===1||event.delta===-1), actions: assign({ cart: ({ context, event }) => context.cart.map((line,i)=>i===event.index?{...line,quantity:Math.max(1,Math.min(20,line.quantity+event.delta))}:line) }) },
         EDIT: { guard: ({ context, event }) => Number.isInteger(event.index) && !!context.cart[event.index], target: 'OPTION',
           actions: assign({ draft: ({ context, event }) => ({ ...context.cart[event.index], optionIds: [...context.cart[event.index].optionIds], editIndex: event.index }) }) },
         REMOVE: { guard: ({ event }) => Number.isInteger(event.index), actions: assign({ cart: ({ context, event }) => context.cart.filter((_,i) => i !== event.index) }) },

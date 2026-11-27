@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getHealth, type ServiceStatus } from './api/health';
 import { useKiosk } from './kiosk/useKiosk';
+import { YellowStages, YellowHeader } from './brands/yellow/YellowStages';
 import { YellowMenu, ProductArt } from './brands/yellow/YellowMenu';
 import { draftValid } from './kiosk/machine';
 import type { OrderLine, Scenario, Packing, Payment } from './scenario/contracts';
@@ -33,6 +34,7 @@ export function App() {
   const c = snapshot.context;
   const state = String(snapshot.value);
   const [contrast, setContrast] = useState(false);
+  const [gradeSession,setGradeSession]=useState<string|null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { heading.current?.focus(); }, [state]);
   const s = c.scenario;
@@ -43,7 +45,8 @@ export function App() {
     STARTING:'미션을 준비하고 있어요',MISSION:'오늘의 연습 미션',MENU:'메뉴를 골라 주세요',OPTION:'주문 옵션을 선택해 주세요',CART:'장바구니를 확인해 주세요',
     PAYMENT:'결제 방법을 선택해 주세요',SUBMITTING:'주문을 확인하고 있어요',SUBMIT_ERROR:'주문 결과를 확인하지 못했어요',COMPLETE:'연습 결과',CANCELLING:'연습을 취소하고 있어요',
     CANCEL_ERROR:'취소 결과를 확인하지 못했어요',CANCELLED:'연습을 취소했어요',EXPIRED:'연습 정보를 찾을 수 없어요' };
-  const yellow = s?.scenarioId==='yellow-cafe' && ['MENU','OPTION','CART','PAYMENT'].includes(state);
+  const yellowReceipt=s?.scenarioId==='yellow-cafe' && state==='COMPLETE' && gradeSession!==c.session?.id;
+  const yellow = s?.scenarioId==='yellow-cafe' && (['MENU','OPTION','CART','PAYMENT'].includes(state)||yellowReceipt);
   const back = ['MENU','OPTION','CART','PAYMENT'].includes(state);
   const cancel = ['MISSION','MENU','OPTION','CART','PAYMENT','SUBMIT_ERROR'].includes(state);
   return <div className={'app'+(contrast?' contrast':'')+(yellow?' yellow-mode':'')}>
@@ -57,8 +60,8 @@ export function App() {
       {stepIndex[state]!==undefined && <nav aria-label="연습 단계"><ol className="steps">{steps.map((step,i)=><li key={step} aria-current={i===stepIndex[state]?'step':undefined} className={i===stepIndex[state]?'current':i<stepIndex[state]?'done':''}><span>{i+1}</span>{step}</li>)}</ol></nav>}
       <section className={state==='START'?'panel hero':'panel'} aria-labelledby="page-title">
         <p className="eyebrow">{s && state!=='START' ? s.title : 'SENIOSK / PRACTICE'}</p>
-        {yellow && state!=='MENU' && <div className="yellow-stage-head">YELLOW CAFE <span>연습용 키오스크</span></div>}
-        <h1 id="page-title" tabIndex={-1} ref={heading}>{title[state]??state}</h1>
+        {yellow && state!=='MENU' && <YellowHeader activeMs={c.activeMs} send={send} complete={yellowReceipt}/>}
+        <h1 id="page-title" tabIndex={-1} ref={heading}>{yellowReceipt?'주문 완료':title[state]??state}</h1>
         {c.help && <aside id="help-panel" className="notice" aria-label="도움말"><h2>천천히 진행해도 괜찮아요</h2><p>미션에 적힌 메뉴와 옵션을 골라 장바구니에 담아 주세요. 뒤로 가서 수정할 수 있고 실제 돈은 사용하지 않습니다.</p><button className="secondary" onClick={()=>send({type:'HELP'})}>도움말 닫기</button></aside>}
         {c.error && <p role="alert" className="error">{c.error}</p>}
         {state==='LOADING' && <p>시나리오를 불러오는 중입니다.</p>}
@@ -80,7 +83,8 @@ export function App() {
           <div className="cards">{s.menus.filter(m=>m.categoryId===c.category).map(menu=><button key={menu.id} className="card menu" onClick={()=>send({type:'SELECT_MENU',menuId:menu.id})}><span className="menu-mark" aria-hidden="true">{menu.label.slice(0,1)}</span><strong>{menu.label}</strong><span>{money(menu.price)}</span><span className="link-label">선택하기 →</span></button>)}</div>
           <button className="primary wide" onClick={()=>send({type:'VIEW_CART'})}>장바구니 보기 ({count}개)</button>
         </>}
-        {state==='OPTION' && s && d && <>
+        {yellow && state!=='MENU' && <YellowStages snapshot={snapshot} send={send} total={total} count={count} onGrade={()=>setGradeSession(c.session?.id??null)}/>}
+        {state==='OPTION' && s && d && !yellow && <>
           <h2>{s.menus.find(m=>m.id===d.menuId)?.label}</h2>
           {s.scenarioId==='yellow-cafe' && <ProductArt id={d.menuId}/>}
           {s.menus.find(m=>m.id===d.menuId)?.optionGroups.map(g=><fieldset key={g.id}><legend>{g.label} {g.required?'(필수)':'(선택)'}</legend><div className="choices">
@@ -93,21 +97,21 @@ export function App() {
           {!draftValid(c) && <p className="hint">필수 옵션과 이용 방법을 선택해 주세요. 장바구니는 최대 100줄까지 담을 수 있어요.</p>}
           <button className="primary wide" disabled={!draftValid(c)} onClick={()=>send({type:'ADD'})}>{d.editIndex===null?'장바구니 담기':'변경 내용 저장'}</button>
         </>}
-        {state==='CART' && s && <>
+        {state==='CART' && s && !yellow && <>
           {c.cart.length===0 ? <p>장바구니가 비어 있습니다. 메뉴를 추가해 주세요.</p> : <ul className="cart">{c.cart.map((line,i)=>{
             const menu=s.menus.find(m=>m.id===line.menuId)!;const labels=menu.optionGroups.flatMap(g=>g.options).filter(o=>line.optionIds.includes(o.id)).map(o=>o.label);
             return <li key={i}><div>{yellow && <ProductArt id={menu.id}/>}<strong>{menu.label} {line.quantity}개</strong><p>{[...labels,packingLabel[line.packing]].join(' / ')}</p><strong>{money(linePrice(s,line))}</strong></div><div className="choices"><button className="secondary" aria-label={menu.label+' '+(i+1)+'번 수정'} onClick={()=>send({type:'EDIT',index:i})}>수정</button><button className="secondary" aria-label={menu.label+' '+(i+1)+'번 삭제'} onClick={()=>send({type:'REMOVE',index:i})}>삭제</button></div></li>;
           })}</ul>}
           <p className="total">합계 <strong>{money(total)}</strong></p><div className="choices"><button className="secondary" onClick={()=>send({type:'BACK'})}>메뉴 추가</button><button className="primary" disabled={c.cart.length===0} onClick={()=>send({type:'CHECKOUT'})}>결제하기</button></div>
         </>}
-        {state==='PAYMENT' && s && <><p className="total">모의 결제 금액 <strong>{money(total)}</strong></p><p>연습용 결제입니다. 카드 정보나 현금을 입력하지 마세요.</p>
+        {state==='PAYMENT' && s && !yellow && <><p className="total">모의 결제 금액 <strong>{money(total)}</strong></p><p>연습용 결제입니다. 카드 정보나 현금을 입력하지 마세요.</p>
           <div className="choices" role="group" aria-label="결제 방법">{s.paymentOptions.map(p=><button key={p} className="choice" aria-pressed={c.payment===p} onClick={()=>send({type:'PAY_METHOD',payment:p})}>{paymentLabel[p]}</button>)}</div>
           <button className="primary wide" disabled={!c.payment} onClick={()=>send({type:'SUBMIT'})}>모의 결제 완료</button></>}
         {state==='SUBMITTING' && <p>서버 채점 결과를 기다리는 중입니다. 같은 주문을 중복 제출하지 않습니다.</p>}
         {state==='SUBMIT_ERROR' && <><p>기존 주문과 결제 선택이 보존되었습니다. 동일한 내용으로 다시 확인할 수 있습니다.</p><button className="primary" onClick={()=>send({type:'RETRY'})}>같은 주문 다시 제출</button></>}
         {state==='CANCELLING' && <p>서버에 취소를 요청했습니다.</p>}
         {state==='CANCEL_ERROR' && <div className="choices"><button onClick={()=>send({type:'RETRY'})}>취소 다시 확인</button>{c.frozen && <button className="secondary" onClick={()=>send({type:'SUBMIT'})}>기존 주문 결과 확인</button>}</div>}
-        {state==='COMPLETE' && c.result && <><div className="score"><p>{c.result.correct?'미션 성공!':'다시 연습해 볼까요?'}</p><strong>{(c.result.accuracy*100).toLocaleString('ko-KR',{maximumFractionDigits:2})}%</strong><span>주문 정확도</span></div>
+        {state==='COMPLETE' && c.result && !yellowReceipt && <><div className="score"><p>{c.result.correct?'미션 성공!':'다시 연습해 볼까요?'}</p><strong>{(c.result.accuracy*100).toLocaleString('ko-KR',{maximumFractionDigits:2})}%</strong><span>주문 정확도</span></div>
           <dl className="metrics"><div><dt>일치</dt><dd>{c.result.matched}개</dd></div><div><dt>누락</dt><dd>{c.result.missing}개</dd></div><div><dt>초과</dt><dd>{c.result.extra}개</dd></div></dl><p>모의 결제: {c.result.paymentMatched?'일치':'불일치'}</p><p>서버 기준 경과 시간: {Math.round(c.result.serverElapsedMs/1000)}초</p><p className="hint">서버가 저장한 실제 채점 결과입니다.</p><button className="primary" onClick={()=>send({type:'RESTART'})}>다시 연습하기</button></>}
         {['CANCELLED','EXPIRED'].includes(state) && <><p>{state==='CANCELLED'?'서버에서 취소를 확인했습니다. 새 연습을 시작할 수 있어요.':'기존 결과를 변경하지 않고 새 연습을 시작할 수 있어요.'}</p><button className="primary" onClick={()=>send({type:'RESTART'})}>다시 연습하기</button></>}
         {(back||cancel) && <div className="bottom-nav">{back&&<button className="secondary" onClick={()=>send({type:'BACK'})}>← 뒤로 가기</button>}{cancel&&<button className="danger" onClick={()=>send({type:'CANCEL'})}>연습 취소</button>}</div>}

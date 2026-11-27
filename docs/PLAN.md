@@ -31,3 +31,8 @@
 - Previous CI 45944926832: frontend/backend/legacy/secret scan passed; compose failed generic catalog browser test because a literal menu label containing parentheses was treated as regex. Dedicated yellow navigation passed.
 - Refine dedicated kiosk surface, product SVG shading and toppings, cart table and yellow action styling. Preserve accessibility controls, machine and server contracts. Change generic menu locator to literal matching and capture actual yellow browser menu in CI.
 - Verification: NOT_RUN in current editing environment; next action inspect new CI, screenshot and full mission completion before release.
+
+### SEN-08 full checkout visual implementation
+- Previous CI 45945648427 completed successfully. New scope: independent option, cart, payment selection, simulated terminal and completion receipt; separate learning result; direct cart quantity with guarded machine event and existing CART_EDITED telemetry. Preserve server payload and grading.
+- Product photo paths support original generated WebP assets with vector fallback; binary assets are supplied separately because current GitHub connector accepts blob text/base64 but cannot ingest container file references directly. No actual coupon functionality or real payment. Prices remain illustrative. Full screenshot comparison pending.
+- Verification: NOT_RUN locally. Added browser journey with server grade and stage screenshots; CI required.

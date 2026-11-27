@@ -63,7 +63,9 @@ test('all registered scenarios can be completed by the same renderer',async({pag
     await button(page,'결제하기').click();
     await button(page,payment[mission.payment]).click();
     if(record)await capture(page,'release-payment');
+    if(s.scenarioId==='yellow-cafe') await button(page,'결제하기').click();
     await button(page,'모의 결제 완료').click();
+    if(s.scenarioId==='yellow-cafe') await button(page,'연습 결과 확인').click();
     await expect(page.getByRole('heading',{level:1})).toHaveText('연습 결과');
     await expect(page.getByText('미션 성공!',{exact:true})).toBeVisible();
     await expect(page.locator('.score strong')).toHaveText('100%');

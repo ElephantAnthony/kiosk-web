@@ -35,6 +35,7 @@ export function observeAction(sdk:EventSdk,before:Snapshot,after:Snapshot,event:
       break;
     case 'QUANTITY':if(b.draft&&a.draft?.quantity!==b.draft.quantity)void sdk.track(session,'QUANTITY_CHANGED',{quantity:b.draft.quantity});break;
     case 'ADD':if(changed&&a.draft)void sdk.track(session,a.draft.editIndex===null?'CART_ADDED':'CART_EDITED',{menuId:a.draft.menuId});break;
+    case 'CART_QUANTITY':if(a.cart[event.index]&&b.cart[event.index]&&a.cart[event.index].quantity!==b.cart[event.index].quantity)void sdk.track(session,'CART_EDITED',{menuId:b.cart[event.index].menuId});break;
     case 'REMOVE':if(a.cart.length!==b.cart.length&&a.cart[event.index])void sdk.track(session,'CART_REMOVED',{menuId:a.cart[event.index].menuId});break;
     case 'BACK':if(changed)void sdk.track(session,'BACK');break;
     case 'HELP':if(a.help!==b.help)void sdk.track(session,'HELP',{open:b.help});break;
