@@ -9,7 +9,7 @@
 | EXECUTION 03 | Server grading and completion | PASS |
 | EXECUTION 04 | Kiosk UI, cancellation and fixture extension | PASS: 45775831858, both stores, seven browser tests, capture committed |
 | EXECUTION 05 | Durable event ingestion and SDK | PASS: all five jobs, 45777346496 |
-| EXECUTION 06 | Admin funnel and accessibility completion | 48 Java and 23 Vitest PASS; generated OpenAPI drift and browser gate pending |
+| EXECUTION 06 | Admin funnel and accessibility completion | 48 Java, 23 Vitest, 9 prior browser tests PASS; admin filter repair and strict CI pending |
 | EXECUTION 07 | Release gate and portfolio evidence | TODO |
 
 ## ACTIVE
@@ -31,3 +31,9 @@ SEN-06 acceptance: separate admin security context, env credentials, CSRF, login
 - Repair CI 45919907679: Maven 22 unit + 26 PostgreSQL IT all PASS, V4 applied, exact fixture and EXPLAIN verified; frontend/V1/scanner PASS, 232 commits scanned with zero unclassified findings. OpenAPI diff FAIL due new endpoint; actual output SHA-256 verified, blob f2000f5bb9e3fe201bed5fa63017ea5e01a7c7a1. Browser pending. [Evidence](evidence/runs/SEN-06-backend-45919907679.md).
 
 - CI 45919907679: browser 9 PASS, 1 FAIL at admin scenario exact label after real login and cohort API succeeded. Fix explicit filter labels and role locator, publish verified OpenAPI bytes together, rerun all checks and capture actual screenshot. No app or source regression results fabricated.
+
+## Resume checkpoint
+- Current application source 83d4f80fbca8f106307ee637f2755b02d35d8611. Actual OpenAPI committed at cf4f8a6c6afc7da6ff4106b65e19284a707b584b, SHA-256 67d94eeb466962bb3fe1739c527e2e433128064334f2cda9d9fa35ee512e24c6.
+- Strict CI [45920332880](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45920332880): secret-scan: in_progress; compose: in_progress; frontend: in_progress; backend: in_progress; legacy: in_progress at checkpoint. Do not cancel this run with unrelated code changes. Verify its final results; fix observed failures if any.
+- Prior CI 45919907679 browser 9 passed, administrator test reached successful login and real report API, then failed scenario field exact label lookup. Repair 83d4f80fbca8f106307ee637f2755b02d35d8611 explicitly associates labels with all three controls and uses the scenario combobox role/name. Actual browser screenshot export was skipped on failure. See evidence/runs/SEN-06-browser-45919907679.md.
+- Next: confirm actual strict diff, ten browser tests, ADMIN_UI_PASS, screenshot export. Recover ADMIN_IMAGE chunks, check contiguous order, JPEG markers, byte length and SHA-256. Commit the actual image and README. Only after green full CI and evidence, close SEN-06 and enter EXECUTION 07. No real learner data or deployment.

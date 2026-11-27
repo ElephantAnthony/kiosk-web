@@ -11,3 +11,5 @@ Use one PostgreSQL statement with an event rollup per session before joining the
 Active versus abandoned is an operational estimate: ACTIVE sessions with no server-received event in at least 30 minutes (or 30 minutes since start if no events) are abandoned, without changing stored status. Late events may revise the estimate. Explicit cancellations and completions are distinct. No inference about learner intent or real-world learning effect. Use a bounded date filter and a cohort index, inspect EXPLAIN on synthetic fixtures; do not claim throughput.
 
 React renders accessible native tables and CSS bars, no extra dependency. Empty denominators are null and displayed as a dash, never invented percentages. Screenshots are from actual Chromium runs with synthetic data and no credentials.
+
+Actual generated OpenAPI committed at cf4f8a6. Browser label failure repaired at 83d4f80; final strict CI 45920332880 pending. See ../evidence/runs/SEN-06-browser-45919907679.md.

@@ -49,3 +49,5 @@
 - [SEN-06 repaired backend and EXPLAIN](runs/SEN-06-backend-45919907679.md): 48 Java, frontend/V1/scan pass; exact synthetic counts; actual generated contract recovered; browser and strict gate pending.
 
 - [Admin filter accessibility repair](../troubleshooting/SEN-06-admin-filter-label.md): nine browser passes; admin test failed at exact scenario label, explicit labels required. Strict spec bytes recovered.
+
+- [SEN-06 browser repair and strict checkpoint](runs/SEN-06-browser-45919907679.md): 9 prior browser tests passed; admin label timeout repaired, actual OpenAPI committed, strict CI 45920332880 pending final outcome.

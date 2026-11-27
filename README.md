@@ -376,3 +376,5 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 [관리자 PostgreSQL 검증 및 EXPLAIN](docs/evidence/runs/SEN-06-backend-45919907679.md): 합성 세션 집계, 관리자 인증 및 권한 분리 검증 통과. Java 단위 22개, 실제 PostgreSQL 통합 26개 통과. Flyway V4와 집계 인덱스 사용을 확인했습니다. 생성된 OpenAPI의 변경을 감지했고 실제 출력의 SHA-256을 검증했습니다. 관리자 브라우저 테스트와 최종 명세 비교는 확인 전입니다.
 
 관리자 화면 첫 브라우저 검증에서 로그인과 실제 집계 API 조회까지 성공했지만 시나리오 선택 필드의 이름 탐색 오류가 발생했습니다. 기존 키오스크 브라우저 테스트 9개는 통과했습니다. 명시적 접근성 라벨과 실제 생성 OpenAPI를 반영하고 재검증합니다.
+
+[관리자 브라우저 검증 기록](docs/evidence/runs/SEN-06-browser-45919907679.md) / [최신 strict CI 45920332880](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45920332880): 실제 생성 OpenAPI 커밋 및 명시적 필터 라벨 수정 완료. 최종 명세 비교, 관리자 전체 브라우저 흐름 및 실제 대시보드 캡처는 검증 결과 확인 전입니다.
