@@ -1,0 +1,177 @@
+name: SENIOSK verification
+on:
+  push:
+    branches: ['portfolio/seniosk-v2']
+    paths: ['v2/**', '.github/workflows/ci.yml', 'mcdonaldapp/tests.py', 'requirements.txt']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: seniosk-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: v2/backend/pom.xml
+      - name: Start disposable PostgreSQL for integration tests
+        run: |
+          set -euo pipefail
+          password="$(openssl rand -hex 24)"
+          echo "::add-mask::$password"
+          echo "DB_PASSWORD=$password" >> "$GITHUB_ENV"
+          export POSTGRES_PASSWORD="$password"
+          docker run --rm -d --name seniosk-db-it -p 127.0.0.1:5432:5432 -e POSTGRES_USER=seniosk -e POSTGRES_DB=seniosk -e POSTGRES_PASSWORD postgres:16-alpine
+          for attempt in $(seq 1 40); do
+            if docker exec seniosk-db-it pg_isready -U seniosk -d seniosk; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - run: mvn -B -ntp -f v2/backend/pom.xml -Ppostgres-it verify
+      - name: Export and compare generated OpenAPI
+        run: |
+          python3 v2/scripts/export-generated-json.py OPENAPI v2/backend/target/openapi.json
+          diff -u v2/contracts/openapi.json v2/backend/target/openapi.json
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: generated-openapi
+          path: v2/backend/target/openapi.json
+          if-no-files-found: error
+      - name: Stop disposable PostgreSQL
+        if: always()
+        run: docker stop seniosk-db-it || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-reports
+          path: |
+            v2/backend/target/surefire-reports/
+            v2/backend/target/failsafe-reports/
+          if-no-files-found: warn
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: v2/frontend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Pin npm toolchain
+        run: |
+          npm install -g npm@11.21.2
+          test "$(npm --version)" = "11.21.2"
+      - run: |
+          npm ci --no-audit --no-fund
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-lockfile
+          path: v2/frontend/package-lock.json
+          if-no-files-found: error
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+  legacy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Reproduce shared V1 cart
+        run: SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')" python manage.py test mcdonaldapp.tests.LegacySharedCartReproduction --verbosity 2
+  secret-scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan history and emit safe diagnostic metadata
+        run: |
+          set -euo pipefail
+          report="$(mktemp -d)"
+          trap 'rm -rf "$report"' EXIT
+          chmod 777 "$report"
+          set +e
+          docker run --rm --network none -v "$PWD:/repo:ro" -v "$report:/report" \
+            -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
+            ghcr.io/gitleaks/gitleaks:v8.24.2 git --redact=100 --no-banner --log-opts=--all --gitleaks-ignore-path=/repo/.gitleaksignore --report-format=json --report-path=/report/findings.json /repo
+          result=$?
+          set -e
+          if [ -f "$report/findings.json" ]; then
+            python3 v2/scripts/security-metadata.py "$report/findings.json"
+          fi
+          exit "$result"
+  compose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Pin npm toolchain
+        run: |
+          npm install -g npm@11.21.2
+          test "$(npm --version)" = "11.21.2"
+      - name: Generate ephemeral database password
+        run: |
+          password="$(openssl rand -hex 24)"
+          echo "::add-mask::$password"
+          echo "DB_PASSWORD=$password" >> "$GITHUB_ENV"
+          admin_value="$(openssl rand -hex 24)"
+          echo "::add-mask::$admin_value"
+          echo "ADMIN_USERNAME=ci-admin" >> "$GITHUB_ENV"
+          echo "ADMIN_PASSWORD=$admin_value" >> "$GITHUB_ENV"
+      - name: Validate and start services
+        working-directory: v2
+        run: |
+          docker compose config -q
+          docker compose up --build -d --wait --wait-timeout 180
+          curl --fail --silent --show-error http://127.0.0.1:8080/healthz
+          curl --fail --silent --show-error http://127.0.0.1:5173/healthz
+      - name: Browser smoke and accessibility test
+        working-directory: v2/frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - name: Export actual kiosk screenshot for README
+        if: success()
+        run: |
+          python3 v2/scripts/export-kiosk-screenshot.py
+          python3 v2/scripts/export-admin-screenshot.py
+          python3 v2/scripts/export-release-screens.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-report
+          path: v2/frontend/playwright-report/
+          if-no-files-found: warn
+      - name: Stop local CI services
+        if: always()
+        working-directory: v2
+        run: docker compose down -v

@@ -1,0 +1,15 @@
+# ADR-006: isolated administrator context and cohort analytics
+
+Status: all five jobs PASS in CI 45920332880; actual dashboard capture verified.
+
+Administrator authentication is restricted to a separate Spring Security filter chain for /api/admin/**. The role is stored in a separate HttpSessionSecurityContextRepository attribute. The existing learner owner UUID remains independent; administrator authentication never grants access to another browser's learner session. A successful login rotates the session ID and invalidates the CSRF token. Logout clears only the administrator context and rotates the CSRF token so pending learner events remain attributable to the same owner. The API requires a fresh CSRF token for each mutation. Every admin route except POST login requires ROLE_ADMIN; the login endpoint is also CSRF protected.
+
+A single local administrator is configured through ADMIN_USERNAME and ADMIN_PASSWORD. Blank or invalid configuration disables login, no default user. Password is hashed in memory with BCrypt cost 12 at startup; comparison is against the hash, password and authentication request are not returned or stored in Git. Limit UTF-8 password to 72 bytes, minimum 16 characters. CI generates masked ephemeral credentials. This is a local-only demonstration, not production identity lifecycle, credential rotation, MFA or distributed session management. No login rate limiter is implemented. Do not expose the local service publicly.
+
+Use one PostgreSQL statement with an event rollup per session before joining the authoritative mission_result. This avoids multiplication of results by repeated events. Date cohort is UTC started_at in [from,to), limited to 366 days. Optional scenario and version filters. Funnel is cumulative observed stage coverage, not proof of sequential chronological transitions: count a stage only if all preceding observable stages were recorded. Arrival order does not matter. Last stage additionally requires server completion and a stored result. Server completion totals are separately authoritative and may exceed observed funnel completion. See [metric definitions](../design/FUNNEL.md).
+
+Active versus abandoned is an operational estimate: ACTIVE sessions with no server-received event in at least 30 minutes (or 30 minutes since start if no events) are abandoned, without changing stored status. Late events may revise the estimate. Explicit cancellations and completions are distinct. No inference about learner intent or real-world learning effect. Use a bounded date filter and a cohort index, inspect EXPLAIN on synthetic fixtures; do not claim throughput.
+
+React renders accessible native tables and CSS bars, no extra dependency. Empty denominators are null and displayed as a dash, never invented percentages. Screenshots are from actual Chromium runs with synthetic data and no credentials.
+
+Actual generated OpenAPI committed at cf4f8a6. Browser label failure repaired at 83d4f80; final strict CI 45920332880 passed. See ../evidence/runs/SEN-06-browser-45919907679.md.

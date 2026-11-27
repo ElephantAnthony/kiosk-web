@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: seniosk
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/seniosk}
+    username: ${DB_USER:seniosk}
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-timeout: 3000
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+      accept-float-as-int: false
+  flyway:
+    enabled: true
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:true}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

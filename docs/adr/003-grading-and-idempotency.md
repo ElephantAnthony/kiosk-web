@@ -1,0 +1,11 @@
+# ADR-003: deterministic grading and one completion per session
+
+The multiset key is (menu ID, sorted option IDs, packing). Aggregate duplicate lines; sum matched, missing, extra across the union of keys. Accuracy is matched/(matched+missing+extra), stored at six decimal places, HALF_UP. A nonempty expected mission is required. Correct additionally requires matching simulated payment. An empty actual order is accepted for scoring missing items; UI will prevent empty checkout. Unknown menu/option, duplicate options, invalid cardinality, unsupported payment and packing are rejected before finalization; valid wrong choices are graded. Input is bounded to 100 lines, 20 items per submitted line, 10 option IDs, client active time 0..86400000 ms. Unknown body fields including a client-supplied score are rejected.
+
+The session row is selected with owner predicate and FOR UPDATE inside one Spring transaction. A result has primary key session_id. Status transition and insert either both commit or both roll back. Identical canonical order, payment and client active time return original result (200); changed submission after completion or cancelled session returns 409. A retry must preserve its original active time. No network-level exactly-once claim; one committed logical result per session. Different sessions may proceed independently. Return 404 for other owners. CSRF remains on.
+
+Store canonical actual order and simulated payment, score counts and accuracy, payment match, server elapsed time and client-reported active time separately. Timestamp uses server wall clock, clamped to started_at if clock moves backward. Server elapsed includes idle/network time; client active time is untrusted and not used to calculate score. No card number or identity data. The result is not an independently measured user outcome.
+
+Alternative: in-memory synchronized map loses state at process restart and does not coordinate PostgreSQL transactions. Client score is tamperable. Using only an HTTP idempotency key would not prevent two different keys from completing the same mission. Row lock plus unique constraint is a simpler single-result invariant.
+
+Maven 19 unit and 15 real PostgreSQL integration tests passed in run 45773698103. Generated contract diff passed; final live proxy/browser CI pending. No production throughput or accessibility claims.

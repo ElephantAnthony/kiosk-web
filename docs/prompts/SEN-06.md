@@ -1,0 +1,10 @@
+# EXECUTION 06
+Implement environment-configured administrator authentication with separate security context, CSRF, session fixation protection, logout preserving learner owner, and no default account. PostgreSQL cohort filter by UTC date and scenario/version, authoritative completed/cancelled and result, observed cumulative funnel, inactivity classification and exact synthetic fixture counts including late events, zero denominators, duplicate/reordered events, EXPLAIN. Accessible dashboard with authentication, filters, errors, empty state, table and high contrast. Real Chromium screenshot, generated OpenAPI and strict diff, full regression and history scan. No real participants, deployment, chart library or bulk performance claim. Update README, design, ADR, learning, evidence and handoff. Preserve main/V1. Advance only after all five jobs succeed.
+
+Initial run 45919739819 failed fixture wildcard JSONPath assertion (actual response matches expected). Repair 2078900, retry run 45919907679. Inspect tests, EXPLAIN, browser screenshot and actual generated OpenAPI. [Evidence](../evidence/runs/SEN-06-initial-45919739819.md).
+
+Repair backend passed 48 Java tests, V4, exact fixture counts and EXPLAIN. Actual OpenAPI blob f2000f5bb9e3fe201bed5fa63017ea5e01a7c7a1 recovered and verified. Check Compose/browser before committing new spec to avoid premature cancellation. [Evidence](../evidence/runs/SEN-06-backend-45919907679.md).
+
+Latest source 83d4f80fbca8f106307ee637f2755b02d35d8611; strict CI 45920332880. Actual OpenAPI committed. Prior admin browser test timed out on exact label after login/report success; explicit labels fixed. Verify ten browser tests and ADMIN_UI_PASS, actual ADMIN_IMAGE bytes/digest, commit screenshot and final gate evidence. If failure, fix and reverify. [Browser evidence](../evidence/runs/SEN-06-browser-45919907679.md).
+
+Final: 45920332880 all five jobs PASS, 10 Chromium tests, actual admin JPEG verified. SEN-07 authorized.

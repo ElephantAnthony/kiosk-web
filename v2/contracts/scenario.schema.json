@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://seniosk.example/contracts/scenario.schema.json",
+  "title": "SENIOSK scenario v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scenarioId",
+    "version",
+    "title",
+    "description",
+    "categories",
+    "menus",
+    "packingOptions",
+    "paymentOptions",
+    "missions"
+  ],
+  "properties": {
+    "scenarioId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,63}$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/category"
+      },
+      "minItems": 1,
+      "maxItems": 20
+    },
+    "menus": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/menu"
+      },
+      "minItems": 1,
+      "maxItems": 100
+    },
+    "packingOptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "DINE_IN",
+          "TAKE_OUT"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true
+    },
+    "paymentOptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "CARD",
+          "CASH"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true
+    },
+    "missions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mission"
+      },
+      "minItems": 1,
+      "maxItems": 50
+    }
+  },
+  "$defs": {
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "priceDelta"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "priceDelta": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      }
+    },
+    "optionGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "required",
+        "options"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/option"
+          },
+          "minItems": 1,
+          "maxItems": 20
+        }
+      }
+    },
+    "menu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "categoryId",
+        "label",
+        "price",
+        "optionGroups"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "categoryId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "price": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "optionGroups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/optionGroup"
+          },
+          "minItems": 0,
+          "maxItems": 10
+        }
+      }
+    },
+    "orderLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "menuId",
+        "optionIds",
+        "packing",
+        "quantity"
+      ],
+      "properties": {
+        "menuId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "optionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "minItems": 0,
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "packing": {
+          "type": "string",
+          "enum": [
+            "DINE_IN",
+            "TAKE_OUT"
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      }
+    },
+    "mission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "instruction",
+        "expected",
+        "payment"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "instruction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "expected": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/orderLine"
+          },
+          "minItems": 1,
+          "maxItems": 20
+        },
+        "payment": {
+          "type": "string",
+          "enum": [
+            "CARD",
+            "CASH"
+          ]
+        }
+      }
+    }
+  }
+}

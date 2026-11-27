@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT"
+# Export ADMIN_USERNAME and ADMIN_PASSWORD matching the local Compose configuration before running.
+: "${ADMIN_USERNAME:?Export administrator username for E2E}"
+: "${ADMIN_PASSWORD:?Export administrator password for E2E}"
+# Run from Git Bash, WSL or Linux. No deployment; existing DB volume is preserved.
+# Isolate integration test rows from the persistent local application database.
+it_password="$(openssl rand -hex 24)"
+it_db="$(POSTGRES_PASSWORD="$it_password" docker run --rm -d -p 127.0.0.1::5432 -e POSTGRES_USER=seniosk -e POSTGRES_DB=seniosk -e POSTGRES_PASSWORD postgres:16-alpine)"
+trap 'docker stop "$it_db" >/dev/null 2>&1 || true' EXIT
+ready=false
+for attempt in $(seq 1 40); do
+  if docker exec "$it_db" pg_isready -U seniosk -d seniosk >/dev/null; then ready=true; break; fi
+  sleep 2
+done
+[[ "$ready" == true ]] || { echo "Integration database not ready" >&2; exit 1; }
+it_port="$(docker port "$it_db" 5432/tcp | head -n 1 | sed 's/.*://')"
+DB_URL="jdbc:postgresql://127.0.0.1:$it_port/seniosk" DB_USER=seniosk DB_PASSWORD="$it_password" mvn -B -ntp -f v2/backend/pom.xml -Ppostgres-it verify
+diff -u v2/contracts/openapi.json v2/backend/target/openapi.json
+docker stop "$it_db" >/dev/null
+trap - EXIT
+unset it_password
+(
+  cd v2/frontend
+  [[ "$(npm --version)" == "11.21.2" ]] || { echo "Install npm@11.21.2 before verification" >&2; exit 1; }
+  npm ci --no-audit --no-fund
+  npm run lint
+  npm run typecheck
+  npm test
+  npm run build
+)
+(
+  cd v2
+  docker compose config -q
+  docker compose up --build -d --wait --wait-timeout 180
+  curl --fail --silent --show-error http://127.0.0.1:8080/healthz
+  echo
+)
+(
+  cd v2/frontend
+  npx playwright install chromium
+  npm run test:e2e
+)
