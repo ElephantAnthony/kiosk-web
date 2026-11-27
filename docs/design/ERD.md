@@ -64,3 +64,5 @@ V2 migration and grading transaction tests passed on real PostgreSQL in run 4577
 EXECUTION 04 uses existing status field for ACTIVE -> CANCELLED; no new database migration is required. Cancel uses the same FOR UPDATE lock as grading. PostgreSQL race test verifies exactly one terminal transition, with one mission_result only when completion wins. Event ingestion adds V3 without changing existing status constraints.
 
 V3: training_event has event_id primary key, (session_id, sequence) unique and composite scenario FK. The JSONB body is immutable and schema-validated. Server received_at and client_timestamp are distinct. A rejected batch must leave no new rows; exact replay returns ACK. V3 integration verified in run 45776976931: real PostgreSQL applied all three migrations and four EventApiIT tests passed.
+
+V4 adds ix_training_cohort(started_at, scenario_id, scenario_version). No new personal data or administrator DB table. Admin credential is configured externally, hashed in memory. Reports are derived from existing session, result and event tables; see [metric definitions](FUNNEL.md). V4 and EXPLAIN verification pending.

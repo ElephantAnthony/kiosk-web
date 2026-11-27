@@ -41,3 +41,5 @@
 - [SEN-05 strict verification](runs/SEN-05-strict-45777346496.md): generated API diff PASS, Java/frontend/V1/scan PASS; final browser pending at checkpoint.
 
 - [SEN-05 final gate](runs/SEN-05-pass-45777346496.md): all five jobs success, nine browser tests, eight persisted events recovered.
+
+- SEN-06 source CI [45919739819](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919739819): auth, cohort and dashboard tests authored; results pending.

@@ -27,3 +27,5 @@ This repository keeps public technical evidence, not personal application drafts
 - [Event outbox ADR](adr/005-durable-event-outbox.md) / [Event pipeline](design/EVENT_PIPELINE.md) / [Phase 5 learning](learning/phase-5.md)
 
 - [Event OpenAPI drift troubleshooting](troubleshooting/SEN-05-openapi-drift.md) / [Strict event verification](evidence/runs/SEN-05-strict-45777346496.md)
+
+- [Admin ADR](adr/006-admin-and-funnel.md) / [Funnel metric definitions](design/FUNNEL.md) / [Phase 6 learning](learning/phase-6.md) / [SEN-06 task](prompts/SEN-06.md)

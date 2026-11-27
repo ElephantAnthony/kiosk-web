@@ -9,7 +9,7 @@
 | EXECUTION 03 | Server grading and completion | PASS |
 | EXECUTION 04 | Kiosk UI, cancellation and fixture extension | PASS: 45775831858, both stores, seven browser tests, capture committed |
 | EXECUTION 05 | Durable event ingestion and SDK | PASS: all five jobs, 45777346496 |
-| EXECUTION 06 | Admin funnel and accessibility completion | ACTIVE: administrator authentication and cohort funnel |
+| EXECUTION 06 | Admin funnel and accessibility completion | Source implemented; CI 45919739819 pending |
 | EXECUTION 07 | Release gate and portfolio evidence | TODO |
 
 ## ACTIVE
@@ -23,3 +23,5 @@
 - [Event design](design/EVENT_PIPELINE.md) / [ADR](adr/005-durable-event-outbox.md) / [Task](prompts/SEN-05.md) / [Evidence](evidence/INDEX.md).
 
 SEN-06 acceptance: separate admin security context, env credentials, CSRF, login/logout and ownership regression; PostgreSQL cohort aggregates with explicit denominators, UTC dates, 30-minute inactivity policy, fixture counts and EXPLAIN; accessible dashboard, actual capture, generated OpenAPI diff and full CI.
+
+- SEN-06 source commits 3e0b8f212b4133a967c0acafe42d84c9d8b72331 and e1e0af60e5e8ebfa15a495b47166f466c4b83739. CI [45919739819](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919739819). Authentication, report SQL, V4 index, dashboard and synthetic tests authored. Verify all tests, capture exact generated OpenAPI and screenshot, strict diff and full CI. No pass claimed until observed. [Metric definitions](design/FUNNEL.md) / [ADR](adr/006-admin-and-funnel.md).

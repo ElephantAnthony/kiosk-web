@@ -48,3 +48,14 @@ POST /api/sessions/{id}/events with the same owner cookie and CSRF header. Body 
 ```
 
 The example session ID must be replaced with the caller's real synthetic training session. HTTP 200 returns {"acknowledgedIds":[event UUIDs]}; ACK order is not significant. A repeated ID with identical JSONB content is accepted; changed content or sequence collision returns 409 and rolls back the entire batch. Other owner returns 404. Invalid schema or scenario references return 400; missing CSRF returns 403. The client supports 429 Retry-After from infrastructure; the server does not yet implement a rate limiter. No partial success ACK. Late records for terminal sessions are allowed without changing status or result.
+
+## Administrator endpoints (source implemented; generated contract pending)
+
+| Method | Path | Success | Errors |
+|---|---|---|---|
+| POST | /api/admin/login | 200 | 400, 401, 403 |
+| GET | /api/admin/me | 200 | 401, 403 |
+| GET | /api/admin/funnel | 200 | 400, 401, 403 |
+| POST | /api/admin/logout | 204 | 401, 403 |
+
+Login accepts username/password JSON with session-bound CSRF. Fetch a fresh CSRF token after login/logout. Session ID rotates on login; learner ownership stays separate. No credentials or identifiers in reports. Date and scenario filters, aggregate denominators and abandonment policy: [FUNNEL.md](FUNNEL.md). The role protects every admin API other than login. No default administrator or public deployment.

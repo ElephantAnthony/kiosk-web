@@ -4,7 +4,7 @@
 
 시니스크는 기존 Django 기반 키오스크 프로젝트의 장바구니 공유 결함과 부정확한 측정 문제를 재현하고, Java 21과 Spring Boot 기반으로 개선하는 개발 프로젝트입니다. 실제 브랜드, 결제, 참여자 데이터 없이 가상의 주문 연습 환경을 구축합니다.
 
-> 현재 상태: 두 매장의 실제 주문 및 서버 채점, 취소, 브라우저 테스트 7개를 검증했습니다. IndexedDB 행동 기록과 서버 멱등 수집을 구현했으며 신규 프론트엔드 테스트까지 통과했습니다. 실제 PostgreSQL 및 브라우저 이벤트 복구 테스트를 통과했습니다. 생성된 OpenAPI 비교도 통과했습니다. 최종 CI의 5개 Job과 브라우저 테스트 9개를 모두 통과했습니다. 관리자 분석은 후속 개발 범위입니다.
+> 현재 상태: 두 매장의 실제 주문 및 서버 채점, 취소, 브라우저 테스트 7개를 검증했습니다. IndexedDB 행동 기록과 서버 멱등 수집을 구현했으며 신규 프론트엔드 테스트까지 통과했습니다. 실제 PostgreSQL 및 브라우저 이벤트 복구 테스트를 통과했습니다. 생성된 OpenAPI 비교도 통과했습니다. 최종 CI의 5개 Job과 브라우저 테스트 9개를 모두 통과했습니다. 관리자 인증과 행동 분석 화면을 구현했으며 신규 통합 검증을 진행 중입니다.
 
 ## 1. 프로젝트의 문제와 개선 방향
 
@@ -26,10 +26,12 @@ git clone -b portfolio/seniosk-v2 https://github.com/ElephantAnthony/kiosk-web.g
 cd kiosk-web/v2
 cp .env.example .env
 # .env의 DB_PASSWORD에 로컬 개발용 비밀번호를 설정
+# 관리자 화면 사용 시 ADMIN_USERNAME과 ADMIN_PASSWORD도 직접 설정 (16자 이상, UTF-8 72바이트 이하)
 docker compose up --build -d --wait
 ```
 
 - React: http://localhost:5173
+- 관리자: http://localhost:5173/admin (설정된 관리자 인증정보 필요)
 - Spring Boot: http://localhost:8080/healthz
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - 종료: `docker compose down` (기존 볼륨은 보존)
@@ -52,7 +54,7 @@ docker compose up --build -d --wait
 - 세션 생성 및 미션 저장이 하나의 트랜잭션에서 처리됩니다.
 - CSRF 검증 및 서버의 소유자 식별 조건으로 교차 조회를 차단합니다.
 
-이는 익명 브라우저 세션 격리입니다. 회원가입, 관리자 인증, 다중 서버 세션 공유를 구현했다는 의미가 아닙니다.
+이는 익명 브라우저 세션 격리입니다. 회원가입 또는 다중 서버 세션 공유를 구현했다는 의미가 아닙니다. 관리자 권한은 별도 보안 컨텍스트에서 관리합니다.
 
 ### 서버 채점과 주문 완료
 
@@ -139,13 +141,24 @@ flowchart LR
 
 [이벤트 계약](v2/contracts/event.schema.json) / [이벤트 아키텍처](docs/design/EVENT_PIPELINE.md) / [기술 결정](docs/adr/005-durable-event-outbox.md)
 
+### 관리자 학습 분석
+
+관리자는 Spring Security의 별도 보안 컨텍스트를 통해 로그인하고 PostgreSQL에서 실제 연습 데이터를 집계합니다. 환경변수에 유효한 관리자 인증정보가 없으면 로그인할 수 없습니다. 비밀번호는 시작 시 BCrypt로 해싱하며 저장소에 기록하지 않습니다. 학습자 소유권과 관리자 역할을 분리했습니다.
+
+- 세션 완료, 취소, 활성, 이탈 추정과 성공률, 평균 정확도, 서버 경과 시간, 도움말 사용
+- 시나리오 및 UTC 시작일 기준 필터, 종료일 제외, 최대 366일
+- 누적 관측 단계별 도달 및 미도달 세션, 이전 단계 대비 전환율
+- 실제 결과가 없는 경우 비율과 평균을 계산하지 않으며 허위 샘플 통계를 표시하지 않음
+
+30분간 서버 수신 기록이 없는 활성 세션을 이탈 추정으로 집계합니다. 이는 실제 이탈 확정이 아니며 늦게 수신된 이벤트에 따라 바뀔 수 있습니다. 서버 완료와 이벤트로 관측한 퍼널 마지막 단계는 구분합니다. [정확한 지표 정의](docs/design/FUNNEL.md) / [관리자 설계 ADR](docs/adr/006-admin-and-funnel.md)
+
 ## 4. 아키텍처
 
 ```mermaid
 flowchart LR
     B[Browser] --> F[React / TypeScript / XState]
     F -->|Vite Proxy / HTTP| C[Spring MVC + Security]
-    C --> S[Scenario / Session / Grading / Event Service]
+    C --> S[Scenario / Session / Grading / Event / Admin Service]
     S --> R[Spring JDBC Repository]
     R --> P[(PostgreSQL)]
     F --> I[(IndexedDB Outbox)]
@@ -281,13 +294,15 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)/result" -WebSession $web
 │   │       ├── session/
 │   │       ├── mission/
 │   │       ├── grading/
-│   │       └── event/
+│   │       ├── event/
+│   │       └── admin/
 │   ├── contracts/    # JSON Schema, fixture, OpenAPI
 │   ├── frontend/
 │   │   ├── src/api/
 │   │   ├── src/scenario/
 │   │   ├── src/kiosk/
 │   │   ├── src/analytics-sdk/
+│   │   ├── src/admin/
 │   │   └── e2e/
 │   ├── scripts/verify
 │   └── docker-compose.yml
@@ -324,7 +339,7 @@ Invoke-RestMethod "$base/api/sessions/$($result.id)/result" -WebSession $web
 
 ## 10. 다음 개발 단계
 
-이벤트 통합 검증 완료 후 관리자 분석 및 접근성 보완을 진행합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
+관리자 분석 통합 검증 후 최종 릴리스 검증과 포트폴리오를 정리합니다. 실제 테스트가 통과한 결과만 완료로 표시합니다.
 
 최신 검증: [CI 45772447666](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45772447666). OpenAPI 재생성 및 byte-for-byte diff 통과. 백엔드, 프론트엔드, V1, 보안 검사 통과. 이 실행은 JSON import 오류로 브라우저 검사 실패. 후속 CI 45773007930에서 5개 Job 모두 통과. [실행 증빙](docs/evidence/runs/SEN-02-strict-45772447666.md)
 
@@ -352,3 +367,6 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 [최종 strict CI 45777346496](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45777346496): Java 42개, Vitest 22개, OpenAPI diff, V1 및 보안 검사 통과. 최종 CI 전체 5개 Job 및 브라우저 테스트 9개 통과. [증빙](docs/evidence/runs/SEN-05-strict-45777346496.md)
 
 [이벤트 단계 최종 검증](docs/evidence/runs/SEN-05-pass-45777346496.md)
+
+### 관리자 검증
+[CI 45919739819](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919739819): 관리자 인증 및 합성 fixture 집계, 브라우저 접근성 테스트를 추가했습니다. 결과 확인 전입니다. 로컬 전체 검증 시 ADMIN_USERNAME 및 ADMIN_PASSWORD를 셸 환경변수로도 설정해야 합니다. 관리자 인증은 로컬 데모용이며 MFA, 운영 계정 관리, 로그인 rate limit은 구현하지 않았습니다.
