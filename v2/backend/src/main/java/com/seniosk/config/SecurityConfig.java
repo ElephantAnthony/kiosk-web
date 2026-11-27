@@ -6,6 +6,7 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.web.util.HttpSessionMutexListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -17,8 +18,9 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Order(2)
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Explicit allowlist. No administrator account until the auth milestone.
+        // Learner routes never read the separate admin security context.
         // Keep CSRF protection enabled for future cookie-based authentication.
         return http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/healthz", "/v3/api-docs", "/v3/api-docs/**",

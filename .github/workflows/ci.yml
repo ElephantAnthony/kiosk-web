@@ -142,6 +142,10 @@ jobs:
           password="$(openssl rand -hex 24)"
           echo "::add-mask::$password"
           echo "DB_PASSWORD=$password" >> "$GITHUB_ENV"
+          admin_value="$(openssl rand -hex 24)"
+          echo "::add-mask::$admin_value"
+          echo "ADMIN_USERNAME=ci-admin" >> "$GITHUB_ENV"
+          echo "ADMIN_PASSWORD=$admin_value" >> "$GITHUB_ENV"
       - name: Validate and start services
         working-directory: v2
         run: |
@@ -157,7 +161,9 @@ jobs:
           npm run test:e2e
       - name: Export actual kiosk screenshot for README
         if: success()
-        run: python3 v2/scripts/export-kiosk-screenshot.py
+        run: |
+          python3 v2/scripts/export-kiosk-screenshot.py
+          python3 v2/scripts/export-admin-screenshot.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

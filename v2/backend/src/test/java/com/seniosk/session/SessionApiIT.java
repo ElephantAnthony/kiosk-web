@@ -127,6 +127,8 @@ class SessionApiIT {
         assertTrue(spec.at("/paths/~1api~1sessions~1{id}~1result/get/responses").has("200"));
         assertTrue(spec.at("/paths/~1api~1sessions~1{id}~1cancel/post/responses").has("409"));
         assertTrue(spec.at("/paths/~1api~1sessions~1{id}~1events/post/responses").has("409"));
+        assertTrue(spec.path("paths").has("/api/admin/funnel"));
+        assertTrue(spec.path("paths").has("/api/admin/login"));
         spec.remove("servers"); // Runtime address is environment-specific; retain relative server URL semantics.
         Path out = Path.of("target", "openapi.json");
         Files.createDirectories(out.getParent());
