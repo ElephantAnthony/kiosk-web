@@ -9,7 +9,7 @@
 | EXECUTION 03 | Server grading and completion | PASS |
 | EXECUTION 04 | Kiosk UI, cancellation and fixture extension | PASS: 45775831858, both stores, seven browser tests, capture committed |
 | EXECUTION 05 | Durable event ingestion and SDK | PASS: all five jobs, 45777346496 |
-| EXECUTION 06 | Admin funnel and accessibility completion | Implemented; initial fixture assertion failed, repair CI 45919907679 |
+| EXECUTION 06 | Admin funnel and accessibility completion | 48 Java and 23 Vitest PASS; generated OpenAPI drift and browser gate pending |
 | EXECUTION 07 | Release gate and portfolio evidence | TODO |
 
 ## ACTIVE
@@ -27,3 +27,5 @@ SEN-06 acceptance: separate admin security context, env credentials, CSRF, login
 - SEN-06 source commits 3e0b8f212b4133a967c0acafe42d84c9d8b72331 and e1e0af60e5e8ebfa15a495b47166f466c4b83739. CI [45919739819](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919739819). Authentication, report SQL, V4 index, dashboard and synthetic tests authored. Verify all tests, capture exact generated OpenAPI and screenshot, strict diff and full CI. No pass claimed until observed. [Metric definitions](design/FUNNEL.md) / [ADR](adr/006-admin-and-funnel.md).
 
 - Initial source CI 45919739819: 20 unit, 25 of 26 PostgreSQL IT, 23 Vitest, V1 and scanner PASS. Actual synthetic response matched expected cohort counts; wildcard JSONPath assertion FAIL. EXPLAIN and generated OpenAPI not verified. [Evidence](evidence/runs/SEN-06-initial-45919739819.md). Necessary repair 2078900bf64ca45968dc73d4ef991a719e41f53b, new CI 45919907679. Inspect final backend and browser results, regenerate exact OpenAPI, verify screenshot digest and commit both, strict re-run. No new features until green.
+
+- Repair CI 45919907679: Maven 22 unit + 26 PostgreSQL IT all PASS, V4 applied, exact fixture and EXPLAIN verified; frontend/V1/scanner PASS, 232 commits scanned with zero unclassified findings. OpenAPI diff FAIL due new endpoint; actual output SHA-256 verified, blob f2000f5bb9e3fe201bed5fa63017ea5e01a7c7a1. Browser pending. [Evidence](evidence/runs/SEN-06-backend-45919907679.md).

@@ -45,3 +45,5 @@
 - SEN-06 source CI [45919739819](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919739819): auth, cohort and dashboard tests authored; results pending.
 
 - [SEN-06 initial verification](runs/SEN-06-initial-45919739819.md): 23 Vitest, 20 Java unit, 25/26 PostgreSQL IT; actual expected response, failed wildcard assertion; repair and full verification required.
+
+- [SEN-06 repaired backend and EXPLAIN](runs/SEN-06-backend-45919907679.md): 48 Java, frontend/V1/scan pass; exact synthetic counts; actual generated contract recovered; browser and strict gate pending.

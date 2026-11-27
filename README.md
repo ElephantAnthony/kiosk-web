@@ -372,3 +372,5 @@ SEN-03: 서버 결정론적 채점 및 결과 저장 소스 작성. 새 채점 �
 [CI 45919739819](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919739819): 관리자 인증 및 합성 fixture 집계, 브라우저 접근성 테스트를 추가했습니다. 첫 CI에서 프론트엔드 23개 테스트, Java 단위 20개 및 통합 25개 테스트가 통과했고, 퍼널 응답의 예상 수치는 일치했으나 JSONPath 배열 검증 1개가 실패했습니다. 테스트를 수정하고 재검증 중입니다. 로컬 전체 검증 시 ADMIN_USERNAME 및 ADMIN_PASSWORD를 셸 환경변수로도 설정해야 합니다. 관리자 인증은 로컬 데모용이며 MFA, 운영 계정 관리, 로그인 rate limit은 구현하지 않았습니다.
 
 [관리자 초기 검증 및 수정 기록](docs/evidence/runs/SEN-06-initial-45919739819.md) / [재검증 CI 45919907679](https://github.com/ElephantAnthony/kiosk-web/actions/runs/45919907679)
+
+[관리자 PostgreSQL 검증 및 EXPLAIN](docs/evidence/runs/SEN-06-backend-45919907679.md): 합성 세션 집계, 관리자 인증 및 권한 분리 검증 통과. Java 단위 22개, 실제 PostgreSQL 통합 26개 통과. Flyway V4와 집계 인덱스 사용을 확인했습니다. 생성된 OpenAPI의 변경을 감지했고 실제 출력의 SHA-256을 검증했습니다. 관리자 브라우저 테스트와 최종 명세 비교는 확인 전입니다.

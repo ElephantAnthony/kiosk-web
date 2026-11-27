@@ -1,6 +1,6 @@
 # ADR-006: isolated administrator context and cohort analytics
 
-Status: source implemented; CI 45919739819 pending.
+Status: backend verification passed in CI 45919907679, including synthetic cohort/EXPLAIN; generated contract drift and browser gate pending.
 
 Administrator authentication is restricted to a separate Spring Security filter chain for /api/admin/**. The role is stored in a separate HttpSessionSecurityContextRepository attribute. The existing learner owner UUID remains independent; administrator authentication never grants access to another browser's learner session. A successful login rotates the session ID and invalidates the CSRF token. Logout clears only the administrator context and rotates the CSRF token so pending learner events remain attributable to the same owner. The API requires a fresh CSRF token for each mutation. Every admin route except POST login requires ROLE_ADMIN; the login endpoint is also CSRF protected.
 
